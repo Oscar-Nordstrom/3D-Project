@@ -11,8 +11,8 @@ Camera::~Camera()
 
 DirectX::XMMATRIX Camera::GetMatrix() const
 {
-	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(position.x, position.y, position.z, 0.0f);//Position of the camera
-	DirectX::XMVECTOR lookAtPos = DirectX::XMVectorSet(direction.x, direction.y, direction.z, 0.0f);//Direction the camera is looking at
+	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(position.x, position.y, position.z, 1.0f);//Position of the camera
+	DirectX::XMVECTOR lookAtPos = DirectX::XMVectorSet(direction.x, direction.y, direction.z, 1.0f);//Direction the camera is looking at
 	DirectX::XMVECTOR upDir = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);//The up direction
 
 	return  DirectX::XMMatrixLookAtLH(eyePos, lookAtPos, upDir);
@@ -30,7 +30,7 @@ DirectX::XMFLOAT3* Camera::GetDir()
 
 void Camera::SetPos(DirectX::XMFLOAT3 pos)
 {
-	if (pos.x == 0.0f) {
+/*	if (pos.x == 0.0f) {
 		pos.x = 0.01f;
 	}
 	if (pos.y == 0.0f) {
@@ -38,7 +38,7 @@ void Camera::SetPos(DirectX::XMFLOAT3 pos)
 	}
 	if (pos.z == 0.0f) {
 		pos.z = 0.01f;
-	}
+	}*/
 	position = pos;
 }
 

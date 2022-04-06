@@ -117,7 +117,7 @@ bool ShadowMap::LoadShaders()
 	std::string shaderData;
 	std::ifstream reader;
 	//Open the vertex shader cso file
-	reader.open("../x64/Debug/VertexShadowShader.cso", std::ios::binary | std::ios::ate);
+	reader.open("../Debug/VertexShadowShader.cso", std::ios::binary | std::ios::ate);
 	if (!reader.is_open())
 	{
 		std::cerr << "Could not open VS file!" << std::endl;

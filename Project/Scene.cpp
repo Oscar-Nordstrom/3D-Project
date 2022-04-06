@@ -24,9 +24,9 @@ Scene::Scene()
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
 
-	object.Init("../Resources/Obj/cubeTex.obj", "../x64/Debug/VertexShader.cso", "../x64/Debug/PixelShader.cso", "../x64/Debug/ComputeShader.cso", *window.Gfx());
-	floor.Init("../Resources/Obj/cubeTex.obj", "../x64/Debug/VertexShader.cso", "../x64/Debug/PixelShader.cso", "../x64/Debug/ComputeShader.cso", *window.Gfx());
-	floor.Move(0.0f, -5.0f, 0.0f);
+	object.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", *window.Gfx());
+	floor.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", *window.Gfx());
+	floor.Move(0.0f, -50.0f, 0.0f);
 	floor.Scale(10.0f, -0.9f, 10.0f);
 	//floor.Rotate(0.0f, 0.0f, 0.0f);
 

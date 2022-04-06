@@ -56,23 +56,14 @@ void main(uint3 DTid : SV_DispatchThreadID)
     if (diff >= 0.0f)
     {
         finalDiffuse = diff * (matColor + color);
-        
-        /* //Specular calculations
-        float3 r = -normalize(reflect(dir, normal.xyz));
-        float v = normalize(camPos.xyz - position.xyz);
-        float spec = dot(r, v);
-        if (spec >= 0.0f)
-        {
-            finalSpecular = specular * pow(spec, s);
-            //finalSpecular = specular * pow(spec, s);
-        }*/
+
     }
 
     //Specular calculations
     if (diff >= 0.0f)
     {
         float3 r = -normalize(reflect(-dir, normal.xyz));
-        float v = normalize(camPos.xyz - wPosition.xyz);
+        float3 v = normalize(camPos.xyz - wPosition.xyz);
         float spec = dot(r, v);
         if (spec >= 0.0f)
         {
