@@ -44,10 +44,10 @@ void ShadowMap::SetCamPos(DirectX::XMFLOAT3 pos)
 void ShadowMap::SetCamDir(DirectX::XMFLOAT3 dir)
 {
 	if (dir.x == 0.0f)
-		dir.x = 0.01f;
+		dir.x = 0.00000001f;
 	if (dir.y == 0.0f)
-		dir.y = 0.01f;
-	if (dir.z == 0.0f)
+		dir.y = 0.00000001f;
+	//if (dir.z == 0.0f)
 		//dir.z = 0.01f;
 	cam.SetDir(dir);
 }
@@ -66,8 +66,8 @@ void ShadowMap::SetShadowMap()
 
 	float nearZ = 0.1f; //Minimum viewing 
 	float farZ = 1000.0f;//Maximum viewing distance
-	//projection = DirectX::XMMatrixOrthographicLH(80, 60, nearZ, farZ);;
-	projection = DirectX::XMMatrixOrthographicLH(500, 500, nearZ, farZ);;
+
+	projection = DirectX::XMMatrixOrthographicLH(50, 50, nearZ, farZ);;
 	gfx->SetProjection(projection);
 	gfx->SetCamera(cam.GetMatrix());
 }
@@ -117,7 +117,7 @@ bool ShadowMap::LoadShaders()
 	std::string shaderData;
 	std::ifstream reader;
 	//Open the vertex shader cso file
-	reader.open("../Debug/VertexShadowShader.cso", std::ios::binary | std::ios::ate);
+	reader.open("../x64/Debug/VertexShadowShader.cso", std::ios::binary | std::ios::ate);
 	if (!reader.is_open())
 	{
 		std::cerr << "Could not open VS file!" << std::endl;
@@ -137,21 +137,10 @@ bool ShadowMap::LoadShaders()
 		return false;
 	}
 
-	//Give the shader the data
-	//vShaderByteCode = shaderData;
+
 	shaderData.clear();//Clear the string with data
 	reader.close();//Close the file
 
-	/*D3D11_INPUT_ELEMENT_DESC inputDesc[3] =
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0,  24, D3D11_INPUT_PER_VERTEX_DATA, 0}
-	};
-
-	HRESULT hr = gfx->GetDevice()->CreateInputLayout(inputDesc, 3, vShaderByteCode.c_str(), vShaderByteCode.length(), &inputLayout);
-	
-	return !FAILED(hr);*/
 
 	return true;
 }
