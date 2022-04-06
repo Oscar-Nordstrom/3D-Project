@@ -30,15 +30,6 @@ DirectX::XMFLOAT3* Camera::GetDir()
 
 void Camera::SetPos(DirectX::XMFLOAT3 pos)
 {
-/*	if (pos.x == 0.0f) {
-		pos.x = 0.01f;
-	}
-	if (pos.y == 0.0f) {
-		pos.y = 0.01f;
-	}
-	if (pos.z == 0.0f) {
-		pos.z = 0.01f;
-	}*/
 	position = pos;
 }
 
