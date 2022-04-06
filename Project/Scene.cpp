@@ -26,7 +26,7 @@ Scene::Scene()
 
 	object.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", *window.Gfx());
 	floor.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", *window.Gfx());
-	floor.Move(0.0f, -50.0f, 0.0f);
+	floor.Move(0.0f, -5.0f, 0.0f);
 	floor.Scale(10.0f, -0.9f, 10.0f);
 	//floor.Rotate(0.0f, 0.0f, 0.0f);
 
@@ -41,6 +41,7 @@ Scene::Scene()
 	shadow.SetCamDir(*cam.GetDir());
 	shadow.SetCamPos(*cam.GetPos());
 
+	sponza.Load("../Resources/Obj/sponza.obj", "bla", "bla", "bla", window.Gfx());
 
 }
 

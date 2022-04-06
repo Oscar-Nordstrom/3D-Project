@@ -376,31 +376,6 @@ struct SubMesh {
 
 					ss >> Ns;
 				}
-				/*else if (prefix == "Ka") {
-					ss >> Ka.x >> Ka.y >> Ka.z;
-
-				}
-				else if (prefix == "Kd") {
-					ss >> Kd.x >> Kd.y >> Kd.z;
-				}
-				else if (prefix == "Ks") {
-					ss >> Ks.x >> Ks.y >> Ks.z;
-				}
-				else if (prefix == "Ke") {
-					ss >> Ke.x >> Ke.y >> Ke.z;
-				}
-				else if (prefix == "Ni") {
-					ss >> Ni;
-				}
-				else if (prefix == "d") {
-					ss >> d;
-				}
-				else if (prefix == "illum") {
-					ss >> lum;
-				}
-				else if (prefix == "map_Bump") {
-					ss >> map_Bump;
-				}*/
 				else if (prefix == "map_Kd") {
 					ss >> map_Kd;
 				}

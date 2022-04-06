@@ -241,16 +241,13 @@ bool SceneObject::LoadMesh(ID3D11Device* device, ID3D11DeviceContext* context, s
 	DirectX::XMFLOAT3 tempVN;
 	DirectX::XMFLOAT2 tempVT;
 	int tempI = 0;
-	int i = 0;
 	file.open(meshPath);
 	if (!file.is_open()) {
 		std::cerr << "Failed to open mesh file.\n";
 		return false;
 	}
 	while (getline(file, line)) {
-		if (i++ > 50000) {
-			i = 0;
-		}
+
 
 		ss.clear();
 		if (line[line.size() - 1] != ' ') {
@@ -290,7 +287,6 @@ bool SceneObject::LoadMesh(ID3D11Device* device, ID3D11DeviceContext* context, s
 				if (c > 2) {
 					c = 0;
 					SimpleVertex vertTemp(tempV, tempVN, tempVT);
-					int ii = 0;
 					int tempIndex = GetIndex(vertTemp);
 					if (tempIndex == -1) {
 						verts.push_back(vertTemp);

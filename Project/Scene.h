@@ -3,6 +3,8 @@
 #include "Timer.h"
 #include "Camera.h"
 
+#include "Model.h"
+
 #include "SceneObject.h"
 #include "Structures.h"
 #include "ShadowMap.h"
@@ -33,6 +35,8 @@ private:
 	ShadowMap shadow;
 	ID3D11Buffer* lightBuf;
 	ID3D11Buffer* camBuf;
+
+	Model sponza;
 
 	DirectX::XMMATRIX proj;
 };
