@@ -4,9 +4,12 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <map>
+#include <cassert>
 
 #include "Structures.h"
 #include "Graphics.h"
+
 
 using namespace std;
 
@@ -20,12 +23,11 @@ private:
 	bool LoadShaders(string vShader, string pShader, string cShader);
 	bool LoadObj(string obj);
 private:
-	int FindVert(SimpleVertex vert);
 	vector<DirectX::XMFLOAT3> v;
 	vector<DirectX::XMFLOAT3> vn;
 	vector<DirectX::XMFLOAT2> vt;
 
-	vector<SimpleVertex> verts;
+	vector<SimpleVertex> verts; 
 	vector<unsigned short> indices;
 
 	string vShaderByteCode;

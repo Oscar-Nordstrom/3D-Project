@@ -120,6 +120,13 @@ struct SimpleVertex
 		}
 		return false;
 	}
+	std::string make_this_string() {
+		std::string ret;
+
+		ret = std::to_string(pos.x)+ std::to_string(pos.y) + std::to_string(pos.z) + std::to_string(n.x) + std::to_string(n.y) + std::to_string(n.z) + std::to_string(uv.x) + std::to_string(uv.y);
+
+		return ret;
+	}
 };
 
 struct Matrices

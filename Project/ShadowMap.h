@@ -32,4 +32,6 @@ private:
 	ID3D11ShaderResourceView* srv;
 	ID3D11Buffer* constantBuffer;
 
+	int it = 0;
+
 };

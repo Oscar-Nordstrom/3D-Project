@@ -42,7 +42,6 @@ Scene::Scene()
 	shadow.SetCamPos(*cam.GetPos());
 
 	sponza.Load("../Resources/Obj/sponza.obj", "bla", "bla", "bla", window.Gfx());
-
 }
 
 Scene::~Scene()
