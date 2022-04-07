@@ -4,6 +4,7 @@
 #include "Camera.h"
 
 #include "Model.h"
+#include "SceneObjectTest.h"
 
 #include "SceneObject.h"
 #include "Structures.h"
@@ -36,7 +37,8 @@ private:
 	ID3D11Buffer* lightBuf;
 	ID3D11Buffer* camBuf;
 
-	Model sponza;
+	//Model sponza;
+	SceneObjectTest test;
 
 	DirectX::XMMATRIX proj;
 };

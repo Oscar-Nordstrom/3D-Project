@@ -183,17 +183,19 @@ bool ShadowMap::CreateConstantBuffer()
 
 bool ShadowMap::UpdateConstantBuffer()
 {
-	ShadowVertexData d;
-	d.proj = projection;
-	d.view = cam.GetMatrix();
+	
+		ShadowVertexData d;
+		d.proj = projection;
+		d.view = cam.GetMatrix();
+		
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+		HRESULT hr = gfx->GetContext()->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		CopyMemory(mappedResource.pData, &d, sizeof(ShadowVertexData));//Write the new memory ///////////////////////////////////
+		
+		gfx->GetContext()->Unmap(constantBuffer, 0);
 
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
-	HRESULT hr = gfx->GetContext()->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	CopyMemory(mappedResource.pData, &d, sizeof(Matrices));//Write the new memory
-	gfx->GetContext()->Unmap(constantBuffer, 0);
-
-	return !FAILED(hr);
+		return !FAILED(hr);
 }
 
 
