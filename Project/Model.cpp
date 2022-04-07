@@ -217,7 +217,7 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 		if (prefix == "mtllib") {
 			
 			ss >> mtlFile;
-			images = new MtlImages(mtlFile);
+			images = new MtlImages(mtlFile, gfx->GetDevice());
 		}
 		else if (prefix == "usemtl") {
 			ss >> mtl;
@@ -235,7 +235,7 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 			vt.push_back(tempVt);
 		}
 		else if (prefix == "g") {
-			if (subs.size() > 0 || useSubs) {
+			if (useSubs) {
 				submeshEnd = indices.size() - 1;
 				SubMesh* subM = new SubMesh(gfx->GetDevice(), gfx->GetContext(), indices, images, subName, mtlFile, mtl, submeshStart, submeshEnd);
 				subs.push_back(*subM);
@@ -292,16 +292,17 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 		}
 
 	}
-	if (subs.size() > 0) {
+	if (useSubs) {
+		useSubs = false;
 		submeshEnd = indices.size() - 1;
 		SubMesh* subM = new SubMesh(gfx->GetDevice(), gfx->GetContext(), indices, images, subName, mtlFile, mtl, submeshStart, submeshEnd);
 		subs.push_back(*subM);
 	}
 
 	//For debugging
-	//int jfjd = 0;
-	//subs;
-	//images;
+	int jfjd = 0;
+	subs;
+	images;
 	/*verts;
 	indices;
 	if (FindVert() != -1) {

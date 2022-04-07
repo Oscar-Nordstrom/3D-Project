@@ -191,7 +191,7 @@ bool ShadowMap::UpdateConstantBuffer()
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 		HRESULT hr = gfx->GetContext()->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		CopyMemory(mappedResource.pData, &d, sizeof(ShadowVertexData));//Write the new memory ///////////////////////////////////
+		CopyMemory(mappedResource.pData, &d, sizeof(ShadowVertexData));//Write the new memory 
 		
 		gfx->GetContext()->Unmap(constantBuffer, 0);
 

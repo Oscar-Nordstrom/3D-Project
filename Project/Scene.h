@@ -30,8 +30,8 @@ private:
 	Window window;
 	Timer timer;
 	Camera cam;
-	SceneObject object;
-	SceneObject floor;
+	SceneObjectTest object;
+	SceneObjectTest floor;
 	DirectionalLight dLight;
 	ShadowMap shadow;
 	ID3D11Buffer* lightBuf;

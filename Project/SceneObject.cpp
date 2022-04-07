@@ -309,7 +309,7 @@ bool SceneObject::LoadMesh(ID3D11Device* device, ID3D11DeviceContext* context, s
 		else if (prefix == "mtllib") {
 			ss >> mtlFile;
 			//Read the mtl file and load in all the image files;
-			mtlFileTex = new MtlImages(mtlFile);
+			mtlFileTex = new MtlImages(mtlFile, device);
 			int idsds = 0;
 		}
 		else if (prefix == "g") {

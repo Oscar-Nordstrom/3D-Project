@@ -25,9 +25,11 @@ Scene::Scene()
 	window.Gfx()->SetProjection(proj);
 
 	test.Init("../Resources/Obj/sponza.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
-
-	object.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", *window.Gfx());
-	floor.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", *window.Gfx());
+	//test.Init("../Resources/Obj/cubeTexTest.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	test.Move(0.0f, -2000.0f, 0.0f);
+	object.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	object.Move(0.0f, 0.0f, 0.0f);
+	floor.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	floor.Move(0.0f, -5.0f, 0.0f);
 	floor.Scale(10.0f, -0.9f, 10.0f);
 	//floor.Rotate(0.0f, 0.0f, 0.0f);
@@ -97,17 +99,17 @@ bool Scene::DoFrame()
 	UpdateCam();
 	checkInput();
 
-	if (!test.Update(t, window.Gfx())) {
+	if (!test.Update(0.0f, window.Gfx())) {
 		std::cerr << "Failed to update test object.\n";
 		return false;
 	}
 
 
-	if (!object.Update(t, *window.Gfx())) {
+	if (!object.Update(t, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}
-	if (!floor.Update(0.0f, *window.Gfx())) {
+	if (!floor.Update(0.0f, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}

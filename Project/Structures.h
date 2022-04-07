@@ -42,10 +42,11 @@ struct TextureRT {
 struct MtlImages {
 	std::vector<std::string> names;
 	std::vector<unsigned char*> img;
+	std::vector<ID3D11Texture2D*>textures;
 	std::vector<int> widths;
 	std::vector<int> heights;
 
-	MtlImages(std::string fileName) {
+	MtlImages(std::string fileName, ID3D11Device*& device) {
 		std::stringstream ss;
 		std::ifstream file;
 		std::string line;
@@ -53,7 +54,7 @@ struct MtlImages {
 		std::string temp;
 
 		names.push_back("Default");
-		AddImg("Default.png");
+		AddImg("Default.png", device);
 
 		file.open("../Resources/Mtl/" + fileName);
 		if (!file.is_open()) {
@@ -68,23 +69,30 @@ struct MtlImages {
 			ss >> prefix;
 			if (prefix == "map_Kd") {
 				ss >> temp;
-				names.push_back(prefix);
-				AddImg(temp);
+				names.push_back(temp);
+				AddImg(temp, device);
 			}
 			else if (prefix == "map_Ks") {
 				ss >> temp;
-				names.push_back(prefix);
-				AddImg(temp);
+				names.push_back(temp);
+				AddImg(temp, device);
 			}
 			else if (prefix == "map_Ka") {
 				ss >> temp;
-				names.push_back(prefix);
-				AddImg(temp);
+				names.push_back(temp);
+				AddImg(temp, device);
+			}
+		}
+
+	}
+	~MtlImages() {
+		for (int i = 0; i < textures.size(); i++) {
+			if (textures[i]) {
+				textures[i]->Release();
 			}
 		}
 	}
-
-	bool AddImg(std::string what) {
+	bool AddImg(std::string what, ID3D11Device*& device) {
 		int width, height, channels;
 		unsigned char* imgTemp;
 		std::string file = "../Resources/Mtl/" + what;
@@ -96,7 +104,32 @@ struct MtlImages {
 		img.push_back(imgTemp);
 		widths.push_back(width);
 		heights.push_back(height);
-		return true;
+		
+
+		D3D11_TEXTURE2D_DESC text2D;
+		text2D.Width = widths[widths.size() - 1];
+		text2D.Height = heights[heights.size() - 1];
+		text2D.MipLevels = 1;
+		text2D.ArraySize = 1;
+		text2D.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		text2D.SampleDesc.Count = 1;
+		text2D.SampleDesc.Quality = 0;
+		text2D.Usage = D3D11_USAGE_IMMUTABLE;
+		text2D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		text2D.CPUAccessFlags = 0;
+		text2D.MiscFlags = 0;
+
+		D3D11_SUBRESOURCE_DATA text2dData;
+		text2dData.pSysMem = img[img.size()-1];
+		text2dData.SysMemPitch = widths[widths.size() - 1]*4;
+		text2dData.SysMemSlicePitch = 0;
+
+		//Create the texture
+		ID3D11Texture2D* tex;
+		HRESULT hr = device->CreateTexture2D(&text2D, &text2dData, &tex);
+		textures.push_back(tex);
+
+		return !FAILED(hr);
 	}
 
 };
@@ -151,7 +184,7 @@ struct Material {
 	std::string map_Kd;
 	std::string map_Ks;
 	std::string map_Ka;
-
+	int one, two, three;
 	Material(float Ns, std::string map_Kd, std::string map_Ks, std::string map_Ka)
 		:Ns(Ns), map_Kd(map_Kd), map_Ks(map_Ks), map_Ka(map_Ka)
 	{
@@ -172,19 +205,19 @@ struct Material {
 		bool found = false;
 		bool found1 = false;
 		bool found2 = false;
-		int one, two, three;
+		//int one, two, three;
 		int i = 0;
 		int size = mtlFileTex->names.size();
 		for (i = 0; i < size; i++) {
-			if (mtlFileTex->names[i] == "map_Kd") {
+			if (mtlFileTex->names[i] == map_Kd) {
 				found = true;
 				one = i;
 			}
-			else if (mtlFileTex->names[i] == "map_Ks") {
+			else if (mtlFileTex->names[i] == map_Ks) {
 				found1 = true;
 				two = i;
 			}
-			else if (mtlFileTex->names[i] == "map_Ka") {
+			else if (mtlFileTex->names[i] == map_Ka) {
 				found2 = true;
 				three = i;
 			}
@@ -203,9 +236,7 @@ struct Material {
 			three = 0;
 		}
 
-
-
-		D3D11_TEXTURE2D_DESC text2D;
+		/*D3D11_TEXTURE2D_DESC text2D;
 		text2D.Width = mtlFileTex->widths[one];
 		text2D.Height = mtlFileTex->heights[one];
 		text2D.MipLevels = 1;
@@ -268,18 +299,27 @@ struct Material {
 		//Create the texture
 		if (FAILED(device->CreateTexture2D(&text2D, &text2dData, &textureBuffer[2]))) {
 			return false;
-		}
+		}*/
 
 		return true;
 	}
-	bool CreateSRV(ID3D11Device* device, ID3D11Texture2D* textureBuffer[], ID3D11ShaderResourceView* srv[]) {
-		if (FAILED(device->CreateShaderResourceView(textureBuffer[0], nullptr, &srv[0]))) {
+	bool CreateSRV(ID3D11Device* device, ID3D11Texture2D* textureBuffer[], ID3D11ShaderResourceView* srv[], MtlImages* mtlFileTex) {
+		/*if (FAILED(device->CreateShaderResourceView(textureBuffer[0], nullptr, &srv[0]))) {
 			return false;
 		}
 		if (FAILED(device->CreateShaderResourceView(textureBuffer[1], nullptr, &srv[1]))) {
 			return false;
 		}
 		if (FAILED(device->CreateShaderResourceView(textureBuffer[2], nullptr, &srv[2]))) {
+			return false;
+		}*/
+		if (FAILED(device->CreateShaderResourceView(mtlFileTex->textures[one], nullptr, &srv[0]))) {
+			return false;
+		}
+		if (FAILED(device->CreateShaderResourceView(mtlFileTex->textures[two], nullptr, &srv[1]))) {
+			return false;
+		}
+		if (FAILED(device->CreateShaderResourceView(mtlFileTex->textures[three], nullptr, &srv[2]))) {
 			return false;
 		}
 		return true;
@@ -389,6 +429,9 @@ struct SubMesh {
 						found = true;
 					}
 				}
+				else {
+					break;
+				}
 
 			}
 			if (found) {
@@ -410,7 +453,7 @@ struct SubMesh {
 		if (!mat.SetupTexture(device, textureBuffer, mtlFileTex)) {
 			return false;
 		}
-		if (!mat.CreateSRV(device, textureBuffer, srv)) {
+		if (!mat.CreateSRV(device, textureBuffer, srv, mtlFileTex)) {
 			return false;
 		}
 		if (!mat.SetUpCbuf(device, cbuf)) {
@@ -436,8 +479,12 @@ struct SubMesh {
 		indexBuffer->Release();
 		cbuf->Release();
 		for (int i = 0; i < 3; i++) {
-			textureBuffer[i]->Release();
-			srv[i]->Release();
+			/*if (textureBuffer[i]) {
+				textureBuffer[i]->Release();
+			}*/
+			if (srv[i]) {
+				srv[i]->Release();
+			}
 		}
 	}
 };
