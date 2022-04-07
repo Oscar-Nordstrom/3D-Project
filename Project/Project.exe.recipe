@@ -2,21 +2,21 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\oscar\Desktop\3D-Project\Project\Debug\Project.exe</FullPath>
+      <FullPath>C:\Users\oscar\Desktop\3D-Prog\Debug\Project.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\Users\oscar\Desktop\3D-Project\Project\Debug\ComputeShader.cso</FullPath>
+      <FullPath>C:\Users\oscar\Desktop\3D-Prog\Debug\ComputeShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\oscar\Desktop\3D-Project\Project\Debug\PixelShader.cso</FullPath>
+      <FullPath>C:\Users\oscar\Desktop\3D-Prog\Debug\PixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\oscar\Desktop\3D-Project\Project\Debug\VertexShader.cso</FullPath>
+      <FullPath>C:\Users\oscar\Desktop\3D-Prog\Debug\VertexShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\oscar\Desktop\3D-Project\Project\Debug\VertexShadowShader.cso</FullPath>
+      <FullPath>C:\Users\oscar\Desktop\3D-Prog\Debug\VertexShadowShader.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />
