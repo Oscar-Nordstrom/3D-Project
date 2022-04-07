@@ -52,6 +52,9 @@ struct MtlImages {
 		std::string prefix = "";
 		std::string temp;
 
+		names.push_back("Default");
+		AddImg("Default.png");
+
 		file.open("../Resources/Mtl/" + fileName);
 		if (!file.is_open()) {
 			std::cerr << "Failed to open mesh file.\n";
@@ -189,8 +192,15 @@ struct Material {
 				break;
 			}
 		}
-		if (!found || !found1 || !found2) {
-			return false;
+		//Setting deafult texture if it was not found (0 == deafult)
+		if (!found) {
+			one = 0; 
+		}
+		if (!found1) {
+			two = 0;
+		}
+		if (!found2) {
+			three = 0;
 		}
 
 
@@ -338,6 +348,9 @@ struct SubMesh {
 		data.SysMemSlicePitch = 0;
 
 		HRESULT hr = device->CreateBuffer(&ibDesc, &data, &indexBuffer);
+		if (hr != S_OK) {
+			int njdgfgd = 0;
+		}
 
 		return !FAILED(hr);
 
@@ -380,7 +393,6 @@ struct SubMesh {
 			}
 			if (found) {
 				if (prefix == "Ns") {
-
 					ss >> Ns;
 				}
 				else if (prefix == "map_Kd") {

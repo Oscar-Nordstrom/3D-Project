@@ -13,7 +13,7 @@ int roundUpTo(int numToRound, int multiple)
 }
 
 Scene::Scene()
-	:window(800, 600, L"Project"), object(*window.Gfx()), floor(*window.Gfx()), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight)
+	:window(800, 600, L"Project"), object(*window.Gfx()), floor(*window.Gfx()), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), test(*window.Gfx())
 {
 
 	float fov = 90.0f; //90 degrees field of view
@@ -23,6 +23,8 @@ Scene::Scene()
 	float farZ = 1000.0f;//Maximum viewing distance
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
+
+	test.Init("../Resources/Obj/sponza.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 
 	object.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", *window.Gfx());
 	floor.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", *window.Gfx());
@@ -41,7 +43,7 @@ Scene::Scene()
 	shadow.SetCamDir(*cam.GetDir());
 	shadow.SetCamPos(*cam.GetPos());
 
-	sponza.Load("../Resources/Obj/sponza.obj", "bla", "bla", "bla", window.Gfx());
+	//sponza.Load("../Resources/Obj/sponza.obj", "bla", "bla", "bla", window.Gfx());
 }
 
 Scene::~Scene()
@@ -80,6 +82,9 @@ bool Scene::DoFrame()
 	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
 	shadow.SetCamDir(dLight.direction);
 	shadow.SetShadowMap();
+
+	test.Draw(window.Gfx(), false);
+
 	object.Draw(window.Gfx(), false);
 	floor.Draw(window.Gfx(), false);
 
@@ -92,7 +97,10 @@ bool Scene::DoFrame()
 	UpdateCam();
 	checkInput();
 
-	
+	if (!test.Update(t, window.Gfx())) {
+		std::cerr << "Failed to update test object.\n";
+		return false;
+	}
 
 
 	if (!object.Update(t, *window.Gfx())) {
@@ -105,6 +113,8 @@ bool Scene::DoFrame()
 	}
 	object.Draw(window.Gfx());
 	floor.Draw(window.Gfx());
+
+	test.Draw(window.Gfx());
 
 	shadow.BindDepthResource();
 
