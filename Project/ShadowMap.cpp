@@ -183,10 +183,6 @@ bool ShadowMap::CreateConstantBuffer()
 
 bool ShadowMap::UpdateConstantBuffer()
 {
-	it++;
-	if (it > 100) {
-		it++;
-	}
 	
 		ShadowVertexData d;
 		d.proj = projection;
