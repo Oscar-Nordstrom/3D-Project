@@ -1,0 +1,65 @@
+# Material file for elite.obj
+
+newmtl skin
+	Ns 96
+	d 1
+	illum 2
+	Kd 0.554662 0.47682 0.406413
+	Ks 0.0 0.0 0.0
+	Ka 0.0 0.0 0.0
+	map_Kd skin.png
+
+newmtl steel
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.44 0.44 0.5
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+	map_Kd steel.png
+
+newmtl rubber
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.1 0.1 0.1
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+	map_Kd carbon.png
+
+newmtl camo
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.13 0.21 0.09
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+	map_Kd camo.png
+
+newmtl leather
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.2 0.1 0.1
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+	map_Kd leather.png
+
+newmtl ribbon
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.27 0.21 0.16
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+	map_Kd carbon.png
+
+newmtl eye
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.8 0.8 0.8
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+	map_Kd eye.png
+

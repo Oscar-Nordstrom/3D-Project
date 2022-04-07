@@ -24,13 +24,14 @@ Scene::Scene()
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
 
-	test.Init("../Resources/Obj/sponza.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	test.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	//test.Init("../Resources/Obj/cubeTexTest.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
-	test.Move(0.0f, -2000.0f, 0.0f);
+	test.Move(0.0f, 0.0f, 0.0f);
+	test.Scale(2.0f, 2.0f, 2.0f);
 	object.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
-	object.Move(0.0f, 0.0f, 0.0f);
+	object.Move(0.0f, -10.0f, 0.0f);
 	floor.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
-	floor.Move(0.0f, -5.0f, 0.0f);
+	floor.Move(0.0f, -20.0f, 0.0f);
 	floor.Scale(10.0f, -0.9f, 10.0f);
 	//floor.Rotate(0.0f, 0.0f, 0.0f);
 
