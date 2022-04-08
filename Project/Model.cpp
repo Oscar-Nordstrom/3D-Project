@@ -272,7 +272,8 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 					count = 0;
 					SimpleVertex vertTemp(tempV, tempVn, tempVt);
 
-					auto found_it = verts_map.find(vertTemp.make_this_string());
+					//Works for smaller files, but for larger like sponza something goes wrong
+					/*auto found_it = verts_map.find(vertTemp.make_this_string());
 					if (verts_map.end() == found_it) {
 						verts.push_back(vertTemp);
 						int indi = (int)verts.size() - 1;
@@ -281,7 +282,11 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 					}
 					else {
 						indices.push_back(found_it->second);
-					}
+					}*/
+					verts.push_back(vertTemp);
+					int indi = (int)verts.size() - 1;
+					indices.push_back(indi);
+
 					if (submesh) {
 						submesh = false;
 						submeshStart = indices.size() - 1;

@@ -1,8 +1,0 @@
-# Blender MTL File: 'Mailbox.blend'
-# Material Count: 1
-
-newmtl Mailbox
-Ns 96.078431
-map_Kd Texturen\\TileD.png
-map_Ks Texturen\\TileS.png
-map_Ka Texturen\\TileA.png
