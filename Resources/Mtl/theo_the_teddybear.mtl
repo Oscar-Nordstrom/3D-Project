@@ -1,0 +1,50 @@
+# Material file for theo_the_teddybear.obj
+
+newmtl skin
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.8 0.59 0.37
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+
+newmtl fur
+	Ns 0
+	d 1
+	illum 2
+	Kd -0.62 -0.24 0.8
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+
+newmtl white
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.8 0.8 0.8
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+
+newmtl black
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.05 0.05 0.05
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+
+newmtl green
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.1 0.43 0.1
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+
+newmtl red
+	Ns 0
+	d 1
+	illum 2
+	Kd 0.69 0.05 0.05
+	Ks 0.0 0.0 0.0
+	Ka 0.2 0.2 0.2
+

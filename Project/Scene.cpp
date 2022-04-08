@@ -24,10 +24,10 @@ Scene::Scene()
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
 
-	test.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	test.Init("../Resources/Obj/theo_the_teddybear.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	test.Move(-2.0f, -3.0f, 0.0f);
 	test.Rotate(0.0f, 3.0, 0.0f);
-	test.Scale(2.0f, 2.0f, 2.0f);
+	test.Scale(-0.95f, -0.95f, -0.95f);
 	object.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	object.Move(2.0f, 0.0f, 0.0f);
 	object.Scale(2.0f, 2.0f, 2.0f);
