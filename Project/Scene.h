@@ -11,6 +11,7 @@
 #include "ShadowMap.h"
 #include <string>
 #include <iostream>
+#include <DirectXMath.h>
 
 class Scene {
 public:

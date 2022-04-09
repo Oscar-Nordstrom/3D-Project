@@ -193,19 +193,31 @@ void Scene::checkInput()
 	DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(x,y,z);
 
 	//cam.SetDir(DirectX::XMFLOAT3(pos.x, pos.y, pos.z + 1));
-
+	DirectX::XMVECTOR speed = DirectX::XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 
 	if (window.Kbd()->KeyIsPressed('W')) {
-		pos.z += 0.1f;
+		DirectX::XMVECTOR test = cam.GetForwardVector();
+		test = DirectX::XMVectorMultiply(test, speed);
+		cam.Move(test);
+		//pos.z += 0.1f;
 	}
 	else if (window.Kbd()->KeyIsPressed('S')) {
-		pos.z += -0.1f;
+		DirectX::XMVECTOR test = cam.GetBackwardVector();
+		test = DirectX::XMVectorMultiply(test, speed);
+		cam.Move(test);
+		//pos.z += -0.1f;
 	}
 	if (window.Kbd()->KeyIsPressed('D')) {
-		pos.x += 0.1f;
+		DirectX::XMVECTOR test = cam.GetRightVector();
+		test = DirectX::XMVectorMultiply(test, speed);
+		cam.Move(test);
+		//pos.x += 0.1f;
 	}
 	else if (window.Kbd()->KeyIsPressed('A')) {
-		pos.x += -0.1f;
+		DirectX::XMVECTOR test = cam.GetLeftVector();
+		test = DirectX::XMVectorMultiply(test, speed);
+		cam.Move(test);
+		//pos.x += -0.1f;
 	}
 	if (window.Kbd()->KeyIsPressed('U')) {
 		pos.y += 0.1f;
@@ -213,7 +225,7 @@ void Scene::checkInput()
 	else if (window.Kbd()->KeyIsPressed('N')) {
 		pos.y += -0.1f;
 	}
-	cam.SetPos(pos);
+	//cam.SetPos(pos);
 
 	
 }
