@@ -200,14 +200,14 @@ struct Material {
 
 		return numToRound + multiple - remainder;
 	}
-	bool SetupTexture(ID3D11Device* device, ID3D11Texture2D* textureBuffer[], MtlImages* mtlFileTex) {
+	bool SetupTexture(ID3D11Device* device, MtlImages* mtlFileTex) {
 
 		bool found = false;
 		bool found1 = false;
 		bool found2 = false;
 		//int one, two, three;
 		int i = 0;
-		int size = mtlFileTex->names.size();
+		int size = (int)mtlFileTex->names.size();
 		for (i = 0; i < size; i++) {
 			if (mtlFileTex->names[i] == map_Kd) {
 				found = true;
@@ -303,7 +303,7 @@ struct Material {
 
 		return true;
 	}
-	bool CreateSRV(ID3D11Device* device, ID3D11Texture2D* textureBuffer[], ID3D11ShaderResourceView* srv[], MtlImages* mtlFileTex) {
+	bool CreateSRV(ID3D11Device* device, ID3D11ShaderResourceView* srv[], MtlImages* mtlFileTex) {
 		/*if (FAILED(device->CreateShaderResourceView(textureBuffer[0], nullptr, &srv[0]))) {
 			return false;
 		}
@@ -353,7 +353,6 @@ struct SubMesh {
 
 	std::vector<unsigned short> subIndices;
 	ID3D11Buffer* indexBuffer;
-	ID3D11Texture2D* textureBuffer[3];
 	ID3D11ShaderResourceView* srv[3];
 	ID3D11Buffer* cbuf;
 
@@ -367,7 +366,7 @@ struct SubMesh {
 	}
 
 	bool SetUpIndexBuffer(ID3D11Device* device, std::vector<unsigned short>& indices) {
-		int size = indices.size();
+		int size = (int)indices.size();
 		for (int i = 0; i < size; i++) {
 			if (i >= start && i <= end) {
 				subIndices.push_back(indices[i]);
@@ -388,9 +387,6 @@ struct SubMesh {
 		data.SysMemSlicePitch = 0;
 
 		HRESULT hr = device->CreateBuffer(&ibDesc, &data, &indexBuffer);
-		if (hr != S_OK) {
-			int njdgfgd = 0;
-		}
 
 		return !FAILED(hr);
 
@@ -450,10 +446,10 @@ struct SubMesh {
 			}
 		}
 		Material mat(Ns, map_Kd, map_Ks, map_Ka);
-		if (!mat.SetupTexture(device, textureBuffer, mtlFileTex)) {
+		if (!mat.SetupTexture(device, mtlFileTex)) {
 			return false;
 		}
-		if (!mat.CreateSRV(device, textureBuffer, srv, mtlFileTex)) {
+		if (!mat.CreateSRV(device, srv, mtlFileTex)) {
 			return false;
 		}
 		if (!mat.SetUpCbuf(device, cbuf)) {
@@ -476,15 +472,10 @@ struct SubMesh {
 	}
 
 	void Terminate() {
-		indexBuffer->Release();
-		cbuf->Release();
+		if (indexBuffer)indexBuffer->Release();
+		if (cbuf)cbuf->Release();
 		for (int i = 0; i < 3; i++) {
-			/*if (textureBuffer[i]) {
-				textureBuffer[i]->Release();
-			}*/
-			if (srv[i]) {
-				srv[i]->Release();
-			}
+			if (srv[i])srv[i]->Release();
 		}
 	}
 };

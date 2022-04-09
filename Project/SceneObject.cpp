@@ -30,9 +30,9 @@ SceneObject::~SceneObject()
 	if (indexBuffer)indexBuffer->Release();
 	if (constantBuffer)constantBuffer->Release();
 
-	for (auto o : subs) {
+	/*for (auto o : subs) {
 		o.Terminate();
-	}
+	}*/
 
 
 

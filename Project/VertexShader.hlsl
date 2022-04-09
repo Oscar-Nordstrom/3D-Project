@@ -37,15 +37,16 @@ VSOut main(VertexShaderInput input)
    wPosition = mul(world, wPosition); //World space
     
     position = mul(world, position);//World space
-    position = mul(view, position);//View space
-    position = mul(projection, position);//Clip space
+    //position = mul(view, position);//View space
+    //position = mul(projection, position);//Clip space
 
     
     normal = mul(world, normal); //World space 
     
     //Light
-    output.lightPosition = mul(lightView, wPosition);
-    output.lightPosition = mul(lightProjection, output.lightPosition);
+    output.lightPosition = wPosition;
+   // output.lightPosition = mul(lightView, wPosition);
+   // output.lightPosition = mul(lightProjection, output.lightPosition);
     
     output.position = position;
     output.wPosition = wPosition;

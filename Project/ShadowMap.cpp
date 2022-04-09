@@ -78,6 +78,7 @@ void ShadowMap::BindDepthResource()
 		std::cerr << "Failed update constant buffer.\n";
 	}
 	gfx->GetContext()->VSSetConstantBuffers(1, 1, &constantBuffer);
+	gfx->GetContext()->DSSetConstantBuffers(1, 1, &constantBuffer);
 	gfx->GetContext()->PSSetShaderResources(3, 1, &srv);
 }
 

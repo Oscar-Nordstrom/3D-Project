@@ -13,8 +13,9 @@ int roundUpTo(int numToRound, int multiple)
 }
 
 Scene::Scene()
-	:window(800, 600, L"Project"), object(*window.Gfx()), floor(*window.Gfx()), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), test(*window.Gfx())
+	:window(800, 600, L"Project"), object(*window.Gfx()), floor(*window.Gfx()), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), test(*window.Gfx()), skybox(*window.Gfx())
 {
+	
 
 	float fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
@@ -24,19 +25,19 @@ Scene::Scene()
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
 
-	test.Init("../Resources/Obj/theo_the_teddybear.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	test.Init("../Resources/Obj/theo_the_teddybear.obj", "../Debug/VertexShader.cso","../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	test.Move(-2.0f, -3.0f, 0.0f);
 	test.Rotate(0.0f, 3.0, 0.0f);
 	test.Scale(-0.95f, -0.95f, -0.95f);
-	object.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	object.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	object.Move(2.0f, 0.0f, 0.0f);
 	object.Scale(2.0f, 2.0f, 2.0f);
-	floor.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	floor.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	floor.Move(0.0f, -10.0f, 0.0f);
 	floor.Scale(10.0f, -0.9f, 10.0f);
 	//floor.Rotate(0.0f, 0.0f, 0.0f);
-
-
+	skybox.Init("../Resources/Obj/skybox.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	skybox.Scale(-200.0f, -200.0f, -200.0f);
 	dLight.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
 	SetUpDirLight();
@@ -88,9 +89,9 @@ bool Scene::DoFrame()
 	shadow.SetShadowMap();
 
 	test.Draw(window.Gfx(), false);
-
 	object.Draw(window.Gfx(), false);
 	floor.Draw(window.Gfx(), false);
+	skybox.Draw(window.Gfx(), false);
 
 
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
@@ -105,8 +106,6 @@ bool Scene::DoFrame()
 		std::cerr << "Failed to update test object.\n";
 		return false;
 	}
-
-
 	if (!object.Update(t, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
@@ -115,13 +114,18 @@ bool Scene::DoFrame()
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}
+	if (!skybox.Update(0.0f, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
 	object.Draw(window.Gfx());
 	floor.Draw(window.Gfx());
-
 	test.Draw(window.Gfx());
+	skybox.Draw(window.Gfx());
+
 
 	shadow.BindDepthResource();
-
+	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight());

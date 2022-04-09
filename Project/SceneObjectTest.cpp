@@ -55,10 +55,10 @@ void SceneObjectTest::Draw(Graphics*& gfx, bool withShaders)
 }
 
 
-bool SceneObjectTest::Init(string objPath, string vShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
+bool SceneObjectTest::Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
 {
 
-	if (!model.Load(objPath, vShaderPath, pShaderPath, cShaderPath, transform, gfx)) {
+	if (!model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, transform, gfx)) {
 		return false;
 	}
 

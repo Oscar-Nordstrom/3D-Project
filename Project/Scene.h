@@ -32,13 +32,16 @@ private:
 	Camera cam;
 	SceneObjectTest object;
 	SceneObjectTest floor;
+	SceneObjectTest test;
+	SceneObjectTest skybox;
 	DirectionalLight dLight;
 	ShadowMap shadow;
 	ID3D11Buffer* lightBuf;
 	ID3D11Buffer* camBuf;
 
-	//Model sponza;
-	SceneObjectTest test;
+
+	
 
 	DirectX::XMMATRIX proj;
+
 };

@@ -5,18 +5,23 @@ Model::Model()
 	indexBuffer = nullptr;
 	inputLayout = nullptr;
 	pShader = nullptr;
+	hShader = nullptr;
+	dShader = nullptr;
 	vShader = nullptr;
 	cShader = nullptr;
 	samState = nullptr;
 	vertexBuffer = nullptr;
 	constantBuffer = nullptr;
 	images = nullptr;
-	topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	topologyTriList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	topology = D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
 }
 
 Model::~Model()
 {
 	if (vShader)vShader->Release();
+	if (hShader)hShader->Release();
+	if (dShader)dShader->Release();
 	if (pShader)pShader->Release();
 	if (cShader)cShader->Release();
 	if (inputLayout)inputLayout->Release();
@@ -26,16 +31,17 @@ Model::~Model()
 	if (constantBuffer)constantBuffer->Release();
 
 	for (auto o : subs) {
-		o.Terminate();
+		o->Terminate();
+		delete o;
 	}
 
 	delete images;
 }
 
-bool Model::Load(string obj, string vShader, string pShader, string cShader, DirectX::XMMATRIX transform, Graphics*& gfx)
+bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
 {
 	
-	if (!LoadShaders(vShader, pShader, cShader, gfx)) {
+	if (!LoadShaders(vShaderPath,hShaderPath, dShaderPath, pShaderPath, cShaderPath, gfx)) {
 		return false;
 	}
 	if (!LoadObj(obj, gfx)) {
@@ -65,16 +71,22 @@ bool Model::Load(string obj, string vShader, string pShader, string cShader, Dir
 	return true;
 }
 
-
 void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, bool withShaders)
 {
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
-
+	
 	if (withShaders) {
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
+		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
+		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
 		gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
+	}
+	else {
+		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
 	}
 	gfx->GetContext()->IASetInputLayout(inputLayout);
 	if (withShaders) {
@@ -84,14 +96,21 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, bool withShaders)
 		UpdateCbuf(*gfx, transform);
 	}
 	gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-	gfx->GetContext()->IASetPrimitiveTopology(topology);
+	if (withShaders) {
+		gfx->GetContext()->IASetPrimitiveTopology(topology);
+	}
+	else {
+		gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
+	}
+	
 	gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
+	gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 
 
 
 	if (subs.size() > 0) {
 		for (auto& o : subs) {
-			o.Bind(gfx->GetContext(), withShaders);
+			o->Bind(gfx->GetContext(), withShaders);
 		}
 	}
 	else {
@@ -102,9 +121,9 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, bool withShaders)
 	}
 }
 
-bool Model::LoadShaders(string vShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
+bool Model::LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
 {
-	std::string shaderData;
+	/*std::string shaderData;
 	std::ifstream reader;
 	//Open the vertex shader cso file
 	reader.open(vShaderPath, std::ios::binary | std::ios::ate);
@@ -131,6 +150,9 @@ bool Model::LoadShaders(string vShaderPath, string pShaderPath, string cShaderPa
 	vShaderByteCode = shaderData;
 	shaderData.clear();//Clear the string with data
 	reader.close();//Close the file
+
+
+
 	//Open the pixel shader cso file
 	reader.open(pShaderPath, std::ios::binary | std::ios::ate);
 	if (!reader.is_open())
@@ -172,6 +194,22 @@ bool Model::LoadShaders(string vShaderPath, string pShaderPath, string cShaderPa
 	{
 		std::cerr << "Failed to create pixel shader!" << std::endl;
 		return false;
+	}*/
+
+	if (!ReadShader(gfx, vShaderPath, VERTEX_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+		return false;
+	}
+	if (!ReadShader(gfx, hShaderPath, HULL_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+		return false;
+	}
+	if (!ReadShader(gfx, dShaderPath, DOMAIN_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+		return false;
+	}
+	if (!ReadShader(gfx, pShaderPath, PIXEL_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+		return false;
+	}
+	if (!ReadShader(gfx, cShaderPath, COMPUTE_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+		return false;
 	}
 
 	return true;
@@ -179,6 +217,7 @@ bool Model::LoadShaders(string vShaderPath, string pShaderPath, string cShaderPa
 
 bool Model::LoadObj(string obj, Graphics*& gfx)
 {
+	bool foundMtllib = false;
 
 	bool submesh = false;
 	bool useSubs = false;
@@ -197,7 +236,6 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 	int tempI = 0;
 	int step = 0;
 
-	//map<string, SimpleVertex> verts_map;
 	map<string, int> verts_map;
 
 	ifstream file(obj);
@@ -207,17 +245,18 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 	while (getline(file, line)) {
 
 		ss.clear();
-		if (line[line.size() - 1] != ' ') {
+		if (line.size() > 0 && line[line.size() - 1] != ' ') {
 			line += " ";
 		}
 		ss.str(line);
 
 		ss >> prefix;
 
-		if (prefix == "mtllib") {
+		if (!foundMtllib && prefix == "mtllib") {
 			
 			ss >> mtlFile;
 			images = new MtlImages(mtlFile, gfx->GetDevice());
+			foundMtllib = true;
 		}
 		else if (prefix == "usemtl") {
 			ss >> mtl;
@@ -236,9 +275,9 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 		}
 		else if (prefix == "g") {
 			if (useSubs) {
-				submeshEnd = indices.size() - 1;
+				submeshEnd = (int)indices.size() - 1;
 				SubMesh* subM = new SubMesh(gfx->GetDevice(), gfx->GetContext(), indices, images, subName, mtlFile, mtl, submeshStart, submeshEnd);
-				subs.push_back(*subM);
+				subs.push_back(subM);
 			}
 			submesh = true;
 			ss >> subName;
@@ -289,7 +328,7 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 
 					if (submesh) {
 						submesh = false;
-						submeshStart = indices.size() - 1;
+						submeshStart = (int)indices.size() - 1;
 						useSubs = true;
 					}
 				}
@@ -299,23 +338,17 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 	}
 	if (useSubs) {
 		useSubs = false;
-		submeshEnd = indices.size() - 1;
+		submeshEnd = (int)indices.size() - 1;
 		SubMesh* subM = new SubMesh(gfx->GetDevice(), gfx->GetContext(), indices, images, subName, mtlFile, mtl, submeshStart, submeshEnd);
-		subs.push_back(*subM);
+		subs.push_back(subM);
 	}
 
-	//For debugging
-	int jfjd = 0;
-	subs;
-	images;
-	/*verts;
-	indices;
+	/*For debugging
 	if (FindVert() != -1) {
 		assert(false && "THIS WAS SAD");
 	}*/
 	return true;
 }
-
 
 bool Model::CreateInputLayout(ID3D11Device*& device)
 {
@@ -413,6 +446,72 @@ bool Model::CreateConstantBuffer(Graphics& gfx, DirectX::XMMATRIX transform)
 	HRESULT hr = gfx.GetDevice()->CreateBuffer(&cbDesc, &data, &constantBuffer);
 
 	return !FAILED(hr);
+}
+
+bool Model::ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader*& v, ID3D11HullShader*& h, ID3D11DomainShader*& d, ID3D11PixelShader*& p, ID3D11ComputeShader*& c)
+{
+
+	std::string shaderData;
+	std::ifstream reader;
+	reader.open(path, std::ios::binary | std::ios::ate);
+	if (!reader.is_open())
+	{
+		std::cerr << "Could not open PS file!" << std::endl;
+		return false;
+	}
+
+	reader.seekg(0, std::ios::end);//Go to the end of the file
+	shaderData.reserve(static_cast<unsigned int>(reader.tellg()));//Reserve space based on the size of the file
+	reader.seekg(0, std::ios::beg);//Go to the start of the file
+
+	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());//Assign the file to the shader data
+
+	switch (flag)
+	{
+	case VERTEX_SHADER:
+		if (FAILED(gfx->GetDevice()->CreateVertexShader(shaderData.c_str(), shaderData.length(), nullptr, &v)))
+		{
+			std::cerr << "Failed to create pixel shader!" << std::endl;
+			return false;
+		}
+		vShaderByteCode = shaderData;
+		break;
+	case HULL_SHADER:
+		if (FAILED(gfx->GetDevice()->CreateHullShader(shaderData.c_str(), shaderData.length(), nullptr, &h)))
+		{
+			std::cerr << "Failed to create pixel shader!" << std::endl;
+			return false;
+		}
+		break;
+	case DOMAIN_SHADER:
+		if (FAILED(gfx->GetDevice()->CreateDomainShader(shaderData.c_str(), shaderData.length(), nullptr, &d)))
+		{
+			std::cerr << "Failed to create pixel shader!" << std::endl;
+			return false;
+		}
+		break;
+	case PIXEL_SHADER:
+		if (FAILED(gfx->GetDevice()->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr, &p)))
+		{
+			std::cerr << "Failed to create pixel shader!" << std::endl;
+			return false;
+		}
+		break;
+	case COMPUTE_SHADER:
+		if (FAILED(gfx->GetDevice()->CreateComputeShader(shaderData.c_str(), shaderData.length(), nullptr, &c)))
+		{
+			std::cerr << "Failed to create pixel shader!" << std::endl;
+			return false;
+		}
+		break;
+	}
+	//Create the pixel shader and store it in pShader
+	
+
+	shaderData.clear();//Clear the string with data
+	reader.close();//Close the file
+
+	return true;
 }
 
 bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
