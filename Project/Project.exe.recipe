@@ -2,27 +2,27 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\3D-Project\Debug\Project.exe</FullPath>
+      <FullPath>D:\3D-Prog\Debug\Project.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>D:\3D-Project\Debug\ComputeShader.cso</FullPath>
+      <FullPath>D:\3D-Prog\Debug\ComputeShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\3D-Project\Debug\DomainShader.cso</FullPath>
+      <FullPath>D:\3D-Prog\Debug\DomainShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\3D-Project\Debug\HullShader.cso</FullPath>
+      <FullPath>D:\3D-Prog\Debug\HullShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\3D-Project\Debug\PixelShader.cso</FullPath>
+      <FullPath>D:\3D-Prog\Debug\PixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\3D-Project\Debug\VertexShader.cso</FullPath>
+      <FullPath>D:\3D-Prog\Debug\VertexShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\3D-Project\Debug\VertexShadowShader.cso</FullPath>
+      <FullPath>D:\3D-Prog\Debug\VertexShadowShader.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />
