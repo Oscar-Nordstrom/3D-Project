@@ -4,8 +4,8 @@
 ShadowMap::ShadowMap(Graphics* gfx, DirectionalLight* light)
 	:gfx(gfx), light(light)
 {
-	cam.SetRotation(light->direction);
-	cam.SetPosition(DirectX::XMFLOAT3(0.0f, 5.0f, 0.0f));
+	cam.SetDir(light->direction);
+	cam.SetPos(DirectX::XMFLOAT3(0.0f, 5.0f, 0.0f));
 
 	//Set Pixel and Vertx Shader
 	if (!LoadShaders()) {
@@ -38,7 +38,7 @@ ShadowMap::~ShadowMap()
 
 void ShadowMap::SetCamPos(DirectX::XMFLOAT3 pos)
 {
-	cam.SetPosition(pos);
+	cam.SetPos(pos);
 }
 
 void ShadowMap::SetCamDir(DirectX::XMFLOAT3 dir)
@@ -49,7 +49,7 @@ void ShadowMap::SetCamDir(DirectX::XMFLOAT3 dir)
 		dir.y = 0.00000001f;
 	//if (dir.z == 0.0f)
 		//dir.z = 0.01f;
-	cam.SetRotation(dir);
+	cam.SetDir(dir);
 }
 
 void ShadowMap::SetShadowMap()
