@@ -42,11 +42,11 @@ Scene::Scene()
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
 	SetUpDirLight();
 	//cam.SetPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
-	cam.SetDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
+	cam.SetRotation(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
 	SetUpCamBuf();
 
-	shadow.SetCamDir(*cam.GetDir());
-	shadow.SetCamPos(*cam.GetPos());
+	shadow.SetCamDir(cam.GetRotationFloat3());
+	shadow.SetCamPos(cam.GetPositionFloat3());
 
 	//sponza.Load("../Resources/Obj/sponza.obj", "bla", "bla", "bla", window.Gfx());
 }
@@ -81,7 +81,10 @@ bool Scene::DoFrame()
 	const float t = timer.Mark() * speedfactor;
 	timerCount += t;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
-	window.SetTitle(timerString.c_str());
+
+	std::wstring dirStr = L"X: "+std::to_wstring(cam.GetRotationFloat3().x) + L", Y: " + std::to_wstring(cam.GetRotationFloat3().y) + L", Z: " + std::to_wstring(cam.GetRotationFloat3().z);
+
+	window.SetTitle(dirStr.c_str());
 
 	//Shadows
 	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
@@ -158,7 +161,7 @@ bool Scene::SetUpDirLight()
 bool Scene::SetUpCamBuf()
 {
 	D3D11_BUFFER_DESC desc;
-	desc.ByteWidth = roundUpTo(sizeof(cam.GetPos()), 16);
+	desc.ByteWidth = roundUpTo(sizeof(cam.GetPositionFloat3()), 16);
 	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -166,7 +169,7 @@ bool Scene::SetUpCamBuf()
 	desc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = cam.GetPos();
+	data.pSysMem = &cam.GetPositionFloat3();
 	data.SysMemPitch = 0;
 	data.SysMemSlicePitch = 0;
 
@@ -180,48 +183,33 @@ void Scene::UpdateCam()
 	D3D11_MAPPED_SUBRESOURCE mappedResource;//Create a mapped resource
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	HRESULT hr = window.Gfx()->GetContext()->Map(camBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
-	CopyMemory(mappedResource.pData, cam.GetPos(), sizeof(DirectX::XMFLOAT4));//Write the new memory
+	CopyMemory(mappedResource.pData, &cam.GetPositionFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf, 0);//Reenable GPU access to the data
 }
 
 void Scene::checkInput()
 {
+	DirectX::XMFLOAT3 move = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-	//float x = cam.GetPos()->x;
-	//float y = cam.GetPos()->y;
-	//float z = cam.GetPos()->z;
-	//DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(x,y,z);
-
-
-	DirectX::XMFLOAT3 dir = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-	float speed = 0.5f;
-
+	float speed = 1.0f;
 
 	if (window.Kbd()->KeyIsPressed('W')) {
-		//pos.z += speed;
-		dir.z = speed;
+		cam.Move(cam.GetForwardVector());
 	}
 	else if (window.Kbd()->KeyIsPressed('S')) {
-		//pos.z += -speed;
-		dir.z = -speed;
+		cam.Move(cam.GetBackwardVector());
 	}
 	if (window.Kbd()->KeyIsPressed('D')) {
-		//pos.x += speed;
-		dir.x = speed;
+		cam.Move(cam.GetRightVector());
 	}
 	else if (window.Kbd()->KeyIsPressed('A')) {
-		//pos.x += -speed;
-		dir.x = -speed;
+		cam.Move(cam.GetLeftVector());
 	}
 	if (window.Kbd()->KeyIsPressed('U')) {
-		//pos.y += speed;
-		dir.y = speed;
+		move.y = 1;
 	}
 	else if (window.Kbd()->KeyIsPressed('N')) {
-		//pos.y += -speed;
-		dir.z = -speed;
+		move.y = -1;
 	}
-	cam.Move(dir);
-
-	
+	//cam.Move(move);
 }
