@@ -52,8 +52,8 @@ PixelShaderOutput main(PixelShaderInput input)
 
     PixelShaderOutput output;
     
-    output.color = tex1.Sample(samp1, input.uv);// * shadowCoeff;
-    output.specular = tex2.Sample(samp1, input.uv);// * shadowCoeff;
+    output.color = tex1.Sample(samp1, input.uv);// *shadowCoeff;
+    output.specular = tex2.Sample(samp1, input.uv);// *shadowCoeff;
     output.ambient = tex3.Sample(samp1, input.uv);
     output.position = input.position;
     output.wPosition = input.wPosition;

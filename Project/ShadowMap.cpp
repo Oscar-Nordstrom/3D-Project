@@ -74,6 +74,8 @@ void ShadowMap::SetShadowMap()
 
 void ShadowMap::BindDepthResource()
 {
+	cam.SetDir(light->direction);
+	cam.SetPos(DirectX::XMFLOAT3(0.0f, 5.0f, 0.0f));
 	if (!UpdateConstantBuffer()) {
 		std::cerr << "Failed update constant buffer.\n";
 	}
@@ -84,7 +86,7 @@ void ShadowMap::BindDepthResource()
 
 bool ShadowMap::CreateDepthStencil()
 {
-	D3D11_TEXTURE2D_DESC dsTextureDesc;
+	/*D3D11_TEXTURE2D_DESC dsTextureDesc;
 	dsTextureDesc.Width = gfx->GetWidth();
 	dsTextureDesc.Height = gfx->GetHeight();
 	dsTextureDesc.MipLevels = 1;
@@ -95,7 +97,21 @@ bool ShadowMap::CreateDepthStencil()
 	dsTextureDesc.Usage = D3D11_USAGE_DEFAULT;
 	dsTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	dsTextureDesc.CPUAccessFlags = 0;
+	dsTextureDesc.MiscFlags = 0;*/
+
+	D3D11_TEXTURE2D_DESC dsTextureDesc;
+	dsTextureDesc.Width = gfx->GetWidth();
+	dsTextureDesc.Height = gfx->GetHeight();
+	dsTextureDesc.MipLevels = 1;
+	dsTextureDesc.ArraySize = 1;
+	dsTextureDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsTextureDesc.SampleDesc.Count = 1;
+	dsTextureDesc.SampleDesc.Quality = 0;
+	dsTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+	dsTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	dsTextureDesc.CPUAccessFlags = 0;
 	dsTextureDesc.MiscFlags = 0;
+
 
 	if (FAILED(gfx->GetDevice()->CreateTexture2D(&dsTextureDesc, nullptr, &dsTexture))) {
 		std::cerr << "Failed to create ds texture.\n";

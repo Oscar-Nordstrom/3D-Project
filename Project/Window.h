@@ -49,4 +49,5 @@ public:
 	int width, height;
 	HWND hwnd;
 	Graphics* gfx;
+
 };
