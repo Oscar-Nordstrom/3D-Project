@@ -2,7 +2,6 @@
 
 Camera::Camera()
 {
-	speed = 1.0f;
 	Reset();
 }
 
@@ -12,9 +11,8 @@ Camera::~Camera()
 
 DirectX::XMMATRIX Camera::GetMatrix()
 {
-	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(position.x, position.y, position.z, 1.0f);//Position of the camera
-	DirectX::XMVECTOR lookAtPos = DirectX::XMVectorSet(position.x+direction.x, position.y+direction.y, position.y+direction.z, 1.0f);//Direction the camera is looking at
-	//DirectX::XMVECTOR lookAtPos = DirectX::XMVectorSet(position.x, position.y, position.z+1, 1.0f);//Direction the camera is looking at
+	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(position.x, position.y, position.z, 1.0f);//Position of the camera  ////MAY NOT BE ZERO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	DirectX::XMVECTOR lookAtPos = DirectX::XMVectorSet(direction.x, direction.y, direction.z, 1.0f);//Direction the camera is looking at
 	DirectX::XMVECTOR upDir = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);//The up direction
 
 	return  DirectX::XMMatrixLookAtLH(eyePos, lookAtPos, upDir);
@@ -54,33 +52,5 @@ void Camera::Move(DirectX::XMFLOAT3 vec)
 	position.z += vec.z;
 }
 
-void Camera::Forward()
-{
-	position.z += speed;
-}
 
-void Camera::Backward()
-{
-	position.z -= speed;
-}
-
-void Camera::Left()
-{
-	position.x -= speed;
-}
-
-void Camera::Right()
-{
-	position.x += speed;
-}
-
-void Camera::Up()
-{
-	position.y += speed;
-}
-
-void Camera::Down()
-{
-	position.y -= speed;
-}
 

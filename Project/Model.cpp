@@ -26,6 +26,7 @@ Model::~Model()
 	if (cShader)cShader->Release();
 	if (inputLayout)inputLayout->Release();
 	if (samState)samState->Release();
+	if (shadowSamp)shadowSamp->Release();
 	if (vertexBuffer)vertexBuffer->Release();
 	if (indexBuffer)indexBuffer->Release();
 	if (constantBuffer)constantBuffer->Release();
@@ -87,10 +88,12 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, bool withShaders)
 		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
 	}
 	gfx->GetContext()->IASetInputLayout(inputLayout);
 	if (withShaders) {
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
+		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
 	}
 	else {
 		UpdateCbuf(*gfx, transform);
@@ -104,7 +107,9 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, bool withShaders)
 	}
 	
 	gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
-	gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
+	if (withShaders) {
+		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
+	}
 
 
 
@@ -375,6 +380,13 @@ bool Model::SetUpSampler(ID3D11Device*& device)
 	sampler.MaxAnisotropy = 1;
 
 	HRESULT hr = device->CreateSamplerState(&sampler, &samState);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	sampler.Filter = D3D11_FILTER_MINIMUM_ANISOTROPIC;
+
+	hr = device->CreateSamplerState(&sampler, &shadowSamp);
 
 	return !FAILED(hr);
 }

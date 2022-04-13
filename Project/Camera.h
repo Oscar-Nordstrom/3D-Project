@@ -15,17 +15,8 @@ public:
 
 	void Move(DirectX::XMFLOAT3 vec);
 
-	void Forward();
-	void Backward();
-	void Left();
-	void Right();
-	void Up();
-	void Down();
-
 
 private:
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 direction;
-
-	float speed;
 };

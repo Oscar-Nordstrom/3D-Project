@@ -35,7 +35,7 @@ private:
 	SceneObjectTest object;
 	SceneObjectTest floor;
 	SceneObjectTest test;
-	SceneObjectTest skybox;
+	//SceneObjectTest skybox;
 	DirectionalLight dLight;
 	ShadowMap shadow;
 	ID3D11Buffer* lightBuf;

@@ -13,7 +13,7 @@ int roundUpTo(int numToRound, int multiple)
 }
 
 Scene::Scene()
-	:window(800, 600, L"Project"), object(*window.Gfx()), floor(*window.Gfx()), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), test(*window.Gfx()), skybox(*window.Gfx())
+	:window(800, 600, L"Project"), object(*window.Gfx()), floor(*window.Gfx()), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), test(*window.Gfx())//, skybox(*window.Gfx())
 {
 	
 
@@ -36,8 +36,8 @@ Scene::Scene()
 	floor.Move(0.0f, -10.0f, 0.0f);
 	floor.Scale(10.0f, -0.9f, 10.0f);
 	//floor.Rotate(0.0f, 0.0f, 0.0f);
-	skybox.Init("../Resources/Obj/skybox.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
-	skybox.Scale(-200.0f, -200.0f, -200.0f);
+	//skybox.Init("../Resources/Obj/skybox.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	//skybox.Scale(-200.0f, -200.0f, -200.0f);
 	dLight.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
 	SetUpDirLight();
@@ -88,14 +88,16 @@ bool Scene::DoFrame()
 
 	//Shadows
 	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
-	shadow.SetCamDir(dLight.direction);
+	shadow.SetCamDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
+	//Using the same camera
+
 	shadow.SetShadowMap();
 
 	test.Draw(window.Gfx(), false);
 	object.Draw(window.Gfx(), false);
 	floor.Draw(window.Gfx(), false);
-	skybox.Draw(window.Gfx(), false);
-
+	//skybox.Draw(window.Gfx(), false);
+	
 
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
 
@@ -117,14 +119,14 @@ bool Scene::DoFrame()
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}
-	if (!skybox.Update(0.0f, window.Gfx())) {
+	/*if (!skybox.Update(0.0f, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
-	}
+	}*/
 	object.Draw(window.Gfx());
 	floor.Draw(window.Gfx());
 	test.Draw(window.Gfx());
-	skybox.Draw(window.Gfx());
+	//skybox.Draw(window.Gfx());
 
 
 	shadow.BindDepthResource();

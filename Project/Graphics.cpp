@@ -239,7 +239,7 @@ bool Graphics::SetUpSampler(ID3D11Device* device, ID3D11SamplerState*& samState)
 	sampler.MaxAnisotropy = 1;
 
 	HRESULT hr = device->CreateSamplerState(&sampler, &samState);
-
+	
 
 	return !FAILED(hr);
 }

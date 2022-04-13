@@ -1,13 +1,12 @@
 #include "ShadowMap.h"
 
 
-ShadowMap::ShadowMap(Graphics* gfx, DirectionalLight* light)
+ShadowMap::ShadowMap(Graphics*& gfx, DirectionalLight* light)
 	:gfx(gfx), light(light)
 {
 	cam.SetDir(light->direction);
-	cam.SetPos(DirectX::XMFLOAT3(0.0f, 5.0f, 0.0f));
+	cam.SetPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
 
-	//Set Pixel and Vertx Shader
 	if (!LoadShaders()) {
 		std::cerr << "Failed load shader.\n";
 	}
@@ -24,8 +23,8 @@ ShadowMap::ShadowMap(Graphics* gfx, DirectionalLight* light)
 
 ShadowMap::~ShadowMap()
 {
-	if (vertexShader)
-		vertexShader->Release();
+	if (vertexShadowShader)
+		vertexShadowShader->Release();
 	if (dsTexture)
 		dsTexture->Release();
 	if (dsView)
@@ -61,21 +60,19 @@ void ShadowMap::SetShadowMap()
 
 	gfx->GetContext()->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH, 1, 0);
 
-	gfx->GetContext()->VSSetShader(vertexShader, nullptr, 0);
+	gfx->GetContext()->VSSetShader(vertexShadowShader, nullptr, 0);
 	gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
 
 	float nearZ = 0.1f; //Minimum viewing 
 	float farZ = 1000.0f;//Maximum viewing distance
 
-	projection = DirectX::XMMatrixOrthographicLH(50, 50, nearZ, farZ);;
+	projection = DirectX::XMMatrixOrthographicLH(8, 6, nearZ, farZ);
 	gfx->SetProjection(projection);
 	gfx->SetCamera(cam.GetMatrix());
 }
 
 void ShadowMap::BindDepthResource()
 {
-	cam.SetDir(light->direction);
-	cam.SetPos(DirectX::XMFLOAT3(0.0f, 5.0f, 0.0f));
 	if (!UpdateConstantBuffer()) {
 		std::cerr << "Failed update constant buffer.\n";
 	}
@@ -86,7 +83,7 @@ void ShadowMap::BindDepthResource()
 
 bool ShadowMap::CreateDepthStencil()
 {
-	/*D3D11_TEXTURE2D_DESC dsTextureDesc;
+	D3D11_TEXTURE2D_DESC dsTextureDesc;
 	dsTextureDesc.Width = gfx->GetWidth();
 	dsTextureDesc.Height = gfx->GetHeight();
 	dsTextureDesc.MipLevels = 1;
@@ -96,19 +93,6 @@ bool ShadowMap::CreateDepthStencil()
 	dsTextureDesc.SampleDesc.Quality = 0;
 	dsTextureDesc.Usage = D3D11_USAGE_DEFAULT;
 	dsTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	dsTextureDesc.CPUAccessFlags = 0;
-	dsTextureDesc.MiscFlags = 0;*/
-
-	D3D11_TEXTURE2D_DESC dsTextureDesc;
-	dsTextureDesc.Width = gfx->GetWidth();
-	dsTextureDesc.Height = gfx->GetHeight();
-	dsTextureDesc.MipLevels = 1;
-	dsTextureDesc.ArraySize = 1;
-	dsTextureDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	dsTextureDesc.SampleDesc.Count = 1;
-	dsTextureDesc.SampleDesc.Quality = 0;
-	dsTextureDesc.Usage = D3D11_USAGE_DEFAULT;
-	dsTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	dsTextureDesc.CPUAccessFlags = 0;
 	dsTextureDesc.MiscFlags = 0;
 
@@ -148,7 +132,7 @@ bool ShadowMap::LoadShaders()
 	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>()); //Assign the file to the shaderdata
 
 	//Create our vertwx shader and store it in vShader
-	if (FAILED(gfx->GetDevice()->CreateVertexShader(shaderData.c_str(), shaderData.length(), nullptr, &vertexShader)))
+	if (FAILED(gfx->GetDevice()->CreateVertexShader(shaderData.c_str(), shaderData.length(), nullptr, &vertexShadowShader)))
 	{
 		std::cerr << "Failed to create vertex shader!" << std::endl;
 		return false;

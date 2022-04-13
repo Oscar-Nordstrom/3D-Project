@@ -2,27 +2,27 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\Oscar Nordström\Desktop\3D-Projekt\Debug\Project.exe</FullPath>
+      <FullPath>D:\3D-Project\Debug\Project.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\Users\Oscar Nordström\Desktop\3D-Projekt\Debug\ComputeShader.cso</FullPath>
+      <FullPath>D:\3D-Project\Debug\ComputeShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\Oscar Nordström\Desktop\3D-Projekt\Debug\DomainShader.cso</FullPath>
+      <FullPath>D:\3D-Project\Debug\DomainShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\Oscar Nordström\Desktop\3D-Projekt\Debug\HullShader.cso</FullPath>
+      <FullPath>D:\3D-Project\Debug\HullShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\Oscar Nordström\Desktop\3D-Projekt\Debug\PixelShader.cso</FullPath>
+      <FullPath>D:\3D-Project\Debug\PixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\Oscar Nordström\Desktop\3D-Projekt\Debug\VertexShader.cso</FullPath>
+      <FullPath>D:\3D-Project\Debug\VertexShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\Oscar Nordström\Desktop\3D-Projekt\Debug\VertexShadowShader.cso</FullPath>
+      <FullPath>D:\3D-Project\Debug\VertexShadowShader.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

@@ -21,6 +21,7 @@ Texture2D<float4> tex1 : register(t0); //Diffuse
 Texture2D<float4> tex2 : register(t1); //Specular
 Texture2D<float4> tex3 : register(t2); //Ambient
 SamplerState samp1 : register(s0);
+SamplerState shadowSamp : register(s1);
 
 Texture2D<float4> shadowMap : register(t3);
 
@@ -38,13 +39,15 @@ PixelShaderOutput main(PixelShaderInput input)
     //Compute pixel depth for shadowing
     float depth = input.lightPosition.z / input.lightPosition.w;//OK
     //Sample
-    float4 sampled = shadowMap.Sample(samp1, smTex);//Maybe need another sampler?
+    float4 sampled = shadowMap.Sample(shadowSamp, smTex); //Maybe need another sampler?
     //Check if shadowd
     if (sampled.r < depth)//Is this right?
     {
         //If the light sees is less than what we see, there is a shadow
-        shadowCoeff = 0.0f;
-    }
+      shadowCoeff = 0.0f;
+   }
+    
+
     
     
 
@@ -52,8 +55,8 @@ PixelShaderOutput main(PixelShaderInput input)
 
     PixelShaderOutput output;
     
-    output.color = tex1.Sample(samp1, input.uv);// *shadowCoeff;
-    output.specular = tex2.Sample(samp1, input.uv);// *shadowCoeff;
+    output.color = tex1.Sample(samp1, input.uv);// * shadowCoeff;
+    output.specular = tex2.Sample(samp1, input.uv);// * shadowCoeff;
     output.ambient = tex3.Sample(samp1, input.uv);
     output.position = input.position;
     output.wPosition = input.wPosition;

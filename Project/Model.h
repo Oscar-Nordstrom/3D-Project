@@ -60,6 +60,7 @@ private:
 	ID3D11ComputeShader* cShader;
 	ID3D11InputLayout* inputLayout;
 	ID3D11SamplerState* samState;
+	ID3D11SamplerState* shadowSamp;
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* constantBuffer;

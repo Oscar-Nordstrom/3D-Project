@@ -9,7 +9,7 @@
 
 class ShadowMap {
 public:
-	ShadowMap(Graphics* gfx, DirectionalLight* light);
+	ShadowMap(Graphics*& gfx, DirectionalLight* light);
 	~ShadowMap();
 	void SetCamPos(DirectX::XMFLOAT3 pos);
 	void SetCamDir(DirectX::XMFLOAT3 dir);
@@ -25,13 +25,11 @@ private:
 	Camera cam;
 	DirectX::XMMATRIX projection;
 	DirectionalLight* light;
-	Graphics* gfx;
-	ID3D11VertexShader* vertexShader;
+	Graphics*& gfx;
+	ID3D11VertexShader* vertexShadowShader;
 	ID3D11Texture2D* dsTexture;
 	ID3D11DepthStencilView* dsView;
 	ID3D11ShaderResourceView* srv;
 	ID3D11Buffer* constantBuffer;
-
-	int it = 0;
 
 };
