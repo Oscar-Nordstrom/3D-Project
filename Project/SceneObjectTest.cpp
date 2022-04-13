@@ -20,6 +20,7 @@ bool SceneObjectTest::Update(float dt, Graphics*& gfx)
 {
 	UpdateTransform(dt);
 	if (!model.UpdateCbuf(*gfx, transform)) {
+		assert(false, "Failed to update constant buffer.");
 		std::cerr << "Failed to update constant buffer.\n";
 		return false;
 	}
@@ -59,6 +60,7 @@ bool SceneObjectTest::Init(string objPath, string vShaderPath, string hShaderPat
 {
 
 	if (!model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, transform, gfx)) {
+		assert(false, "Failed to load model.");
 		return false;
 	}
 

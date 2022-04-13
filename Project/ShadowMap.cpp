@@ -7,7 +7,11 @@ ShadowMap::ShadowMap(Graphics*& gfx, DirectionalLight* light)
 	cam.SetDir(light->direction);
 	cam.SetPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
 
-	if (!LoadShaders()) {
+	assert(LoadShaders(), "Failed to load shaders.");
+	assert(CreateDepthStencil(), "Failed to create ds.");
+	assert(CreateSRV(), "Failed to create srv.");
+	assert(CreateConstantBuffer(), "Failed create constant buffer.");
+	/*if (!LoadShaders()) {
 		std::cerr << "Failed load shader.\n";
 	}
 	if (!CreateDepthStencil()) {
@@ -18,7 +22,7 @@ ShadowMap::ShadowMap(Graphics*& gfx, DirectionalLight* light)
 	}
 	if (!CreateConstantBuffer()) {
 		std::cerr << "Failed create constant buffer.\n";
-	}
+	}*/
 }
 
 ShadowMap::~ShadowMap()
@@ -195,8 +199,11 @@ bool ShadowMap::UpdateConstantBuffer()
 		CopyMemory(mappedResource.pData, &d, sizeof(ShadowVertexData));//Write the new memory 
 		
 		gfx->GetContext()->Unmap(constantBuffer, 0);
+		if (FAILED(hr)) {
+			assert(false, "Failed to update constant buffer.");
+		}
 
-		return !FAILED(hr);
+		return true;
 }
 
 
