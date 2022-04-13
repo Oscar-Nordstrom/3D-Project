@@ -10,6 +10,7 @@ Model::Model()
 	vShader = nullptr;
 	cShader = nullptr;
 	samState = nullptr;
+	shadowSamp = nullptr;
 	vertexBuffer = nullptr;
 	constantBuffer = nullptr;
 	images = nullptr;
@@ -41,8 +42,15 @@ Model::~Model()
 
 bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
 {
-	
-	if (!LoadShaders(vShaderPath,hShaderPath, dShaderPath, pShaderPath, cShaderPath, gfx)) {
+	assert(LoadShaders(vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gfx), "Failed to load shaders.");
+	assert(LoadObj(obj, gfx), "Failed to load OBJ.");
+	assert(CreateInputLayout(gfx->GetDevice()), "Failed to create input layout.");
+	assert(SetUpSampler(gfx->GetDevice()), "Failed to set up sampler.");
+	assert(CreateVertexBuffer(gfx->GetDevice()), "Failed to create vertex buffer.");
+	assert(CreateIndexBuffer(gfx->GetDevice()), "Failed to create index buffer.");
+	assert(CreateConstantBuffer(*gfx, transform), "Failed to create constant buffer.");
+
+	/*if (!LoadShaders(vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gfx)) {
 		return false;
 	}
 	if (!LoadObj(obj, gfx)) {
@@ -67,7 +75,7 @@ bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dSha
 	if (!CreateConstantBuffer(*gfx, transform)) {
 		std::cerr << "Failed to create constant buffer.\n";
 		return false;
-	}
+	}*/
 
 	return true;
 }
@@ -541,8 +549,11 @@ bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
 	HRESULT hr = gfx.GetContext()->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	CopyMemory(mappedResource.pData, &m, sizeof(Matrices));//Write the new memory
 	gfx.GetContext()->Unmap(constantBuffer, 0);
+	if (FAILED(hr)) {
+		assert(false, "Failed to update constant buffer.");
+	}
 
-	return !FAILED(hr);
+	return true;
 }
 
 /*int Model::FindVert()

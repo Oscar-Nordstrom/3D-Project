@@ -7,7 +7,11 @@ Graphics::Graphics(int width, int height, HWND& window)
 	w = width;
 	h = height;
 
-	if (!CreateDeviceAndSwapchain(width, height, window)) {
+	assert(CreateDeviceAndSwapchain(width, height, window), "Failed to create device and swapchain.");
+	assert(SetUpGbuffer(device, width, height), "Failed to set up G buffer.");
+	assert(CreateDepthStencilView(width, height), "Failed to create depth stencil view.");
+	assert(CreateUAV(device, width, height), "Failed to create uav.");
+	/*if (!CreateDeviceAndSwapchain(width, height, window)) {
 		std::cerr << "Failed to create device and swapchain.\n";
 	}
 
@@ -22,7 +26,7 @@ Graphics::Graphics(int width, int height, HWND& window)
 
 	if (!CreateUAV(device, width, height)) {
 		std::cerr << "Failed to create uav.\n";
-	}
+	}*/
 
 
 
@@ -41,10 +45,10 @@ Graphics::Graphics(int width, int height, HWND& window)
 
 	deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(3, renderTargets, dsView, 3, 1, &uav, nullptr);
 
-
-	if (!SetUpSampler(device, samState)) {
+	assert(SetUpSampler(device, samState), "Failed to set up sampler.");
+	/*if (!SetUpSampler(device, samState)) {
 		std::cerr << "Failed to set up sampler.\n";
-	}
+	}*/
 	SetViewport(width, height);
 	deviceContext->RSSetViewports(1, &viewport);
 	deviceContext->PSSetSamplers(0, 1, &samState);
@@ -142,6 +146,7 @@ ID3D11Texture2D* Graphics::GetBackBuffer() const
 	ID3D11Texture2D* backbuffer = nullptr;
 	if (FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backbuffer)))) {
 		std::cerr << "Failed to get backbuffer.\n";
+		assert(false, "Failed to get back buffer.");
 		return nullptr;
 	}
 
@@ -187,7 +192,9 @@ flags |= D3D11_CREATE_DEVICE_DEBUG;
 	scDesc.Flags = 0;
 
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, 1, D3D11_SDK_VERSION, &scDesc, &swapChain, &device, nullptr, &deviceContext);
-	if (FAILED(hr)) return false;
+	if (FAILED(hr)) { 
+		return false; 
+	}
 
 
 	return true;
