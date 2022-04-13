@@ -51,18 +51,19 @@ void main(uint3 DTid : SV_DispatchThreadID)
     //Ambient calculations
     finalAmbient = ambient * matColor;
     
+    float3 d = normalize(dir);
+    normal = normalize(normal);
     //Diffuse calculateions
-    float diff = dot(-dir, normal.xyz);
+    float diff = dot(-d, normal.xyz);
     if (diff >= 0.0f)
     {
         finalDiffuse = diff * (matColor + color);
-
     }
 
     //Specular calculations
     if (diff >= 0.0f)
     {
-        float3 r = -normalize(reflect(-dir, normal.xyz));
+        float3 r = -normalize(reflect(-d, normal.xyz));
         float3 v = normalize(camPos.xyz - wPosition.xyz);
         float spec = dot(r, v);
         if (spec >= 0.0f)
