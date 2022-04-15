@@ -14,6 +14,7 @@ int roundUpTo(int numToRound, int multiple)
 
 Scene::Scene()
 	:window(800, 600, L"Project"), object(*window.Gfx()), floor(*window.Gfx()), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), test(*window.Gfx())//, skybox(*window.Gfx())
+	,cMap(window.Gfx())
 {
 	float fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
@@ -91,10 +92,24 @@ bool Scene::DoFrame()
 
 	shadow.SetShadowMap();
 
-	test.Draw(window.Gfx(), false);
-	object.Draw(window.Gfx(), false);
-	floor.Draw(window.Gfx(), false);
+	test.Draw(window.Gfx(), SHADOW);
+	object.Draw(window.Gfx(), SHADOW);
+	floor.Draw(window.Gfx(), SHADOW);
 	//skybox.Draw(window.Gfx(), false);
+
+	//Cube mapping Start
+	//Clear RTVs
+	cMap.Clear(window.Gfx()->GetContext());
+	for (int i = 0; i < 6; i++) {
+		//Set render target
+		cMap.Set(window.Gfx()->GetContext(),i);
+		//Render objects
+		object.Draw(window.Gfx());
+		floor.Draw(window.Gfx());
+		test.Draw(window.Gfx());
+
+	}
+	//Cube mapping end
 	
 
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
@@ -125,6 +140,12 @@ bool Scene::DoFrame()
 	floor.Draw(window.Gfx());
 	test.Draw(window.Gfx());
 	//skybox.Draw(window.Gfx());
+
+
+
+
+
+
 
 
 	shadow.BindDepthResource();

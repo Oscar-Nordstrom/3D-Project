@@ -80,50 +80,54 @@ bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dSha
 	return true;
 }
 
-void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, bool withShaders)
+void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 {
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
 	
-	if (withShaders) {
+	if (flag == NORMAL) {
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
 		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
 		gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
+
+		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
+		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
+
+		gfx->GetContext()->IASetPrimitiveTopology(topology);
+
+		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 	}
-	else {
+	else if(flag == SHADOW) {
 		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
-	}
-	gfx->GetContext()->IASetInputLayout(inputLayout);
-	if (withShaders) {
-		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
-		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
-	}
-	else {
+
 		UpdateCbuf(*gfx, transform);
-	}
-	gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-	if (withShaders) {
-		gfx->GetContext()->IASetPrimitiveTopology(topology);
-	}
-	else {
+
 		gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
 	}
+	else if (flag == CUBE_MAP) {
+		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
+
+		gfx->GetContext()->IASetPrimitiveTopology(topology);
+	}
+
+	gfx->GetContext()->IASetInputLayout(inputLayout);
+	
+	gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	
 	gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
-	if (withShaders) {
-		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
-	}
 
 
 
 	if (subs.size() > 0) {
 		for (auto& o : subs) {
-			o->Bind(gfx->GetContext(), withShaders);
+			o->Bind(gfx->GetContext(), flag);
 		}
 	}
 	else {

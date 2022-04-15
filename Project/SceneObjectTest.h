@@ -10,6 +10,8 @@
 #include <Windows.h>
 
 
+#include "flags.h"
+
 using namespace std;
 
 class SceneObjectTest {
@@ -22,7 +24,7 @@ public:
 	void Move(float dx, float dy, float dz);
 	void Scale(float dx, float dy, float dz);
 	void Rotate(float dx, float dy, float dz);
-	void Draw(Graphics*& gfx, bool withShaders = true);
+	void Draw(Graphics*& gfx, int flag = NORMAL);
 private:
 
 private:

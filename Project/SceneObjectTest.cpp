@@ -49,9 +49,9 @@ void SceneObjectTest::Rotate(float dx, float dy, float dz)
 	rz += dz;
 }
 
-void SceneObjectTest::Draw(Graphics*& gfx, bool withShaders)
+void SceneObjectTest::Draw(Graphics*& gfx, int flag)
 {
-	model.Draw(gfx, transform, withShaders);
+	model.Draw(gfx, transform, flag);
 
 }
 

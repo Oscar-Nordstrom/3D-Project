@@ -10,11 +10,7 @@
 #include "Structures.h"
 #include "Graphics.h"
 
-#define VERTEX_SHADER 0
-#define HULL_SHADER 1
-#define DOMAIN_SHADER 2
-#define PIXEL_SHADER 3
-#define COMPUTE_SHADER 4
+#include "flags.h"
 
 
 using namespace std;
@@ -25,7 +21,7 @@ public:
 	~Model();
 
 	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
-	void Draw(Graphics*& gfx, DirectX::XMMATRIX transform, bool withShaders = true);
+	void Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag = NORMAL);
 	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform);
 private:
 	bool LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx);

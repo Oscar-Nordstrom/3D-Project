@@ -10,9 +10,12 @@
 #include "SceneObject.h"
 #include "Structures.h"
 #include "ShadowMap.h"
+#include "CubeMap.h"
 #include <string>
 #include <iostream>
 #include <DirectXMath.h>
+
+#include "flags.h"
 
 class Scene {
 public:
@@ -32,6 +35,7 @@ private:
 	Window window;
 	Timer timer;
 	Camera cam;
+	CubeMap cMap;
 	SceneObjectTest object;
 	SceneObjectTest floor;
 	SceneObjectTest test;

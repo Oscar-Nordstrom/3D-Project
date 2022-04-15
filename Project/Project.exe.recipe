@@ -19,6 +19,9 @@
       <FullPath>D:\3D-Project\Debug\PixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\3D-Project\Debug\PixelShaderCubeMap.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\3D-Project\Debug\VertexShader.cso</FullPath>
     </ContentFile>
     <ContentFile>

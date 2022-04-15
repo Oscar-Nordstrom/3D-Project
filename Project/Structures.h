@@ -11,6 +11,8 @@
 
 #include "stb_image.h"
 
+#include "flags.h"
+
 struct ShadowVertexData {
 	DirectX::XMMATRIX proj;
 	DirectX::XMMATRIX view;
@@ -462,8 +464,8 @@ struct SubMesh {
 		return true;
 	}
 
-	void Bind(ID3D11DeviceContext*& context, bool withPS = true) {
-		if (withPS)
+	void Bind(ID3D11DeviceContext*& context, int flag = NORMAL) {
+		if (flag == NORMAL)
 			context->PSSetShaderResources(0, 3, srv);
 		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
