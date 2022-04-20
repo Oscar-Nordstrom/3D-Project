@@ -152,6 +152,11 @@ int Graphics::GetHeight()
 	return h;
 }
 
+void Graphics::present()
+{
+	swapChain->Present(1, 0);
+}
+
 bool Graphics::CreateDeviceAndSwapchain(int width, int height, HWND& window)
 {
 	UINT flags = NULL;

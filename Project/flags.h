@@ -1,5 +1,7 @@
 #pragma once
 
+#define NO_SHADER "NO_SHADER"
+
 #define VERTEX_SHADER 0
 #define HULL_SHADER 1
 #define DOMAIN_SHADER 2

@@ -45,7 +45,7 @@ Scene::Scene()
 	soldier6.Move(0.0f, 0.0f, -10.0f);
 	soldier6.Scale(2.0f, 2.0f, 2.0f);
 
-	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShaderCubeMap.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", NO_SHADER,  NO_SHADER, "../Debug/PixelShaderCubeMap.cso", NO_SHADER, window.Gfx());
 	cube.Move(0.0f, 1.0f, 0.0f);
 	cube.Scale(2.0f, 2.0f, 2.0f);
 	
@@ -144,16 +144,12 @@ bool Scene::DoFrame()
 		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 	}
 
-	//cMap.SetSeccond(window.Gfx()->GetContext());
-	//window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(),CUBE_MAP_TWO);
-	//cube.Draw(window.Gfx(), CUBE_MAP_TWO);
+	cMap.SetSeccond(window.Gfx()->GetContext());
+	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(),CUBE_MAP_TWO);//Special case
+	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 
 	//Cube mapping end
 
-
-	cMap.SetSeccond(window.Gfx()->GetContext());
-	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(), CUBE_MAP_TWO);
-	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
 

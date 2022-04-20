@@ -161,19 +161,19 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 bool Model::LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
 {
 
-	if (!ReadShader(gfx, vShaderPath, VERTEX_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+	if (!ReadShader(gfx, vShaderPath, VERTEX_SHADER, vShader, hShader, dShader, pShader, cShader) && vShaderPath != NO_SHADER) {
 		return false;
 	}
-	if (!ReadShader(gfx, hShaderPath, HULL_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+	if (!ReadShader(gfx, hShaderPath, HULL_SHADER, vShader, hShader, dShader, pShader, cShader) && hShaderPath != NO_SHADER) {
 		return false;
 	}
-	if (!ReadShader(gfx, dShaderPath, DOMAIN_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+	if (!ReadShader(gfx, dShaderPath, DOMAIN_SHADER, vShader, hShader, dShader, pShader, cShader) && dShaderPath != NO_SHADER) {
 		return false;
 	}
-	if (!ReadShader(gfx, pShaderPath, PIXEL_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+	if (!ReadShader(gfx, pShaderPath, PIXEL_SHADER, vShader, hShader, dShader, pShader, cShader) && pShaderPath != NO_SHADER) {
 		return false;
 	}
-	if (!ReadShader(gfx, cShaderPath, COMPUTE_SHADER, vShader, hShader, dShader, pShader, cShader)) {
+	if (!ReadShader(gfx, cShaderPath, COMPUTE_SHADER, vShader, hShader, dShader, pShader, cShader) && cShaderPath != NO_SHADER) {
 		return false;
 	}
 

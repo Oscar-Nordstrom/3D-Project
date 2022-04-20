@@ -27,6 +27,8 @@ public:
 	int GetWidth();
 	int GetHeight();
 
+	void present();
+
 
 private:
 
