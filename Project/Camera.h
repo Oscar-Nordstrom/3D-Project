@@ -11,6 +11,7 @@ public:
 	DirectX::XMFLOAT3* GetDir();
 	void SetPos(DirectX::XMFLOAT3 pos);
 	void SetDir(DirectX::XMFLOAT3 dir);
+	void SetUpDir(DirectX::XMFLOAT3 dir);
 	void Reset();
 
 	void Move(DirectX::XMFLOAT3 vec);
@@ -19,4 +20,5 @@ public:
 private:
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 direction;
+	DirectX::XMFLOAT3 upDirection;
 };

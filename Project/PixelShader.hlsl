@@ -45,7 +45,7 @@ PixelShaderOutput main(PixelShaderInput input)
     {
         //If the light sees is less than what we see, there is a shadow
       shadowCoeff = 0.0f;
-   }
+    }
     
 
     

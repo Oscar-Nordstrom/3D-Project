@@ -11,9 +11,9 @@ Camera::~Camera()
 
 DirectX::XMMATRIX Camera::GetMatrix()
 {
-	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(position.x, position.y, position.z, 1.0f);//Position of the camera  ////MAY NOT BE ZERO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	DirectX::XMVECTOR lookAtPos = DirectX::XMVectorSet(direction.x, direction.y, direction.z, 1.0f);//Direction the camera is looking at
-	DirectX::XMVECTOR upDir = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);//The up direction
+	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(position.x, position.y, position.z, 1.0f);//Position of the camera  
+	DirectX::XMVECTOR lookAtPos = DirectX::XMVectorSet(direction.x, direction.y, direction.z, 1.0f);//Direction the camera is looking at ////MAY NOT BE ZERO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	DirectX::XMVECTOR upDir = DirectX::XMVectorSet(upDirection.x, upDirection.y, upDirection.z, 0.0f);//The up direction
 
 	return  DirectX::XMMatrixLookAtLH(eyePos, lookAtPos, upDir);
 }
@@ -38,10 +38,16 @@ void Camera::SetDir(DirectX::XMFLOAT3 dir)
 	direction = dir;
 }
 
+void Camera::SetUpDir(DirectX::XMFLOAT3 dir)
+{
+	upDirection = dir;
+}
+
 void Camera::Reset()
 {
 	position = DirectX::XMFLOAT3(0.0f, 0.0f, -3.0f);
 	direction = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+	upDirection = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
 }
 
 void Camera::Move(DirectX::XMFLOAT3 vec)

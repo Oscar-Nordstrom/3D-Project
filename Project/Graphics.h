@@ -3,8 +3,9 @@
 #include <DirectXMath.h>
 #include <iostream>
 #include "Structures.h"
+#include "flags.h"
 
-#define numGbufs 6
+
 
 
 class Graphics {
@@ -14,8 +15,8 @@ public:
 	ID3D11Device*& GetDevice();
 	ID3D11DeviceContext*& GetContext();
 
-	void StartFrame(float r, float g, float b);
-	void EndFrame(int width, int height);
+	void StartFrame(float r, float g, float b, int flag = NORMAL);
+	void EndFrame(int width, int height, int flag = NORMAL);
 
 	void SetProjection(DirectX::XMMATRIX proj);
 	void SetCamera(DirectX::XMMATRIX cam);
@@ -25,6 +26,7 @@ public:
 	ID3D11Texture2D* GetBackBuffer()const;
 	int GetWidth();
 	int GetHeight();
+
 
 private:
 
@@ -38,6 +40,7 @@ private:
 	bool SetUpSampler(ID3D11Device* device, ID3D11SamplerState*& samState);
 	bool SetUpGbuffer(ID3D11Device* device, int width, int height);
 	bool CreateUAV(ID3D11Device* device, int width, int height);
+	bool CreateRTV(ID3D11Device* device, int width, int height);
 
 	DirectX::XMMATRIX projection;
 	DirectX::XMMATRIX camera;
@@ -54,6 +57,7 @@ private:
 	ID3D11ShaderResourceView* nullSrv[6] = { nullptr, nullptr, nullptr, nullptr, nullptr };
 	TextureRT gBuffer[numGbufs];
 	ID3D11RenderTargetView* renderTargets[6];
+	ID3D11RenderTargetView* rtv;
 	ID3D11ShaderResourceView* shaderResources[6];
 	D3D11_VIEWPORT viewport;
 

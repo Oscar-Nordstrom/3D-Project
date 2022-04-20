@@ -92,6 +92,8 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
 		gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 
+		UpdateCbuf(*gfx, transform);
+
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
 		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
 
@@ -110,11 +112,29 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
 	}
 	else if (flag == CUBE_MAP) {
+		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
+		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
+		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
+		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
+		//gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
+
+		UpdateCbuf(*gfx, transform);
+
+		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
+		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
+
+		gfx->GetContext()->IASetPrimitiveTopology(topology);
+
+		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
+	}
+	else if (flag == CUBE_MAP_TWO) {
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
 
-		gfx->GetContext()->IASetPrimitiveTopology(topology);
+		UpdateCbuf(*gfx, transform);
+
+		gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
 	}
 
 	gfx->GetContext()->IASetInputLayout(inputLayout);
@@ -140,78 +160,6 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 bool Model::LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
 {
-	/*std::string shaderData;
-	std::ifstream reader;
-	//Open the vertex shader cso file
-	reader.open(vShaderPath, std::ios::binary | std::ios::ate);
-	if (!reader.is_open())
-	{
-		std::cerr << "Could not open VS file!" << std::endl;
-		return false;
-	}
-
-	reader.seekg(0, std::ios::end);//Go to the end of the file
-	shaderData.reserve(static_cast<unsigned int>(reader.tellg()));//Reserve space based on how big the file is
-	reader.seekg(0, std::ios::beg);//Go the the start of the file
-
-	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>()); //Assign the file to the shaderdata
-
-	//Create our vertwx shader and store it in vShader
-	if (FAILED(gfx->GetDevice()->CreateVertexShader(shaderData.c_str(), shaderData.length(), nullptr, &vShader)))
-	{
-		std::cerr << "Failed to create vertex shader!" << std::endl;
-		return false;
-	}
-
-	//Give the shader the data
-	vShaderByteCode = shaderData;
-	shaderData.clear();//Clear the string with data
-	reader.close();//Close the file
-
-
-
-	//Open the pixel shader cso file
-	reader.open(pShaderPath, std::ios::binary | std::ios::ate);
-	if (!reader.is_open())
-	{
-		std::cerr << "Could not open PS file!" << std::endl;
-		return false;
-	}
-
-	reader.seekg(0, std::ios::end);//Go to the end of the file
-	shaderData.reserve(static_cast<unsigned int>(reader.tellg()));//Reserve space based on the size of the file
-	reader.seekg(0, std::ios::beg);//Go to the start of the file
-
-	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());//Assign the file to the shader data
-
-	//Create the pixel shader and store it in pShader
-	if (FAILED(gfx->GetDevice()->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr, &pShader)))
-	{
-		std::cerr << "Failed to create pixel shader!" << std::endl;
-		return false;
-	}
-
-	shaderData.clear();//Clear the string with data
-	reader.close();//Close the file
-	//Open the compute shader cso file
-	reader.open(cShaderPath, std::ios::binary | std::ios::ate);
-	if (!reader.is_open())
-	{
-		std::cerr << "Could not open CS file!" << std::endl;
-		return false;
-	}
-	reader.seekg(0, std::ios::end);//Go to the end of the file
-	shaderData.reserve(static_cast<unsigned int>(reader.tellg()));//Reserve space based on the size of the file
-	reader.seekg(0, std::ios::beg);//Go to the start of the file
-
-	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());//Assign the file to the shader data
-
-	//Create the compute shader and store it in cShader
-	if (FAILED(gfx->GetDevice()->CreateComputeShader(shaderData.c_str(), shaderData.length(), nullptr, &cShader)))
-	{
-		std::cerr << "Failed to create pixel shader!" << std::endl;
-		return false;
-	}*/
 
 	if (!ReadShader(gfx, vShaderPath, VERTEX_SHADER, vShader, hShader, dShader, pShader, cShader)) {
 		return false;

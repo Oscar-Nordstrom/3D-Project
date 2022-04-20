@@ -29,6 +29,7 @@ private:
 	void UpdateCam();
 
 	void checkInput();
+	void cubeMapSetCam(int num);
 
 	float speedfactor = 1.0f;
 	float timerCount = 0.0f;
@@ -36,9 +37,15 @@ private:
 	Timer timer;
 	Camera cam;
 	CubeMap cMap;
-	SceneObjectTest object;
-	SceneObjectTest floor;
-	SceneObjectTest test;
+	SceneObjectTest cube;
+	SceneObjectTest soldier1;
+	SceneObjectTest soldier2;
+	SceneObjectTest soldier3;
+	SceneObjectTest soldier4;
+	SceneObjectTest soldier5;
+	SceneObjectTest soldier6;
+	//SceneObjectTest floor;
+	//SceneObjectTest test;
 	//SceneObjectTest skybox;
 	DirectionalLight dLight;
 	ShadowMap shadow;

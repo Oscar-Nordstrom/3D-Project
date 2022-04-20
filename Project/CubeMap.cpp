@@ -5,8 +5,22 @@ CubeMap::CubeMap(Graphics*& gfx)
 	assert(setUpTextures(gfx->GetDevice()), "Failed to set up textures.");
 	assert(SetUpSrvs(gfx->GetDevice()), "Failed to set up shader resource view.");
 	assert(SetUpRtvs(gfx->GetDevice()), "Failed to set up render target view.");
+	assert(SetUpUavs(gfx->GetDevice()), "Failed to set up unorderd access view.");
 	assert(CreateDepthStencilView(gfx->GetDevice()), "Failed to set up depth stencil view.");
-	assert(LoadShader(gfx->GetDevice()), "Failed to oad pixel shader.");
+	assert(LoadShader(gfx->GetDevice()), "Failed to load pixel shader.");
+
+
+	pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	cam.SetPos(pos);
+	cam.SetDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
+
+	float fov = 90.0f; //90 degrees field of view
+	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
+	float aspectRatio = static_cast<float>(W_H_CUBE) / static_cast<float>(W_H_CUBE);//The aspect ratio
+	float nearZ = 0.1f; //Minimum viewing 
+	float farZ = 1000.0f;//Maximum viewing distance
+	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 }
 
 CubeMap::~CubeMap()
@@ -15,30 +29,45 @@ CubeMap::~CubeMap()
 	if (srv)srv->Release();
 	for (int i = 0; i < NUM_TEX; i++) {
 		if (rtv[i])rtv[i]->Release();
+		if (uav[i])uav[i]->Release();
 	}
 	if (dsTex)dsTex->Release();
 	if (dsView)dsView->Release();
 	if (pShader)pShader->Release();
+	if (cShader)cShader->Release();
 }
 
 void CubeMap::Set(ID3D11DeviceContext* context, int num)
 {
-	//Set render targets
-	context->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH, 1.0f, 0.0f);
-	assert(num >= 0 && num < NUM_TEX, "expexted arg int between 0-5");
-	context->OMSetRenderTargets(1, &rtv[num], dsView);
-	//Set shaders
+	context->CSSetShader(cShader, nullptr, 0);
+	context->CSSetUnorderedAccessViews(0, 1, &uav[num], nullptr);
+}
+
+void CubeMap::SetSeccond(ID3D11DeviceContext* context)
+{
 	context->PSSetShader(pShader, nullptr, 0);
-	context->OMSetRenderTargets(6, rtv, dsView);
+	context->PSSetShaderResources(0, 1, &srv);
 }
 
 void CubeMap::Clear(ID3D11DeviceContext* context)
 {
-	FLOAT col[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+	FLOAT col[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	for (int i = 0; i < NUM_TEX; i++) {
-		context->ClearRenderTargetView(rtv[i], col);
+		//context->ClearRenderTargetView(rtv[i], col);
+		context->ClearUnorderedAccessViewFloat(uav[i], col);
 	}
 }
+
+Camera& CubeMap::GetCam()
+{
+	return cam;
+}
+
+DirectX::XMMATRIX CubeMap::GetProj()
+{
+	return proj;
+}
+
 
 bool CubeMap::setUpTextures(ID3D11Device*& device)
 {
@@ -47,7 +76,7 @@ bool CubeMap::setUpTextures(ID3D11Device*& device)
 	texDesc.Height = W_H_CUBE;
 	texDesc.ArraySize = NUM_TEX;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	texDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.CPUAccessFlags = 0;
@@ -81,9 +110,30 @@ bool CubeMap::SetUpRtvs(ID3D11Device*& device)
 			return false;
 		}
 	}
-	
+
 	return true;
 }
+
+bool CubeMap::SetUpUavs(ID3D11Device*& device)
+{
+	HRESULT hr;
+
+	for (int i = 0; i < NUM_TEX; i++) {
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+		uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+		uavDesc.Texture2DArray.FirstArraySlice = (UINT)i;
+		uavDesc.Texture2DArray.ArraySize = 1;
+
+		hr = device->CreateUnorderedAccessView(tex, &uavDesc, &uav[i]);
+		if (FAILED(hr)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
 
 bool CubeMap::CreateDepthStencilView(ID3D11Device*& device)
 {
@@ -125,13 +175,38 @@ bool CubeMap::LoadShader(ID3D11Device*& device)
 
 	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());//Assign the file to the shader data
 
-	
+
 	if (FAILED(device->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr, &pShader)))
 	{
 		std::cerr << "Failed to create pixel shader!" << std::endl;
 		return false;
 	}
-	
+
+
+
+	shaderData.clear();//Clear the string with data
+	reader.close();//Close the file
+
+	reader.open("../Debug/ComputeShaderCubeMap.cso", std::ios::binary | std::ios::ate);
+	if (!reader.is_open())
+	{
+		std::cerr << "Could not open PS file!" << std::endl;
+		return false;
+	}
+
+	reader.seekg(0, std::ios::end);//Go to the end of the file
+	shaderData.reserve(static_cast<unsigned int>(reader.tellg()));//Reserve space based on the size of the file
+	reader.seekg(0, std::ios::beg);//Go to the start of the file
+
+	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());//Assign the file to the shader data
+
+
+	if (FAILED(device->CreateComputeShader(shaderData.c_str(), shaderData.length(), nullptr, &cShader)))
+	{
+		std::cerr << "Failed to create pixel shader!" << std::endl;
+		return false;
+	}
+
 
 
 	shaderData.clear();//Clear the string with data

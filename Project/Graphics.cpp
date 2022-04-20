@@ -11,44 +11,18 @@ Graphics::Graphics(int width, int height, HWND& window)
 	assert(SetUpGbuffer(device, width, height), "Failed to set up G buffer.");
 	assert(CreateDepthStencilView(width, height), "Failed to create depth stencil view.");
 	assert(CreateUAV(device, width, height), "Failed to create uav.");
-	/*if (!CreateDeviceAndSwapchain(width, height, window)) {
-		std::cerr << "Failed to create device and swapchain.\n";
+	assert(CreateRTV(device, width, height), "Failed to create render target view.");
+
+
+
+	for (int i = 0; i < 6; i++) {
+		renderTargets[i] = gBuffer[i].rtv;
+		shaderResources[i] = gBuffer[i].srv;
 	}
-
-	if (!SetUpGbuffer(device, width, height)) {
-		std::cerr << "Failed to set up G buffer.\n";
-	}
-
-
-	if (!CreateDepthStencilView(width, height)) {
-		std::cerr << "Failed to create depth stencil view.\n";
-	}
-
-	if (!CreateUAV(device, width, height)) {
-		std::cerr << "Failed to create uav.\n";
-	}*/
-
-
-
-	renderTargets[0] = gBuffer[0].rtv;
-	renderTargets[1] = gBuffer[1].rtv;
-	renderTargets[2] = gBuffer[2].rtv;
-	renderTargets[3] = gBuffer[3].rtv;
-	renderTargets[4] = gBuffer[4].rtv;
-	renderTargets[5] = gBuffer[5].rtv;
-	shaderResources[0] = gBuffer[0].srv;
-	shaderResources[1] = gBuffer[1].srv;
-	shaderResources[2] = gBuffer[2].srv;
-	shaderResources[3] = gBuffer[3].srv;
-	shaderResources[4] = gBuffer[4].srv;
-	shaderResources[5] = gBuffer[5].srv;
 
 	deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(3, renderTargets, dsView, 3, 1, &uav, nullptr);
 
 	assert(SetUpSampler(device, samState), "Failed to set up sampler.");
-	/*if (!SetUpSampler(device, samState)) {
-		std::cerr << "Failed to set up sampler.\n";
-	}*/
 	SetViewport(width, height);
 	deviceContext->RSSetViewports(1, &viewport);
 	deviceContext->PSSetSamplers(0, 1, &samState);
@@ -58,13 +32,14 @@ Graphics::Graphics(int width, int height, HWND& window)
 
 Graphics::~Graphics()
 {
-	if(device)device->Release();
+	if (device)device->Release();
 	if (deviceContext)deviceContext->Release();
 	if (swapChain)swapChain->Release();
 	if (dsTexture)dsTexture->Release();
 	if (dsView)dsView->Release();
 	if (samState)samState->Release();
 	if (uav)uav->Release();
+	if (rtv)rtv->Release();
 
 	for (int i = 0; i < numGbufs; i++) {
 		if (gBuffer[i].texture)gBuffer[i].texture->Release();
@@ -84,7 +59,7 @@ ID3D11DeviceContext*& Graphics::GetContext()
 	return deviceContext;
 }
 
-void Graphics::StartFrame(float r, float g, float b)
+void Graphics::StartFrame(float r, float g, float b, int flag)
 {
 	timeI += 0.005f;
 	if (timeI >= 1.0f) {
@@ -105,15 +80,29 @@ void Graphics::StartFrame(float r, float g, float b)
 
 }
 
-void Graphics::EndFrame(int width, int height)
+void Graphics::EndFrame(int width, int height, int flag)
 {
-	deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
-	deviceContext->CSSetShaderResources(0, numGbufs, shaderResources);
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
-	deviceContext->Dispatch(width/20, height/20, 1);
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
-	deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
-	swapChain->Present(1, 0);
+	if (flag == NORMAL) {
+		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
+		deviceContext->CSSetShaderResources(0, numGbufs, shaderResources);
+		deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
+		deviceContext->Dispatch(width / 20, height / 20, 1);
+		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
+		swapChain->Present(1, 0);
+	}
+	else if (flag == CUBE_MAP) {
+		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
+		deviceContext->CSSetShaderResources(0, numGbufs, shaderResources);
+		deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
+		deviceContext->Dispatch(width / 20, height / 20, 1);
+		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
+		//swapChain->Present(1, 0);
+	}
+	else if (flag == CUBE_MAP_TWO) {
+		deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
+	}
 }
 
 void Graphics::SetProjection(DirectX::XMMATRIX proj)
@@ -167,7 +156,7 @@ bool Graphics::CreateDeviceAndSwapchain(int width, int height, HWND& window)
 {
 	UINT flags = NULL;
 #ifdef _DEBUG
-flags |= D3D11_CREATE_DEVICE_DEBUG;
+	flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0 };
@@ -192,8 +181,8 @@ flags |= D3D11_CREATE_DEVICE_DEBUG;
 	scDesc.Flags = 0;
 
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, 1, D3D11_SDK_VERSION, &scDesc, &swapChain, &device, nullptr, &deviceContext);
-	if (FAILED(hr)) { 
-		return false; 
+	if (FAILED(hr)) {
+		return false;
 	}
 
 
@@ -246,7 +235,7 @@ bool Graphics::SetUpSampler(ID3D11Device* device, ID3D11SamplerState*& samState)
 	sampler.MaxAnisotropy = 1;
 
 	HRESULT hr = device->CreateSamplerState(&sampler, &samState);
-	
+
 
 	return !FAILED(hr);
 }
@@ -311,11 +300,22 @@ bool Graphics::CreateUAV(ID3D11Device* device, int width, int height)
 	uavDesc.Texture2D.MipSlice = 0;
 
 
-	ID3D11Texture2D * backbuffer = GetBackBuffer();
+	ID3D11Texture2D* backbuffer = GetBackBuffer();
 
 	HRESULT hr = device->CreateUnorderedAccessView(backbuffer, &uavDesc, &uav);
 
 	backbuffer->Release();
+	return !FAILED(hr);
+}
+
+bool Graphics::CreateRTV(ID3D11Device* device, int width, int height)
+{
+	ID3D11Texture2D* backbuffer = GetBackBuffer();
+
+	HRESULT hr = device->CreateRenderTargetView(backbuffer, NULL, &rtv);
+
+	backbuffer->Release();
+
 	return !FAILED(hr);
 }
 

@@ -10,6 +10,9 @@
       <FullPath>D:\3D-Project\Debug\ComputeShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\3D-Project\Debug\ComputeShaderCubeMap.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\3D-Project\Debug\DomainShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
