@@ -10,6 +10,12 @@
 
 #define numGbufs 6
 
+#define CTRL 17
+#define SPACE 32
+#define LEFT_ARROW 37
+#define UP_ARROW 38
+#define RIGHT_ARROW 39
+#define DOWN_ARROW 40
 
 #define NORMAL 100
 #define SHADOW 101

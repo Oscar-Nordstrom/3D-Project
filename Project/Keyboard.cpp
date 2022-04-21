@@ -20,6 +20,14 @@ bool Keyboard::KeyIsPressed(unsigned char keycode)
 	return false;
 }
 
+bool Keyboard::KeyIsPressed(int keycode)
+{
+	if (keycode < 256 && keycode >= 0) {
+		return keys[keycode];
+	}
+	return false;
+}
+
 void Keyboard::Keydown(unsigned char keycode)
 {
 	int k = int(keycode);

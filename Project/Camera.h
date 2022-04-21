@@ -14,11 +14,21 @@ public:
 	void SetUpDir(DirectX::XMFLOAT3 dir);
 	void Reset();
 
-	void Move(DirectX::XMFLOAT3 vec);
+	void Rotate(float rot);
+
+	void forward();
+	void backward();
+	void left();
+	void right();
+	void up();
+	void down();
+
 
 
 private:
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 direction;
 	DirectX::XMFLOAT3 upDirection;
+
+	float speed;
 };

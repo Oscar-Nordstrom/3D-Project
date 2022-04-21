@@ -261,26 +261,33 @@ void Scene::UpdateCam()
 
 void Scene::checkInput()
 {
-	DirectX::XMFLOAT3 move = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	if (window.Kbd()->KeyIsPressed('W')) {
-		move.z = 1;
+		cam.forward();
 	}
 	else if (window.Kbd()->KeyIsPressed('S')) {
-		move.z = -1;
+		cam.backward();
 	}
 	if (window.Kbd()->KeyIsPressed('D')) {
-		move.x = 1;
+		cam.right();
 	}
 	else if (window.Kbd()->KeyIsPressed('A')) {
-		move.x = -1;
+		cam.left();
 	}
-	if (window.Kbd()->KeyIsPressed('U')) {
-		move.y = 1;
+	//Rotate
+	if (window.Kbd()->KeyIsPressed(LEFT_ARROW)) {
+		cam.Rotate(-0.05f);
 	}
-	else if (window.Kbd()->KeyIsPressed('N')) {
-		move.y = -1;
+	else if (window.Kbd()->KeyIsPressed(RIGHT_ARROW)) {
+		cam.Rotate(0.05f);
 	}
-	cam.Move(move);
+	//Up/down
+	if (window.Kbd()->KeyIsPressed(SPACE)) {
+		cam.up();
+	}
+	else if (window.Kbd()->KeyIsPressed(CTRL)) {
+		cam.down();
+	}
+	//cam.Move(move);
 }
 
 void Scene::cubeMapSetCam(int num)
