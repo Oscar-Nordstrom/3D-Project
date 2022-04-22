@@ -20,7 +20,7 @@ cbuffer camcb : register(b2)
     float4 camPos;
 }
 
-RWTexture2D<unorm float4> rtv : register(u0);
+RWTexture2D<unorm float4> uav : register(u0);
 
 
 
@@ -75,5 +75,5 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     final = finalAmbient + finalDiffuse + finalSpecular;
     
-    rtv[DTid.xy] = final;
+    uav[DTid.xy] = final;
 }

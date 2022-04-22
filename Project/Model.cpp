@@ -96,9 +96,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
 		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
-
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
-
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 	}
 	else if(flag == SHADOW) {
@@ -122,9 +120,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
 		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
-
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
-
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 	}
 	else if (flag == CUBE_MAP_TWO) {
@@ -134,13 +130,13 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 		UpdateCbuf(*gfx, transform);
 
+		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
+		gfx->GetContext()->IASetPrimitiveTopology(topology);
 		gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
 	}
 
 	gfx->GetContext()->IASetInputLayout(inputLayout);
-	
 	gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-	
 	gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 
 

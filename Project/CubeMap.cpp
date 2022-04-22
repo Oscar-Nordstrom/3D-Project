@@ -21,6 +21,7 @@ CubeMap::CubeMap(Graphics*& gfx)
 	float nearZ = 0.1f; //Minimum viewing 
 	float farZ = 1000.0f;//Maximum viewing distance
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
+
 }
 
 CubeMap::~CubeMap()
@@ -43,10 +44,9 @@ void CubeMap::Set(ID3D11DeviceContext* context, int num)
 	context->CSSetUnorderedAccessViews(0, 1, &uav[num], nullptr);
 }
 
-void CubeMap::SetSeccond(ID3D11DeviceContext* context)
+void CubeMap::SetSeccond(Graphics*& gfx)
 {
-	context->PSSetShader(pShader, nullptr, 0);
-	context->PSSetShaderResources(0, 1, &srv);
+
 }
 
 void CubeMap::Clear(ID3D11DeviceContext* context)
@@ -91,7 +91,15 @@ bool CubeMap::setUpTextures(ID3D11Device*& device)
 
 bool CubeMap::SetUpSrvs(ID3D11Device*& device)
 {
-	HRESULT hr = device->CreateShaderResourceView(tex, nullptr, &srv);
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc.Texture2DArray.FirstArraySlice = 0;
+	srvDesc.Texture2DArray.MostDetailedMip = 0;
+	srvDesc.Texture2DArray.MipLevels = 1;
+	srvDesc.Texture2DArray.ArraySize = NUM_TEX;
+
+	HRESULT hr = device->CreateShaderResourceView(tex, &srvDesc, &srv);
 	return !FAILED(hr);
 }
 
@@ -122,7 +130,7 @@ bool CubeMap::SetUpUavs(ID3D11Device*& device)
 		D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 		uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
-		uavDesc.Texture2DArray.FirstArraySlice = (UINT)i;
+		uavDesc.Texture2DArray.FirstArraySlice = D3D11CalcSubresource(0, i, 1);;
 		uavDesc.Texture2DArray.ArraySize = 1;
 
 		hr = device->CreateUnorderedAccessView(tex, &uavDesc, &uav[i]);

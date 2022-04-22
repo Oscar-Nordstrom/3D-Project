@@ -8,11 +8,10 @@ struct PixelShaderInput
 };
 
 TextureCube tex : register(t0);
+
 SamplerState samp1 : register(s0);
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-   // return tex.Sample(samp1, float3(input.uv, 0.0f));
-    float4 color = float4(0.0f, 1.0f, 0.0f, 0.0f);
-    return color;
+   return tex.Sample(samp1, float3(input.uv, 1.0f));
 }

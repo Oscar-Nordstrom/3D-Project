@@ -13,7 +13,7 @@ public:
 	CubeMap(Graphics*& gfx);
 	~CubeMap();
 	void Set(ID3D11DeviceContext* context, int num);
-	void SetSeccond(ID3D11DeviceContext* context);
+	void SetSeccond(Graphics*& gfx);
 	void Clear(ID3D11DeviceContext* context);
 	Camera& GetCam();
 	DirectX::XMMATRIX GetProj();
@@ -39,4 +39,7 @@ private:
 
 	
 	DirectX::XMFLOAT3 pos;
+
+
+
 };

@@ -45,7 +45,7 @@ Scene::Scene()
 	soldier6.Move(0.0f, 0.0f, -10.0f);
 	soldier6.Scale(2.0f, 2.0f, 2.0f);
 
-	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", NO_SHADER,  NO_SHADER, "../Debug/PixelShaderCubeMap.cso", NO_SHADER, window.Gfx());
+	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	cube.Move(0.0f, 1.0f, 0.0f);
 	cube.Scale(2.0f, 2.0f, 2.0f);
 	
@@ -96,7 +96,7 @@ bool Scene::DoFrame()
 
 	window.SetTitle(dirStr.c_str());
 
-	//Shadows
+	//Shadows Start
 	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
 	shadow.SetCamDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
 	//Using the same camera
@@ -109,20 +109,21 @@ bool Scene::DoFrame()
 	soldier4.Draw(window.Gfx(), SHADOW);
 	soldier5.Draw(window.Gfx(), SHADOW);
 	soldier6.Draw(window.Gfx(), SHADOW);
-
+	//Shadows End
 
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
 
+
 	//Cube mapping Start
 	cMap.Clear(window.Gfx()->GetContext());
-	//Go through all rtvs
+	//Go through all uavs
 	for (int i = 0; i < NUM_TEX; i++) {
 		//Rotate camera
 		
 		cubeMapSetCam(i);
 		
-		//Render to current rtv
+		//Render to current uavs
 		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
 		window.Gfx()->SetProjection(cMap.GetProj());
 		window.Gfx()->SetCamera(cMap.GetCam().GetMatrix());
@@ -143,10 +144,10 @@ bool Scene::DoFrame()
 		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 	}
+	//Seccond pass
+	window.Gfx()->SetProjection(proj);
+	window.Gfx()->SetCamera(cam.GetMatrix());
 
-	cMap.SetSeccond(window.Gfx()->GetContext());
-	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(),CUBE_MAP_TWO);//Special case
-	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 
 	//Cube mapping end
 
@@ -185,10 +186,10 @@ bool Scene::DoFrame()
 		return false;
 	}
 
-	if (!cube.Update(0.0f, window.Gfx())) {
+	/*if (!cube.Update(0.0f, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
-	}
+	}*/
 
 	soldier1.Draw(window.Gfx());
 	soldier2.Draw(window.Gfx());
@@ -197,7 +198,7 @@ bool Scene::DoFrame()
 	soldier5.Draw(window.Gfx());
 	soldier6.Draw(window.Gfx());
 
-
+	cube.Draw(window.Gfx());
 
 	shadow.BindDepthResource();
 	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);

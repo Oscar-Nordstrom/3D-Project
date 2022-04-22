@@ -101,7 +101,7 @@ void Graphics::EndFrame(int width, int height, int flag)
 		//swapChain->Present(1, 0);
 	}
 	else if (flag == CUBE_MAP_TWO) {
-		deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
+		deviceContext->OMSetRenderTargets(1, &rtv, dsView);
 	}
 }
 
