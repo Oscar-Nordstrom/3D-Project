@@ -146,9 +146,10 @@ bool Scene::DoFrame()
 	}
 	//Seccond pass
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP_TWO);
-	cMap.SetSeccond(window.Gfx());
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
+	cMap.SetSeccond(window.Gfx());
+	window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
 	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 	window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP_TWO);
 	cMap.SetEnd(window.Gfx());
