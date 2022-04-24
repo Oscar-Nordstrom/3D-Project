@@ -14,6 +14,7 @@ public:
 	~CubeMap();
 	void Set(ID3D11DeviceContext* context, int num);
 	void SetSeccond(Graphics*& gfx);
+	void SetEnd(Graphics*& gfx);
 	void Clear(ID3D11DeviceContext* context);
 	Camera& GetCam();
 	DirectX::XMMATRIX GetProj();
@@ -27,6 +28,7 @@ private:
 private:
 	ID3D11Texture2D* tex;
 	ID3D11ShaderResourceView* srv;
+	ID3D11ShaderResourceView* nullSrv;
 	ID3D11RenderTargetView* rtv[6];
 	ID3D11UnorderedAccessView* uav[6];
 	ID3D11Texture2D* dsTex;

@@ -124,15 +124,20 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 	}
 	else if (flag == CUBE_MAP_TWO) {
-		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
-		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
-		gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
+		//gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
+		//gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
+		//gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
+
+		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
+		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
+		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
+
 
 		UpdateCbuf(*gfx, transform);
 
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
-		gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
+		//gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
 	}
 
 	gfx->GetContext()->IASetInputLayout(inputLayout);

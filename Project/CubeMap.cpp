@@ -4,7 +4,7 @@ CubeMap::CubeMap(Graphics*& gfx)
 {
 	assert(setUpTextures(gfx->GetDevice()), "Failed to set up textures.");
 	assert(SetUpSrvs(gfx->GetDevice()), "Failed to set up shader resource view.");
-	assert(SetUpRtvs(gfx->GetDevice()), "Failed to set up render target view.");
+	//assert(SetUpRtvs(gfx->GetDevice()), "Failed to set up render target view.");
 	assert(SetUpUavs(gfx->GetDevice()), "Failed to set up unorderd access view.");
 	assert(CreateDepthStencilView(gfx->GetDevice()), "Failed to set up depth stencil view.");
 	assert(LoadShader(gfx->GetDevice()), "Failed to load pixel shader.");
@@ -21,6 +21,8 @@ CubeMap::CubeMap(Graphics*& gfx)
 	float nearZ = 0.1f; //Minimum viewing 
 	float farZ = 1000.0f;//Maximum viewing distance
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
+
+	nullSrv = nullptr;
 
 }
 
@@ -41,12 +43,18 @@ CubeMap::~CubeMap()
 void CubeMap::Set(ID3D11DeviceContext* context, int num)
 {
 	context->CSSetShader(cShader, nullptr, 0);
-	context->CSSetUnorderedAccessViews(0, 1, &uav[num], nullptr);
+	context->CSSetUnorderedAccessViews(6, 1, &uav[num], nullptr);
 }
 
 void CubeMap::SetSeccond(Graphics*& gfx)
 {
+	gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
+	gfx->GetContext()->PSSetShaderResources(3, 1, &srv);
+}
 
+void CubeMap::SetEnd(Graphics*& gfx)
+{
+	gfx->GetContext()->PSSetShaderResources(0, 1, &nullSrv);
 }
 
 void CubeMap::Clear(ID3D11DeviceContext* context)
@@ -76,7 +84,7 @@ bool CubeMap::setUpTextures(ID3D11Device*& device)
 	texDesc.Height = W_H_CUBE;
 	texDesc.ArraySize = NUM_TEX;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texDesc.BindFlags = /*D3D11_BIND_RENDER_TARGET |*/ D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	texDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.CPUAccessFlags = 0;
@@ -130,7 +138,9 @@ bool CubeMap::SetUpUavs(ID3D11Device*& device)
 		D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 		uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
-		uavDesc.Texture2DArray.FirstArraySlice = D3D11CalcSubresource(0, i, 1);;
+		uavDesc.Texture2DArray.FirstArraySlice = D3D11CalcSubresource(0, i, 1);
+		//uavDesc.Texture2DArray.FirstArraySlice = (UINT)i;
+		uavDesc.Texture2DArray.MipSlice = 0;
 		uavDesc.Texture2DArray.ArraySize = 1;
 
 		hr = device->CreateUnorderedAccessView(tex, &uavDesc, &uav[i]);

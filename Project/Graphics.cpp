@@ -61,20 +61,44 @@ ID3D11DeviceContext*& Graphics::GetContext()
 
 void Graphics::StartFrame(float r, float g, float b, int flag)
 {
-	timeI += 0.005f;
-	if (timeI >= 1.0f) {
-		timeI = 0;
-	}
-	deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
-	deviceContext->OMSetRenderTargets(numGbufs, renderTargets, dsView);
-	deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
-	const float color[] = { r, g, b, 1.0f };
-	deviceContext->ClearUnorderedAccessViewFloat(uav, color);
-	for (int i = 0; i < numGbufs; i++) {
-		deviceContext->ClearRenderTargetView(renderTargets[i], color);
-	}
+	if (flag == NORMAL) {
+		timeI += 0.005f;
+		if (timeI >= 1.0f) {
+			timeI = 0;
+		}
+		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
+		//deviceContext->OMSetRenderTargets(numGbufs, renderTargets, dsView);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
+		const float color[] = { r, g, b, 1.0f };
+		deviceContext->ClearUnorderedAccessViewFloat(uav, color);
+		for (int i = 0; i < numGbufs; i++) {
+			deviceContext->ClearRenderTargetView(renderTargets[i], color);
+		}
 
-	deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	}
+	else if (flag == CUBE_MAP) {
+		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
+		const float color[] = { r, g, b, 1.0f };
+		deviceContext->ClearUnorderedAccessViewFloat(uav, color);
+		for (int i = 0; i < numGbufs; i++) {
+			deviceContext->ClearRenderTargetView(renderTargets[i], color);
+		}
+		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	}
+	else if (flag == CUBE_MAP_TWO) {
+		//deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
+		//deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
+		deviceContext->OMSetRenderTargets(1, &rtv, dsView);
+		const float color[] = { r, g, b, 1.0f };
+		/*deviceContext->ClearUnorderedAccessViewFloat(uav, color);
+		for (int i = 0; i < numGbufs; i++) {
+			deviceContext->ClearRenderTargetView(renderTargets[i], color);
+		}*/
+		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+		deviceContext->CSSetUnorderedAccessViews(6, 1, &nullUav, 0);
+	}
 
 
 
@@ -101,6 +125,12 @@ void Graphics::EndFrame(int width, int height, int flag)
 		//swapChain->Present(1, 0);
 	}
 	else if (flag == CUBE_MAP_TWO) {
+		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
+		//deviceContext->CSSetShaderResources(0, numGbufs, shaderResources);
+		//deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
+		//deviceContext->Dispatch(width / 20, height / 20, 1);
+		//deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
+		//deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
 		deviceContext->OMSetRenderTargets(1, &rtv, dsView);
 	}
 }

@@ -465,7 +465,7 @@ struct SubMesh {
 	}
 
 	void Bind(ID3D11DeviceContext*& context, int flag = NORMAL) {
-		if (flag == NORMAL || flag == CUBE_MAP)
+		if (flag == NORMAL || flag == CUBE_MAP || flag == CUBE_MAP_TWO)
 			context->PSSetShaderResources(0, 3, srv);
 		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 

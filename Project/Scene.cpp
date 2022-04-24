@@ -145,10 +145,13 @@ bool Scene::DoFrame()
 		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 	}
 	//Seccond pass
+	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP_TWO);
+	cMap.SetSeccond(window.Gfx());
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
-
-
+	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
+	window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP_TWO);
+	cMap.SetEnd(window.Gfx());
 	//Cube mapping end
 
 
@@ -198,7 +201,7 @@ bool Scene::DoFrame()
 	soldier5.Draw(window.Gfx());
 	soldier6.Draw(window.Gfx());
 
-	cube.Draw(window.Gfx());
+
 
 	shadow.BindDepthResource();
 	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
