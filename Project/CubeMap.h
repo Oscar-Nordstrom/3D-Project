@@ -29,6 +29,7 @@ private:
 	ID3D11Texture2D* tex;
 	ID3D11ShaderResourceView* srv;
 	ID3D11ShaderResourceView* nullSrv;
+	ID3D11UnorderedAccessView* nullUav;
 	ID3D11RenderTargetView* rtv[6];
 	ID3D11UnorderedAccessView* uav[6];
 	ID3D11Texture2D* dsTex;

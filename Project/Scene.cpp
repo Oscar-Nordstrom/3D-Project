@@ -145,14 +145,14 @@ bool Scene::DoFrame()
 		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 	}
 	//Seccond pass
-	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP_TWO);
+	/*window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP_TWO);
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
 	cMap.SetSeccond(window.Gfx());
 	window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
 	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 	window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP_TWO);
-	cMap.SetEnd(window.Gfx());
+	cMap.SetEnd(window.Gfx());*/
 	//Cube mapping end
 
 
@@ -194,6 +194,9 @@ bool Scene::DoFrame()
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}*/
+	cMap.SetSeccond(window.Gfx());
+	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
+	cMap.SetEnd(window.Gfx());
 
 	soldier1.Draw(window.Gfx());
 	soldier2.Draw(window.Gfx());
@@ -201,6 +204,7 @@ bool Scene::DoFrame()
 	soldier4.Draw(window.Gfx());
 	soldier5.Draw(window.Gfx());
 	soldier6.Draw(window.Gfx());
+
 
 
 

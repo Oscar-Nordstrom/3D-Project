@@ -23,6 +23,7 @@ CubeMap::CubeMap(Graphics*& gfx)
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 
 	nullSrv = nullptr;
+	nullUav = nullptr;
 
 }
 
@@ -48,13 +49,15 @@ void CubeMap::Set(ID3D11DeviceContext* context, int num)
 
 void CubeMap::SetSeccond(Graphics*& gfx)
 {
+	gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
+	gfx->GetContext()->CSSetUnorderedAccessViews(6, 1, &nullUav, nullptr);
 	gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
 	gfx->GetContext()->PSSetShaderResources(3, 1, &srv);
 }
 
 void CubeMap::SetEnd(Graphics*& gfx)
 {
-	gfx->GetContext()->PSSetShaderResources(0, 1, &nullSrv);
+	gfx->GetContext()->PSSetShaderResources(3, 1, &nullSrv);
 }
 
 void CubeMap::Clear(ID3D11DeviceContext* context)
@@ -180,7 +183,7 @@ bool CubeMap::LoadShader(ID3D11Device*& device)
 {
 	std::string shaderData;
 	std::ifstream reader;
-	reader.open("../Debug/PixelShaderCubeMap.cso", std::ios::binary | std::ios::ate);
+	reader.open("../Debug/PixelShaderCubeMapTest.cso", std::ios::binary | std::ios::ate);
 	if (!reader.is_open())
 	{
 		std::cerr << "Could not open PS file!" << std::endl;
@@ -205,7 +208,7 @@ bool CubeMap::LoadShader(ID3D11Device*& device)
 	shaderData.clear();//Clear the string with data
 	reader.close();//Close the file
 
-	reader.open("../Debug/ComputeShaderCubeMap.cso", std::ios::binary | std::ios::ate);
+	reader.open("../Debug/ComputeShaderCubeMapTest.cso", std::ios::binary | std::ios::ate);
 	if (!reader.is_open())
 	{
 		std::cerr << "Could not open PS file!" << std::endl;

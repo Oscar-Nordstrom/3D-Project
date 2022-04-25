@@ -142,5 +142,11 @@
     <FxCompile Include="GeometryShader.hlsl">
       <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="PixelShaderCubeMapTest.hlsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShaderCubeMapTest.hlsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

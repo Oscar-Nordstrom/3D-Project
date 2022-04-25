@@ -13,6 +13,9 @@
       <FullPath>D:\3D-Project\Debug\ComputeShaderCubeMap.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\3D-Project\Debug\ComputeShaderCubeMapTest.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\3D-Project\Debug\DomainShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
@@ -23,6 +26,9 @@
     </ContentFile>
     <ContentFile>
       <FullPath>D:\3D-Project\Debug\PixelShaderCubeMap.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\3D-Project\Debug\PixelShaderCubeMapTest.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>D:\3D-Project\Debug\VertexShader.cso</FullPath>

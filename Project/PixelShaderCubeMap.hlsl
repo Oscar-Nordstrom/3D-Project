@@ -22,14 +22,14 @@ cbuffer camcb : register(b2)
 float4 main(PixelShaderInput input) : SV_TARGET
 {
     
-    float3 viewVector = input.wPosition.xyz - camPos.xyz;
+   /* float3 viewVector = input.wPosition.xyz - camPos.xyz;
     float3 reflectVec = reflect(viewVector, normalize(input.normal.xyz));
     
     float4 dtex = cMap.Sample(samp1, reflectVec);
     dtex.w = 1; //we force it
-    return dtex;
+    return dtex;*/
     
-    //float4 test = float4(0.0f, 1.0f, 0.0f, 0.0f);
-    //return test;
-   // return cMap.Sample(samp1, float3(input.uv, 1.0f));
+    float4 test = float4(1.0f, 0.0f, 0.0f, 0.0f);
+    return test;
+    //return tex1.Sample(samp1, input.uv);
 }

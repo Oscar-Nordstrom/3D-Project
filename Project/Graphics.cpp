@@ -130,8 +130,8 @@ void Graphics::EndFrame(int width, int height, int flag)
 		//deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
 		//deviceContext->Dispatch(width / 20, height / 20, 1);
 		//deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
-		//deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
-		deviceContext->OMSetRenderTargets(1, &rtv, dsView);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
+		//deviceContext->OMSetRenderTargets(1, &rtv, dsView);
 	}
 }
 
