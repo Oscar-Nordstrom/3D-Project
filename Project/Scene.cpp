@@ -204,10 +204,18 @@ bool Scene::DoFrame()
 		return false;
 	}
 
-	/*if (!cube.Update(0.0f, window.Gfx())) {
+	if (!cube.Update(0.0f, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
-	}*/
+	}
+
+	for (int i = 0; i < 6; i++) {
+		if (!skybox[i]->Update(0.0f, window.Gfx())) {
+			std::cerr << "Failed to update object.\n";
+			return false;
+		}
+	}
+
 	cMap.SetSeccond(window.Gfx());
 	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 	cMap.SetEnd(window.Gfx());
@@ -355,4 +363,29 @@ void Scene::cubeMapSetCam(int num)
 
 void Scene::SetUpSkybox()
 {
+	skybox[0]->Scale(100.0f, 100.0f, 0.0f);
+	skybox[1]->Scale(100.0f, 100.0f, 0.0f);
+	skybox[2]->Scale(100.0f, 100.0f, 0.0f);
+	skybox[3]->Scale(100.0f, 100.0f, 0.0f);
+	skybox[4]->Scale(100.0f, 100.0f, 0.0f);
+	skybox[5]->Scale(100.0f, 100.0f, 0.0f);
+
+	skybox[0]->Move(0.0f, 0.0f, 50.0f); //Front
+	skybox[1]->Move(0.0f, 0.0f, -50.0f); //Back
+	skybox[2]->Move(50.0f, 0.0f, 0.0f); //Right
+	skybox[3]->Move(-50.0f, 0.0f, 0.0f); //Left
+	skybox[4]->Move(0.0f, 50.0f, 0.0f); //Up
+	skybox[5]->Move(0.0f, -50.0f, 0.0f); //Down
+
+	skybox[1]->Rotate(0.0f, DegToRad(180.0f), 0.0f);
+	skybox[2]->Rotate(0.0f, DegToRad(90.0f), 0.0f);
+	skybox[3]->Rotate(0.0f, DegToRad(-90.0f), 0.0f);
+	skybox[4]->Rotate(DegToRad(-90.0f), 0.0f, 0.0f);
+	skybox[5]->Rotate(DegToRad(90.0f), 0.0f, 0.0f);
+}
+
+float Scene::DegToRad(float deg)
+{
+	double pi = 3.14159265359;
+	return (deg * (pi / 180));
 }

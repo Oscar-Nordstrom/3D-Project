@@ -3,6 +3,8 @@
 #include "Timer.h"
 #include "Camera.h"
 
+#include <math.h>
+
 
 #include "Model.h"
 #include "SceneObjectTest.h"
@@ -32,6 +34,8 @@ private:
 	void cubeMapSetCam(int num);
 
 	void SetUpSkybox();
+
+	float DegToRad(float deg);
 
 	float speedfactor = 1.0f;
 	float timerCount = 0.0f;
