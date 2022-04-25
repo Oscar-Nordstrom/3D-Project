@@ -48,7 +48,14 @@ Scene::Scene()
 	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	cube.Move(0.0f, 1.0f, 0.0f);
 	cube.Scale(2.0f, 2.0f, 2.0f);
-	
+
+
+	for (int i = 0; i < 6; i++) {
+		skybox.push_back(new SceneObjectTest(*window.Gfx()));
+		skybox[i]->Init("../Resources/Obj/plane.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	}
+	SetUpSkybox();
+
 	dLight.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
 	SetUpDirLight();
@@ -65,6 +72,11 @@ Scene::~Scene()
 {
 	lightBuf->Release();
 	camBuf->Release();
+
+	for (int i = 0; i < 6; i++) {
+		if (skybox[i] != nullptr)
+			delete skybox[i];
+	}
 
 }
 
@@ -138,6 +150,8 @@ bool Scene::DoFrame()
 		soldier5.Draw(window.Gfx(), CUBE_MAP);
 		soldier6.Draw(window.Gfx(), CUBE_MAP);
 
+		
+
 		shadow.BindDepthResource();
 		window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
@@ -206,6 +220,9 @@ bool Scene::DoFrame()
 	soldier6.Draw(window.Gfx());
 
 
+	for (int i = 0; i < 6; i++) {
+		skybox[i]->Draw(window.Gfx());
+	}
 
 
 	shadow.BindDepthResource();
@@ -334,4 +351,8 @@ void Scene::cubeMapSetCam(int num)
 		cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
 		break;
 	}
+}
+
+void Scene::SetUpSkybox()
+{
 }

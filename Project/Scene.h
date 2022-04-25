@@ -31,6 +31,8 @@ private:
 	void checkInput();
 	void cubeMapSetCam(int num);
 
+	void SetUpSkybox();
+
 	float speedfactor = 1.0f;
 	float timerCount = 0.0f;
 	Window window;
@@ -52,8 +54,7 @@ private:
 	ID3D11Buffer* lightBuf;
 	ID3D11Buffer* camBuf;
 
-
-	
+	vector<SceneObjectTest*> skybox;
 
 	DirectX::XMMATRIX proj;
 
