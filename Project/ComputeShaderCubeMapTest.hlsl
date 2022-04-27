@@ -20,7 +20,7 @@ cbuffer camcb : register(b2)
     float4 camPos;
 }
 
-RWTexture2D<unorm float4> backbuffer : register(u0);
+RWTexture2DArray<unorm float4> backbuffer : register(u6);
 
 
 
@@ -75,6 +75,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     final = finalAmbient + finalDiffuse + finalSpecular;*/
     
-    backbuffer[DTid.xy] = matColor;
+    backbuffer[DTid.xyz] = matColor;
 
 }

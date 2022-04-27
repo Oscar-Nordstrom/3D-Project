@@ -17,6 +17,11 @@ struct PixelShaderOutput
     float4 specular : SV_Target5;
 };
 
+cbuffer camcb : register(b2)
+{
+    float4 camPos;
+}
+
 Texture2D<float4> tex1 : register(t0); //Diffuse
 Texture2D<float4> tex2 : register(t1); //Specular
 Texture2D<float4> tex3 : register(t2); //Ambient
@@ -52,12 +57,21 @@ PixelShaderOutput main(PixelShaderInput input)
     
     
     float4 red = float4(1.0f, 0.0f, 0.0f, 0.0f);
+
+
+    float3 viewVector = input.wPosition.xyz - camPos.xyz;
+    //float3 reflectVec = reflect(viewVector, normalize(input.normal.xyz));
+
+   // float4 dtex = cMap.Sample(samp1, reflectVec);
+    float4 dtex = cMap.Sample(samp1, viewVector);
+    dtex.w = 1; //we force it
   
 
     PixelShaderOutput output;
     
-    output.color = cMap.Sample(samp1, float3(input.uv, 1.0f)); // * shadowCoeff;
-   // output.color = red;
+    //output.color = cMap.Sample(samp1, float3(input.uv, 1.0f)); // * shadowCoeff;
+    output.color = dtex;
+    //output.color = red;
     output.specular = tex2.Sample(samp1, input.uv); // * shadowCoeff;
     output.ambient = tex3.Sample(samp1, input.uv);
     output.position = input.position;

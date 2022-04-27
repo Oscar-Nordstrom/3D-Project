@@ -13,7 +13,7 @@ int roundUpTo(int numToRound, int multiple)
 }
 
 Scene::Scene()
-	:window(800, 600, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight) ,cMap(window.Gfx()),
+	:window(800, 600, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx()),
 	soldier1(*window.Gfx()), soldier2(*window.Gfx()), soldier3(*window.Gfx()), soldier4(*window.Gfx()), soldier5(*window.Gfx()), soldier6(*window.Gfx()),
 	cube(*window.Gfx())
 {
@@ -91,7 +91,7 @@ int Scene::Start()
 			return -1;
 		}
 
-		
+
 
 		Sleep(1);
 	}
@@ -104,7 +104,7 @@ bool Scene::DoFrame()
 	timerCount += t;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
 
-	std::wstring dirStr = L"X: "+std::to_wstring(cam.GetDir()->x) + L", Y: " + std::to_wstring(cam.GetDir()->y) + L", Z: " + std::to_wstring(cam.GetDir()->z);
+	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetDir()->x) + L", Y: " + std::to_wstring(cam.GetDir()->y) + L", Z: " + std::to_wstring(cam.GetDir()->z);
 
 	window.SetTitle(dirStr.c_str());
 
@@ -132,17 +132,17 @@ bool Scene::DoFrame()
 	//Go through all uavs
 	for (int i = 0; i < NUM_TEX; i++) {
 		//Rotate camera
-		
+
 		cubeMapSetCam(i);
-		
+
 		//Render to current uavs
 		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
 		window.Gfx()->SetProjection(cMap.GetProj());
 		window.Gfx()->SetCamera(cMap.GetCam().GetMatrix());
-		
+
 		cMap.Set(window.Gfx()->GetContext(), i);
 
-		
+
 		soldier1.Draw(window.Gfx(), CUBE_MAP);
 		soldier2.Draw(window.Gfx(), CUBE_MAP);
 		soldier3.Draw(window.Gfx(), CUBE_MAP);
@@ -150,9 +150,10 @@ bool Scene::DoFrame()
 		soldier5.Draw(window.Gfx(), CUBE_MAP);
 		soldier6.Draw(window.Gfx(), CUBE_MAP);
 
-		
+
 
 		shadow.BindDepthResource();
+		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
@@ -244,7 +245,7 @@ bool Scene::DoFrame()
 
 bool Scene::SetUpDirLight()
 {
-	
+
 
 	D3D11_BUFFER_DESC desc;
 	desc.ByteWidth = roundUpTo(sizeof(dLight), 16);
