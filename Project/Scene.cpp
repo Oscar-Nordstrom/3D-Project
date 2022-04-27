@@ -13,9 +13,9 @@ int roundUpTo(int numToRound, int multiple)
 }
 
 Scene::Scene()
-	:window(800, 600, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx()),
+	:window(WIDTH, HEIGHT, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx()),
 	soldier1(*window.Gfx()), soldier2(*window.Gfx()), soldier3(*window.Gfx()), soldier4(*window.Gfx()), soldier5(*window.Gfx()), soldier6(*window.Gfx()),
-	cube(*window.Gfx())
+	cube(*window.Gfx()), ground(*window.Gfx())
 {
 	float fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
@@ -25,12 +25,16 @@ Scene::Scene()
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
 
+	ground.Init("../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
+	ground.Scale(200.0f, 200.0f, 0.0f);
+	ground.Rotate(DegToRad(90.0f), 0.0f, 0.0f);
+	ground.Move(0.0f, -5.0f, 0.0f);
 
 	soldier1.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	soldier1.Move(0.0f, 10.0f, 0.0f);
 	soldier1.Scale(2.0f, 2.0f, 2.0f);
 	soldier2.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
-	soldier2.Move(0.0f, -10.0f, 0.0f);
+	soldier2.Move(0.0f, 20.0f, 0.0f);
 	soldier2.Scale(2.0f, 2.0f, 2.0f);
 	soldier3.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
 	soldier3.Move(10.0f, 0.0f, 0.0f);
@@ -46,7 +50,7 @@ Scene::Scene()
 	soldier6.Scale(2.0f, 2.0f, 2.0f);
 
 	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", window.Gfx());
-	cube.Move(0.0f, 1.0f, 0.0f);
+	//cube.Move(0.0f, 1.0f, 0.0f);
 	cube.Scale(2.0f, 2.0f, 2.0f);
 
 
@@ -121,6 +125,8 @@ bool Scene::DoFrame()
 	soldier4.Draw(window.Gfx(), SHADOW);
 	soldier5.Draw(window.Gfx(), SHADOW);
 	soldier6.Draw(window.Gfx(), SHADOW);
+
+	
 	//Shadows End
 
 	window.Gfx()->SetProjection(proj);
@@ -149,7 +155,10 @@ bool Scene::DoFrame()
 		soldier4.Draw(window.Gfx(), CUBE_MAP);
 		soldier5.Draw(window.Gfx(), CUBE_MAP);
 		soldier6.Draw(window.Gfx(), CUBE_MAP);
-
+		for (int i = 0; i < 6; i++) {
+			skybox[i]->Draw(window.Gfx(), CUBE_MAP);
+		}
+		ground.Draw(window.Gfx(), CUBE_MAP);
 
 
 		shadow.BindDepthResource();
@@ -159,16 +168,7 @@ bool Scene::DoFrame()
 		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 	}
-	//Seccond pass
-	/*window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP_TWO);
-	window.Gfx()->SetProjection(proj);
-	window.Gfx()->SetCamera(cam.GetMatrix());
-	cMap.SetSeccond(window.Gfx());
-	window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
-	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
-	window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP_TWO);
-	cMap.SetEnd(window.Gfx());*/
-	//Cube mapping end
+	//Cube map first end
 
 
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
@@ -216,10 +216,20 @@ bool Scene::DoFrame()
 			return false;
 		}
 	}
+	for (int i = 0; i < 6; i++) {
+		skybox[i]->Draw(window.Gfx());
+	}
 
+	if (!ground.Update(0.0f, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+
+	//Cube map seccond Start
 	cMap.SetSeccond(window.Gfx());
 	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 	cMap.SetEnd(window.Gfx());
+	//Cube map seccond End
 
 	soldier1.Draw(window.Gfx());
 	soldier2.Draw(window.Gfx());
@@ -228,10 +238,7 @@ bool Scene::DoFrame()
 	soldier5.Draw(window.Gfx());
 	soldier6.Draw(window.Gfx());
 
-
-	for (int i = 0; i < 6; i++) {
-		skybox[i]->Draw(window.Gfx());
-	}
+	ground.Draw(window.Gfx());
 
 
 	shadow.BindDepthResource();

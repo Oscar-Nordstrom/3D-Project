@@ -8,7 +8,7 @@ CubeMap::CubeMap(Graphics*& gfx)
 	assert(SetUpUavs(gfx->GetDevice()), "Failed to set up unorderd access view.");
 	assert(CreateDepthStencilView(gfx->GetDevice()), "Failed to set up depth stencil view.");
 	assert(LoadShader(gfx->GetDevice()), "Failed to load pixel shader.");
-
+	SetViewport();
 
 	pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
@@ -17,7 +17,7 @@ CubeMap::CubeMap(Graphics*& gfx)
 
 	float fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
-	float aspectRatio = static_cast<float>(W_H_CUBE) / static_cast<float>(W_H_CUBE);//The aspect ratio
+	float aspectRatio = 1.0f;//static_cast<float>(W_H_CUBE) / static_cast<float>(W_H_CUBE);//The aspect ratio
 	float nearZ = 0.1f; //Minimum viewing 
 	float farZ = 1000.0f;//Maximum viewing distance
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
@@ -43,12 +43,14 @@ CubeMap::~CubeMap()
 
 void CubeMap::Set(ID3D11DeviceContext* context, int num)
 {
+	context->RSSetViewports(1, &viewPort);
 	context->CSSetShader(cShader, nullptr, 0);
 	context->CSSetUnorderedAccessViews(6, 1, &uav[num], nullptr);
 }
 
 void CubeMap::SetSeccond(Graphics*& gfx)
 {
+	//gfx->GetContext()->RSSetViewports(1, &viewPort);
 	gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 	gfx->GetContext()->CSSetUnorderedAccessViews(6, 1, &nullUav, nullptr);
 	gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
@@ -58,6 +60,7 @@ void CubeMap::SetSeccond(Graphics*& gfx)
 void CubeMap::SetEnd(Graphics*& gfx)
 {
 	gfx->GetContext()->PSSetShaderResources(3, 1, &nullSrv);
+	//gfx->SetNormalViewPort();
 }
 
 void CubeMap::Clear(ID3D11DeviceContext* context)
@@ -141,8 +144,7 @@ bool CubeMap::SetUpUavs(ID3D11Device*& device)
 		D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 		uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
-		uavDesc.Texture2DArray.FirstArraySlice = D3D11CalcSubresource(0, i, 1);
-		//uavDesc.Texture2DArray.FirstArraySlice = (UINT)i;
+		uavDesc.Texture2DArray.FirstArraySlice = (UINT)i;
 		uavDesc.Texture2DArray.MipSlice = 0;
 		uavDesc.Texture2DArray.ArraySize = 1;
 
@@ -234,4 +236,14 @@ bool CubeMap::LoadShader(ID3D11Device*& device)
 	reader.close();//Close the file
 
 	return true;
+}
+
+void CubeMap::SetViewport()
+{
+	viewPort.TopLeftX = 0;
+	viewPort.TopLeftY = 0;
+	viewPort.Width = W_H_CUBE;
+	viewPort.Height = W_H_CUBE;
+	viewPort.MinDepth = 0;
+	viewPort.MaxDepth = 1;
 }

@@ -44,15 +44,13 @@ private:
 	Camera cam;
 	CubeMap cMap;
 	SceneObjectTest cube;
+	SceneObjectTest ground;
 	SceneObjectTest soldier1;
 	SceneObjectTest soldier2;
 	SceneObjectTest soldier3;
 	SceneObjectTest soldier4;
 	SceneObjectTest soldier5;
 	SceneObjectTest soldier6;
-	//SceneObjectTest floor;
-	//SceneObjectTest test;
-	//SceneObjectTest skybox;
 	DirectionalLight dLight;
 	ShadowMap shadow;
 	ID3D11Buffer* lightBuf;

@@ -25,6 +25,7 @@ private:
 	bool SetUpUavs(ID3D11Device*& device);
 	bool CreateDepthStencilView(ID3D11Device*& device);
 	bool LoadShader(ID3D11Device*& device);
+	void SetViewport();
 private:
 	ID3D11Texture2D* tex;
 	ID3D11ShaderResourceView* srv;
@@ -39,6 +40,7 @@ private:
 
 	Camera cam;
 	DirectX::XMMATRIX proj;
+	D3D11_VIEWPORT viewPort;
 
 	
 	DirectX::XMFLOAT3 pos;

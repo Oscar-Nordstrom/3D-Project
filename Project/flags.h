@@ -22,4 +22,7 @@
 #define CUBE_MAP 102
 #define CUBE_MAP_TWO 103
 
-#define W_H_CUBE 1000
+#define WIDTH 800
+#define HEIGHT 600
+
+#define W_H_CUBE 600

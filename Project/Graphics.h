@@ -29,6 +29,8 @@ public:
 
 	void present();
 
+	void SetNormalViewPort();
+
 
 private:
 

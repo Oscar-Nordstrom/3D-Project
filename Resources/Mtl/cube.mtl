@@ -3,6 +3,6 @@
 
 newmtl Material
 Ns 3
-map_Kd Texturen\\TileD.png
-map_Ks Texturen\\TileS.png
-map_Ka Texturen\\TileA.png
+map_Kd Texturen\\DefaultWhite.png
+map_Ks Texturen\\black.png
+map_Ka Texturen\\black.png

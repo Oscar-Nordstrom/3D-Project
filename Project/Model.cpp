@@ -50,32 +50,6 @@ bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dSha
 	assert(CreateIndexBuffer(gfx->GetDevice()), "Failed to create index buffer.");
 	assert(CreateConstantBuffer(*gfx, transform), "Failed to create constant buffer.");
 
-	/*if (!LoadShaders(vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gfx)) {
-		return false;
-	}
-	if (!LoadObj(obj, gfx)) {
-		return false;
-	}
-	if (!CreateInputLayout(gfx->GetDevice())) {
-		std::cerr << "Failed to create input layout.\n";
-		return false;
-	}
-	if (!SetUpSampler(gfx->GetDevice())) {
-		std::cerr << "Failed to create sampler.\n";
-		return false;
-	}
-	if (!CreateVertexBuffer(gfx->GetDevice())) {
-		std::cerr << "Failed to create vertex buffer.\n";
-		return false;
-	}
-	if (!CreateIndexBuffer(gfx->GetDevice())) {
-		std::cerr << "Failed to create index buffer.\n";
-		return false;
-	}
-	if (!CreateConstantBuffer(*gfx, transform)) {
-		std::cerr << "Failed to create constant buffer.\n";
-		return false;
-	}*/
 
 	return true;
 }

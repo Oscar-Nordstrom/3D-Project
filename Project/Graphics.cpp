@@ -66,6 +66,7 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 		if (timeI >= 1.0f) {
 			timeI = 0;
 		}
+		deviceContext->RSSetViewports(1, &viewport);
 		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
 		//deviceContext->OMSetRenderTargets(numGbufs, renderTargets, dsView);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
@@ -187,6 +188,11 @@ void Graphics::present()
 	swapChain->Present(1, 0);
 }
 
+void Graphics::SetNormalViewPort()
+{
+	deviceContext->RSSetViewports(1, &viewport);
+}
+
 bool Graphics::CreateDeviceAndSwapchain(int width, int height, HWND& window)
 {
 	UINT flags = NULL;
@@ -268,6 +274,7 @@ bool Graphics::SetUpSampler(ID3D11Device* device, ID3D11SamplerState*& samState)
 	sampler.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampler.MipLODBias = 0;
 	sampler.MaxAnisotropy = 1;
+	
 
 	HRESULT hr = device->CreateSamplerState(&sampler, &samState);
 
