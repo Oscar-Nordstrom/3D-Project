@@ -55,22 +55,16 @@ PixelShaderOutput main(PixelShaderInput input)
     
 
     
-    
-    float4 red = float4(1.0f, 0.0f, 0.0f, 0.0f);
 
 
-    float3 viewVector = input.wPosition.xyz - camPos.xyz;
-    //float3 reflectVec = reflect(viewVector, normalize(input.normal.xyz));
-
-   // float4 dtex = cMap.Sample(samp1, reflectVec);
-    float4 dtex = cMap.Sample(samp1, viewVector);
-    dtex.w = 1; //we force it
   
+    float4 cubeTex = cMap.Sample(samp1, input.wPosition.xyz);
+
 
     PixelShaderOutput output;
     
     //output.color = cMap.Sample(samp1, float3(input.uv, 1.0f)); // * shadowCoeff;
-    output.color = dtex;
+    output.color = cubeTex;
     //output.color = red;
     output.specular = tex2.Sample(samp1, input.uv); // * shadowCoeff;
     output.ambient = tex3.Sample(samp1, input.uv);

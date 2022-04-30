@@ -1,5 +1,5 @@
-newmtl PlaneMaterial
+newmtl Material
 Ns 3
-map_Kd Texturen\\DefaultWhite.png
-map_Ks Texturen\\black.png
-map_Ka Texturen\\black.png
+map_Kd Texturen\\sky.png
+map_Ks Texturen\\sky.png
+map_Ka Texturen\\sky.png

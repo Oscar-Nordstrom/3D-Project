@@ -1,4 +1,4 @@
-newmtl PlaneMaterial
+newmtl Material
 Ns 3
 map_Kd Texturen\\ground.jpg
 map_Ks Texturen\\black.png

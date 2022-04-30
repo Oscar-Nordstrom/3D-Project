@@ -34,6 +34,15 @@
     <Filter Include="Resource Files\Shaders">
       <UniqueIdentifier>{f4979662-e3e6-4926-80b2-212dbc6dcbad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders\CubeMapping">
+      <UniqueIdentifier>{a7cdfa7b-d0e5-49ff-8c12-1d612a33446d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\ShadowMapping">
+      <UniqueIdentifier>{6e6086fe-1787-41dc-8af2-e0b19e044248}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\Particles">
+      <UniqueIdentifier>{72c7de1c-7796-474c-8019-3f2febc002cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -113,6 +122,9 @@
     <ClInclude Include="flags.h">
       <Filter>Header Files\Other</Filter>
     </ClInclude>
+    <ClInclude Include="Billboarding.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">
@@ -124,29 +136,35 @@
     <FxCompile Include="ComputeShader.hlsl">
       <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="VertexShadowShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="HullShader.hlsl">
       <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="DomainShader.hlsl">
       <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShaderCubeMap.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="ComputeShaderCubeMap.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="GeometryShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShaderCubeMapTest.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
+      <Filter>Resource Files\Shaders\CubeMapping</Filter>
     </FxCompile>
     <FxCompile Include="ComputeShaderCubeMapTest.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
+      <Filter>Resource Files\Shaders\CubeMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderCubeMap.hlsl">
+      <Filter>Resource Files\Shaders\CubeMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderCubeMapTest.hlsl">
+      <Filter>Resource Files\Shaders\CubeMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShadowShader.hlsl">
+      <Filter>Resource Files\Shaders\ShadowMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryShaderParticle.hlsl">
+      <Filter>Resource Files\Shaders\Particles</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShaderParticle.hlsl">
+      <Filter>Resource Files\Shaders\Particles</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderParticle.hlsl">
+      <Filter>Resource Files\Shaders\Particles</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
