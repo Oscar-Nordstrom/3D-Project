@@ -13,9 +13,12 @@ Model::Model()
 	shadowSamp = nullptr;
 	vertexBuffer = nullptr;
 	constantBuffer = nullptr;
+	constantBufferTessBool = nullptr;
 	images = nullptr;
 	topologyTriList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	topology = D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
+
+	tesselation = true;
 }
 
 Model::~Model()
@@ -31,6 +34,8 @@ Model::~Model()
 	if (vertexBuffer)vertexBuffer->Release();
 	if (indexBuffer)indexBuffer->Release();
 	if (constantBuffer)constantBuffer->Release();
+	if (constantBufferTessBool)constantBufferTessBool->Release();
+	
 
 	for (auto o : subs) {
 		o->Terminate();
@@ -72,6 +77,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
+		gfx->GetContext()->HSSetConstantBuffers(1, 1, &constantBufferTessBool);
 	}
 	else if(flag == SHADOW) {
 		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
@@ -101,8 +107,6 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
 		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
-		//gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
-		//gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 
 		UpdateCbuf(*gfx, transform);
 
@@ -389,6 +393,14 @@ bool Model::CreateConstantBuffer(Graphics& gfx, DirectX::XMMATRIX transform)
 	data.SysMemSlicePitch = 0;
 
 	HRESULT hr = gfx.GetDevice()->CreateBuffer(&cbDesc, &data, &constantBuffer);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	const bool theData = tesselation;
+	data.pSysMem = &theData;
+	cbDesc.ByteWidth =16;
+	hr = gfx.GetDevice()->CreateBuffer(&cbDesc, &data, &constantBufferTessBool);
 
 	return !FAILED(hr);
 }
@@ -478,7 +490,26 @@ bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
 		assert(false, "Failed to update constant buffer.");
 	}
 
+	const bool data = tesselation;
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = gfx.GetContext()->Map(constantBufferTessBool, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	CopyMemory(mappedResource.pData, &data, sizeof(bool));//Write the new memory
+	gfx.GetContext()->Unmap(constantBufferTessBool, 0);
+	if (FAILED(hr)) {
+		assert(false, "Failed to update constant buffer.");
+	}
+
 	return true;
+}
+
+void Model::DisableTesselation()
+{
+	tesselation = false;
+}
+
+void Model::EnableTesselation()
+{
+	tesselation = true;
 }
 
 /*int Model::FindVert()

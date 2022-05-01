@@ -55,6 +55,16 @@ void SceneObjectTest::Draw(Graphics*& gfx, int flag)
 
 }
 
+void SceneObjectTest::DisableTesselation()
+{
+	model.DisableTesselation();
+}
+
+void SceneObjectTest::EnableTesselation()
+{
+	model.EnableTesselation();
+}
+
 
 bool SceneObjectTest::Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
 {

@@ -3,6 +3,11 @@ cbuffer camcb : register(b0)
     float4 camPos;
 }
 
+cbuffer cBuf : register(b1)
+{
+    bool tess;
+};
+
 struct VS_CONTROL_POINT_OUTPUT
 {
 	//float3 vPosition : WORLDPOS;
@@ -46,6 +51,9 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(InputPatch<VS_CONTROL_POINT_OUTPUT,
         distance = 1;
     }
     float gTessFactor = 15 / distance;
+    if (!tess) {
+        gTessFactor = 1;
+    }
 
     for (int i = 0; i < NUM_CONTROL_POINTS; i++)
     {

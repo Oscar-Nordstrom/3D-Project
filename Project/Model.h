@@ -23,6 +23,8 @@ public:
 	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
 	void Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag = NORMAL);
 	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform);
+	void DisableTesselation();
+	void EnableTesselation();
 private:
 	bool LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx);
 	bool LoadObj(string obj, Graphics*& gfx);
@@ -33,7 +35,6 @@ private:
 	bool CreateConstantBuffer(Graphics& gfx, DirectX::XMMATRIX transform);
 
 	bool ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader*& v, ID3D11HullShader*& h, ID3D11DomainShader*& d, ID3D11PixelShader*& p, ID3D11ComputeShader*& c);
-
 	
 private:
 	vector<DirectX::XMFLOAT3> v;
@@ -60,8 +61,11 @@ private:
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* constantBuffer;
+	ID3D11Buffer* constantBufferTessBool;
 	D3D11_PRIMITIVE_TOPOLOGY topology;
 	D3D11_PRIMITIVE_TOPOLOGY topologyTriList;
+
+	bool tesselation;
 
 	ifstream file;
 };

@@ -71,6 +71,18 @@ Scene::Scene()
 	shadow.SetCamDir(*cam.GetDir());
 	shadow.SetCamPos(*cam.GetPos());
 
+	gameObjects.push_back(&ground);
+	gameObjects.push_back(&soldier1);
+	gameObjects.push_back(&soldier2);
+	gameObjects.push_back(&soldier3);
+	gameObjects.push_back(&soldier4);
+	gameObjects.push_back(&soldier5);
+	gameObjects.push_back(&soldier6);
+	gameObjects.push_back(&cube);
+
+	tesselation = true;
+	tesselationTemp = tesselation;
+
 }
 
 Scene::~Scene()
@@ -112,6 +124,17 @@ bool Scene::DoFrame()
 	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetDir()->x) + L", Y: " + std::to_wstring(cam.GetDir()->y) + L", Z: " + std::to_wstring(cam.GetDir()->z);
 
 	window.SetTitle(dirStr.c_str());
+
+	//Enable/Disable tesselation
+	if (tesselationTemp != tesselation) {
+		if (tesselation) {
+			EnableTesselation();
+		}
+		else {
+			DisableTesselation();
+		}
+		tesselationTemp = tesselation;
+	}
 
 
 	//Shadows Start
@@ -398,9 +421,10 @@ void Scene::SetUpSkybox()
 
 void Scene::ImGuiWindows()
 {
-	if (ImGui::Begin("Simulation Speed")) {
-		ImGui::SliderFloat("Speed Factor", &speedfactor, 0.0f, 4.0f);
+	if (ImGui::Begin("Settings")) {
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::SliderFloat("Speed Factor", &speedfactor, 0.0f, 4.0f);
+		ImGui::Checkbox("Tesselation", &tesselation);
 
 	}
 	ImGui::End();
@@ -410,4 +434,18 @@ float Scene::DegToRad(float deg)
 {
 	double pi = 3.14159265359;
 	return (deg * (pi / 180));
+}
+
+void Scene::EnableTesselation()
+{
+	for (SceneObjectTest* object : gameObjects) {
+		object->EnableTesselation();
+	}
+}
+
+void Scene::DisableTesselation()
+{
+	for (SceneObjectTest* object : gameObjects) {
+		object->DisableTesselation();
+	}
 }

@@ -25,6 +25,8 @@ public:
 	void Scale(float dx, float dy, float dz);
 	void Rotate(float dx, float dy, float dz);
 	void Draw(Graphics*& gfx, int flag = NORMAL);
+	void DisableTesselation();
+	void EnableTesselation();
 private:
 
 private:

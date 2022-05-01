@@ -39,6 +39,9 @@ private:
 
 	float DegToRad(float deg);
 
+	void EnableTesselation();
+	void DisableTesselation();
+
 	float speedfactor = 1.0f;
 	float timerCount = 0.0f;
 	Window window;
@@ -53,6 +56,7 @@ private:
 	SceneObjectTest soldier4;
 	SceneObjectTest soldier5;
 	SceneObjectTest soldier6;
+	std::vector<SceneObjectTest*>gameObjects;
 	DirectionalLight dLight;
 	ShadowMap shadow;
 	ID3D11Buffer* lightBuf;
@@ -61,5 +65,8 @@ private:
 	vector<SceneObjectTest*> skybox;
 
 	DirectX::XMMATRIX proj;
+
+	bool tesselation;
+	bool tesselationTemp;
 
 };
