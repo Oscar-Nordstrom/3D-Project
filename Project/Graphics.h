@@ -5,7 +5,9 @@
 #include "Structures.h"
 #include "flags.h"
 
-
+#include "imgui.h"
+#include"imgui_impl_win32.h"
+#include"imgui_impl_dx11.h"
 
 
 class Graphics {
@@ -26,6 +28,9 @@ public:
 	ID3D11Texture2D* GetBackBuffer()const;
 	int GetWidth();
 	int GetHeight();
+	void EnableImGui();
+	void DisableImGui();
+	bool ImGuiEnabled()const;
 
 	void present();
 
@@ -38,6 +43,9 @@ private:
 
 	int w, h;
 
+	void SetUpImGui(HWND& window);
+	void ImGuiStart();
+	void ImGuiEnd();
 	bool CreateDeviceAndSwapchain(int width, int height, HWND& window);
 	bool CreateDepthStencilView(int width, int height);
 	void SetViewport(int width, int height);
@@ -64,6 +72,8 @@ private:
 	ID3D11RenderTargetView* rtv;
 	ID3D11ShaderResourceView* shaderResources[6];
 	D3D11_VIEWPORT viewport;
+
+	bool imGuiEnabled;
 
 
 };

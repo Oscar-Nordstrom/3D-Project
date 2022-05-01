@@ -27,6 +27,7 @@ Graphics::Graphics(int width, int height, HWND& window)
 	deviceContext->RSSetViewports(1, &viewport);
 	deviceContext->PSSetSamplers(0, 1, &samState);
 
+	SetUpImGui(window);
 
 }
 
@@ -47,6 +48,9 @@ Graphics::~Graphics()
 		if (gBuffer[i].srv)gBuffer[i].srv->Release();
 	}
 
+	ImGui_ImplWin32_Shutdown();
+	ImGui_ImplDX11_Shutdown();
+	ImGui::DestroyContext();
 }
 
 ID3D11Device*& Graphics::GetDevice()
@@ -66,6 +70,7 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 		if (timeI >= 1.0f) {
 			timeI = 0;
 		}
+		ImGuiStart();
 		deviceContext->RSSetViewports(1, &viewport);
 		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
 		//deviceContext->OMSetRenderTargets(numGbufs, renderTargets, dsView);
@@ -114,6 +119,7 @@ void Graphics::EndFrame(int width, int height, int flag)
 		deviceContext->Dispatch(width / 20, height / 20, 1);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
+		ImGuiEnd();
 		swapChain->Present(1, 0);
 	}
 	else if (flag == CUBE_MAP) {
@@ -183,6 +189,21 @@ int Graphics::GetHeight()
 	return h;
 }
 
+void Graphics::EnableImGui()
+{
+	imGuiEnabled = true;
+}
+
+void Graphics::DisableImGui()
+{
+	imGuiEnabled = false;
+}
+
+bool Graphics::ImGuiEnabled() const
+{
+	return imGuiEnabled;
+}
+
 void Graphics::present()
 {
 	swapChain->Present(1, 0);
@@ -191,6 +212,36 @@ void Graphics::present()
 void Graphics::SetNormalViewPort()
 {
 	deviceContext->RSSetViewports(1, &viewport);
+}
+
+void Graphics::SetUpImGui(HWND& window)
+{
+	//Setup ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui_ImplWin32_Init(window);
+	ImGui_ImplDX11_Init(device, deviceContext);
+	ImGui::StyleColorsClassic();
+	imGuiEnabled = true;
+}
+
+void Graphics::ImGuiStart()
+{
+	if (imGuiEnabled) {
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+	}
+}
+
+void Graphics::ImGuiEnd()
+{
+	if (imGuiEnabled) {
+		deviceContext->OMSetRenderTargets(1, &rtv, dsView);
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	}
 }
 
 bool Graphics::CreateDeviceAndSwapchain(int width, int height, HWND& window)
@@ -360,5 +411,3 @@ bool Graphics::CreateRTV(ID3D11Device* device, int width, int height)
 
 	return !FAILED(hr);
 }
-
-

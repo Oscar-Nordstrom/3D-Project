@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "imgui.h"
 
 int roundUpTo(int numToRound, int multiple)
 {
@@ -112,6 +113,7 @@ bool Scene::DoFrame()
 
 	window.SetTitle(dirStr.c_str());
 
+
 	//Shadows Start
 	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
 	shadow.SetCamDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
@@ -172,6 +174,8 @@ bool Scene::DoFrame()
 
 
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
+
+	ImGuiWindows();
 
 
 	window.Gfx()->SetProjection(proj);
@@ -390,6 +394,16 @@ void Scene::SetUpSkybox()
 	skybox[3]->Rotate(0.0f, DegToRad(-90.0f), 0.0f);
 	skybox[4]->Rotate(DegToRad(-90.0f), 0.0f, 0.0f);
 	skybox[5]->Rotate(DegToRad(90.0f), 0.0f, 0.0f);
+}
+
+void Scene::ImGuiWindows()
+{
+	if (ImGui::Begin("Simulation Speed")) {
+		ImGui::SliderFloat("Speed Factor", &speedfactor, 0.0f, 4.0f);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+	}
+	ImGui::End();
 }
 
 float Scene::DegToRad(float deg)

@@ -1,7 +1,10 @@
 #include "Window.h"
 #include <iostream>
+#include "imgui_impl_win32.h"
 
 #define WindowStyles WS_BORDER | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 Window::WindowClass Window::WindowClass::wndClass;
 
@@ -138,6 +141,9 @@ LRESULT WINAPI Window::HandleMsgThunk(HWND hwnd, UINT msg, WPARAM wParam, LPARAM
 
 LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam)) {
+		return true;
+	}
 
 	switch (msg)
 	{

@@ -35,6 +35,8 @@ private:
 
 	void SetUpSkybox();
 
+	void ImGuiWindows();
+
 	float DegToRad(float deg);
 
 	float speedfactor = 1.0f;
