@@ -21,6 +21,7 @@
 #define SHADOW 101
 #define CUBE_MAP 102
 #define CUBE_MAP_TWO 103
+#define PARTICLE 104
 
 #define WIDTH 800
 #define HEIGHT 600

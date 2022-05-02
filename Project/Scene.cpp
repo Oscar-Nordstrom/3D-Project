@@ -151,19 +151,17 @@ bool Scene::DoFrame()
 	soldier5.Draw(window.Gfx(), SHADOW);
 	soldier6.Draw(window.Gfx(), SHADOW);
 
-	
-	//Shadows End
-
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
+	//Shadows End
 
 
-	//Cube mapping Start
+
+	//Cube mapping first Start
 	cMap.Clear(window.Gfx()->GetContext());
 	//Go through all uavs
 	for (int i = 0; i < NUM_TEX; i++) {
 		//Rotate camera
-
 		cubeMapSetCam(i);
 
 		//Render to current uavs
@@ -195,6 +193,12 @@ bool Scene::DoFrame()
 	}
 	//Cube map first end
 
+	//Particles Start
+	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, PARTICLE);
+
+	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(), PARTICLE);
+	//Particles End
+
 
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
 
@@ -207,50 +211,7 @@ bool Scene::DoFrame()
 	checkInput();
 
 
-	if (!soldier1.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier2.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier3.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier4.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier5.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier6.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-
-	if (!cube.Update(0.0f, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-
-	for (int i = 0; i < 6; i++) {
-		if (!skybox[i]->Update(0.0f, window.Gfx())) {
-			std::cerr << "Failed to update object.\n";
-			return false;
-		}
-	}
-	for (int i = 0; i < 6; i++) {
-		skybox[i]->Draw(window.Gfx());
-	}
-
-	if (!ground.Update(0.0f, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
+	UpdateObjcects(t);
 
 	//Cube map seccond Start
 	cMap.SetSeccond(window.Gfx());
@@ -326,6 +287,54 @@ void Scene::UpdateCam()
 	HRESULT hr = window.Gfx()->GetContext()->Map(camBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
 	CopyMemory(mappedResource.pData, cam.GetPos(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf, 0);//Reenable GPU access to the data
+}
+
+bool Scene::UpdateObjcects(float t)
+{
+	if (!soldier1.Update(t, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+	if (!soldier2.Update(t, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+	if (!soldier3.Update(t, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+	if (!soldier4.Update(t, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+	if (!soldier5.Update(t, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+	if (!soldier6.Update(t, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+
+	if (!cube.Update(0.0f, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+
+	for (int i = 0; i < 6; i++) {
+		if (!skybox[i]->Update(0.0f, window.Gfx())) {
+			std::cerr << "Failed to update object.\n";
+			return false;
+		}
+	}
+	for (int i = 0; i < 6; i++) {
+		skybox[i]->Draw(window.Gfx());
+	}
+
+	if (!ground.Update(0.0f, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
 }
 
 void Scene::checkInput()

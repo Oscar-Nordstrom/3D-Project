@@ -35,7 +35,7 @@ Model::~Model()
 	if (indexBuffer)indexBuffer->Release();
 	if (constantBuffer)constantBuffer->Release();
 	if (constantBufferTessBool)constantBufferTessBool->Release();
-	
+
 
 	for (auto o : subs) {
 		o->Terminate();
@@ -63,7 +63,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 {
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
-	
+
 	if (flag == NORMAL) {
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
@@ -78,8 +78,11 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 		gfx->GetContext()->HSSetConstantBuffers(1, 1, &constantBufferTessBool);
+
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		gfx->GetContext()->IASetInputLayout(inputLayout);
 	}
-	else if(flag == SHADOW) {
+	else if (flag == SHADOW) {
 		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
@@ -88,13 +91,15 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		UpdateCbuf(*gfx, transform);
 
 		gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
+
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		gfx->GetContext()->IASetInputLayout(inputLayout);
 	}
 	else if (flag == CUBE_MAP) {
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
 		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
-		//gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
 
 		UpdateCbuf(*gfx, transform);
 
@@ -102,6 +107,9 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
+
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		gfx->GetContext()->IASetInputLayout(inputLayout);
 	}
 	else if (flag == CUBE_MAP_TWO) {
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
@@ -114,24 +122,31 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
+
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		gfx->GetContext()->IASetInputLayout(inputLayout);
+	}
+	else if (flag == PARTICLE) {
+	
 	}
 
-	gfx->GetContext()->IASetInputLayout(inputLayout);
-	gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+
+
 	gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 
 
-
-	if (subs.size() > 0) {
-		for (auto& o : subs) {
-			o->Bind(gfx->GetContext(), flag);
+	if (flag != PARTICLE) {
+		if (subs.size() > 0) {
+			for (auto& o : subs) {
+				o->Bind(gfx->GetContext(), flag);
+			}
 		}
-	}
-	else {
+		else {
 
-		gfx->GetContext()->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+			gfx->GetContext()->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
-		gfx->GetContext()->DrawIndexed((UINT)indices.size(), 0, 0);
+			gfx->GetContext()->DrawIndexed((UINT)indices.size(), 0, 0);
+		}
 	}
 }
 
@@ -195,7 +210,7 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 		ss >> prefix;
 
 		if (!foundMtllib && prefix == "mtllib") {
-			
+
 			ss >> mtlFile;
 			images = new MtlImages(mtlFile, gfx->GetDevice());
 			foundMtllib = true;
@@ -253,8 +268,8 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 					count = 0;
 					SimpleVertex vertTemp(tempV, tempVn, tempVt);
 
-					//Works for smaller files, but for larger like sponza something goes wrong
-					/*auto found_it = verts_map.find(vertTemp.make_this_string());
+					//Checking for duplicates
+					auto found_it = verts_map.find(vertTemp.make_this_string());
 					if (verts_map.end() == found_it) {
 						verts.push_back(vertTemp);
 						int indi = (int)verts.size() - 1;
@@ -263,10 +278,11 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 					}
 					else {
 						indices.push_back(found_it->second);
-					}*/
-					verts.push_back(vertTemp);
-					int indi = (int)verts.size() - 1;
-					indices.push_back(indi);
+					}
+					//Not checking for duplicates
+					//verts.push_back(vertTemp);
+					//int indi = (int)verts.size() - 1;
+					//indices.push_back(indi);
 
 					if (submesh) {
 						submesh = false;
@@ -399,7 +415,7 @@ bool Model::CreateConstantBuffer(Graphics& gfx, DirectX::XMMATRIX transform)
 
 	const bool theData = tesselation;
 	data.pSysMem = &theData;
-	cbDesc.ByteWidth =16;
+	cbDesc.ByteWidth = 16;
 	hr = gfx.GetDevice()->CreateBuffer(&cbDesc, &data, &constantBufferTessBool);
 
 	return !FAILED(hr);
@@ -463,7 +479,7 @@ bool Model::ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader
 		break;
 	}
 	//Create the pixel shader and store it in pShader
-	
+
 
 	shaderData.clear();//Clear the string with data
 	reader.close();//Close the file

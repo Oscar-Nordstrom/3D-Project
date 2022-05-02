@@ -29,6 +29,7 @@ private:
 	bool SetUpDirLight();
 	bool SetUpCamBuf();
 	void UpdateCam();
+	bool UpdateObjcects(float t);
 
 	void checkInput();
 	void cubeMapSetCam(int num);

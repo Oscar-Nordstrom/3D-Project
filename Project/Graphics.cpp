@@ -105,7 +105,9 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 		deviceContext->CSSetUnorderedAccessViews(6, 1, &nullUav, 0);
 	}
+	else if (flag == PARTICLE) {
 
+	}
 
 
 }
@@ -139,6 +141,9 @@ void Graphics::EndFrame(int width, int height, int flag)
 		//deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
 		//deviceContext->OMSetRenderTargets(1, &rtv, dsView);
+	}
+	else if (flag == PARTICLE) {
+
 	}
 }
 
