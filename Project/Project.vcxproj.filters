@@ -149,9 +149,6 @@
     <ClInclude Include="flags.h">
       <Filter>Header Files\Other</Filter>
     </ClInclude>
-    <ClInclude Include="Billboarding.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="..\imgui\imconfig.h">
       <Filter>Header Files\ImGui</Filter>
     </ClInclude>
@@ -211,10 +208,13 @@
     <FxCompile Include="GeometryShaderParticle.hlsl">
       <Filter>Resource Files\Shaders\Particles</Filter>
     </FxCompile>
+    <FxCompile Include="PixelShaderParticle.hlsl">
+      <Filter>Resource Files\Shaders\Particles</Filter>
+    </FxCompile>
     <FxCompile Include="VertexShaderParticle.hlsl">
       <Filter>Resource Files\Shaders\Particles</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShaderParticle.hlsl">
+    <FxCompile Include="ComputeShaderParticle.hlsl">
       <Filter>Resource Files\Shaders\Particles</Filter>
     </FxCompile>
   </ItemGroup>

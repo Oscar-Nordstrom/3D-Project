@@ -9,6 +9,7 @@ Model::Model()
 	dShader = nullptr;
 	vShader = nullptr;
 	cShader = nullptr;
+	gShader = nullptr;
 	samState = nullptr;
 	shadowSamp = nullptr;
 	vertexBuffer = nullptr;
@@ -16,6 +17,7 @@ Model::Model()
 	constantBufferTessBool = nullptr;
 	images = nullptr;
 	topologyTriList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	topologyPoints = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 	topology = D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
 
 	tesselation = true;
@@ -28,6 +30,7 @@ Model::~Model()
 	if (dShader)dShader->Release();
 	if (pShader)pShader->Release();
 	if (cShader)cShader->Release();
+	if (gShader)gShader->Release();
 	if (inputLayout)inputLayout->Release();
 	if (samState)samState->Release();
 	if (shadowSamp)shadowSamp->Release();
@@ -45,9 +48,9 @@ Model::~Model()
 	delete images;
 }
 
-bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
+bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
 {
-	assert(LoadShaders(vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gfx), "Failed to load shaders.");
+	assert(LoadShaders(vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, gfx), "Failed to load shaders.");
 	assert(LoadObj(obj, gfx), "Failed to load OBJ.");
 	assert(CreateInputLayout(gfx->GetDevice()), "Failed to create input layout.");
 	assert(SetUpSampler(gfx->GetDevice()), "Failed to set up sampler.");
@@ -56,6 +59,16 @@ bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dSha
 	assert(CreateConstantBuffer(*gfx, transform), "Failed to create constant buffer.");
 
 
+	return true;
+}
+
+bool Model::LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
+{
+	assert(LoadShaders(vShaderPath, NO_SHADER, NO_SHADER, pShaderPath, NO_SHADER, gShaderPath, gfx), "Failed to load shaders.");
+	assert(CreateInputLayout(gfx->GetDevice(), true), "Failed to create input layout.");
+	assert(SetUpSampler(gfx->GetDevice()), "Failed to set up sampler.");
+	assert(CreateVertexBuffer(gfx->GetDevice(), true), "Failed to create vertex buffer.");
+	assert(CreateConstantBuffer(*gfx, transform), "Failed to create constant buffer.");
 	return true;
 }
 
@@ -70,6 +83,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
 		gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
+		gfx->GetContext()->GSSetShader(nullptr, nullptr, 0);
 
 		UpdateCbuf(*gfx, transform);
 
@@ -87,6 +101,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->GSSetShader(nullptr, nullptr, 0);
 
 		UpdateCbuf(*gfx, transform);
 
@@ -100,6 +115,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
 		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
+		gfx->GetContext()->GSSetShader(nullptr, nullptr, 0);
 
 		UpdateCbuf(*gfx, transform);
 
@@ -115,6 +131,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(hShader, nullptr, 0);
 		gfx->GetContext()->DSSetShader(dShader, nullptr, 0);
+		gfx->GetContext()->GSSetShader(nullptr, nullptr, 0);
 
 		UpdateCbuf(*gfx, transform);
 
@@ -127,7 +144,16 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->IASetInputLayout(inputLayout);
 	}
 	else if (flag == PARTICLE) {
-	
+		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
+		gfx->GetContext()->GSSetShader(gShader, nullptr, 0);
+		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
+		gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
+		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->IASetPrimitiveTopology(topologyPoints);
+		gfx->GetContext()->IASetInputLayout(inputLayout);
+		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
+		UpdateCbuf(*gfx, transform);
 	}
 
 
@@ -148,24 +174,30 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 			gfx->GetContext()->DrawIndexed((UINT)indices.size(), 0, 0);
 		}
 	}
+	else {
+		gfx->GetContext()->Draw(1, 0);
+	}
 }
 
-bool Model::LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
+bool Model::LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx)
 {
 
-	if (!ReadShader(gfx, vShaderPath, VERTEX_SHADER, vShader, hShader, dShader, pShader, cShader) && vShaderPath != NO_SHADER) {
+	if (!ReadShader(gfx, vShaderPath, VERTEX_SHADER, vShader, hShader, dShader, pShader, cShader, gShader) && vShaderPath != NO_SHADER) {
 		return false;
 	}
-	if (!ReadShader(gfx, hShaderPath, HULL_SHADER, vShader, hShader, dShader, pShader, cShader) && hShaderPath != NO_SHADER) {
+	if (!ReadShader(gfx, hShaderPath, HULL_SHADER, vShader, hShader, dShader, pShader, cShader, gShader) && hShaderPath != NO_SHADER) {
 		return false;
 	}
-	if (!ReadShader(gfx, dShaderPath, DOMAIN_SHADER, vShader, hShader, dShader, pShader, cShader) && dShaderPath != NO_SHADER) {
+	if (!ReadShader(gfx, dShaderPath, DOMAIN_SHADER, vShader, hShader, dShader, pShader, cShader, gShader) && dShaderPath != NO_SHADER) {
 		return false;
 	}
-	if (!ReadShader(gfx, pShaderPath, PIXEL_SHADER, vShader, hShader, dShader, pShader, cShader) && pShaderPath != NO_SHADER) {
+	if (!ReadShader(gfx, pShaderPath, PIXEL_SHADER, vShader, hShader, dShader, pShader, cShader, gShader) && pShaderPath != NO_SHADER) {
 		return false;
 	}
-	if (!ReadShader(gfx, cShaderPath, COMPUTE_SHADER, vShader, hShader, dShader, pShader, cShader) && cShaderPath != NO_SHADER) {
+	if (!ReadShader(gfx, cShaderPath, COMPUTE_SHADER, vShader, hShader, dShader, pShader, cShader, gShader) && cShaderPath != NO_SHADER) {
+		return false;
+	}
+	if (!ReadShader(gfx, gShaderPath, GEOMETRY_SHADER, vShader, hShader, dShader, pShader, cShader, gShader) && gShaderPath != NO_SHADER) {
 		return false;
 	}
 
@@ -308,16 +340,28 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 	return true;
 }
 
-bool Model::CreateInputLayout(ID3D11Device*& device)
+bool Model::CreateInputLayout(ID3D11Device*& device, bool particle)
 {
-	D3D11_INPUT_ELEMENT_DESC inputDesc[3] =
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0,  24, D3D11_INPUT_PER_VERTEX_DATA, 0}
-	};
+	HRESULT hr;
+	if (!particle) {
+		D3D11_INPUT_ELEMENT_DESC inputDesc[3] =
+		{
+			{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0,  24, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		};
 
-	HRESULT hr = device->CreateInputLayout(inputDesc, 3, vShaderByteCode.c_str(), vShaderByteCode.length(), &inputLayout);
+		hr = device->CreateInputLayout(inputDesc, 3, vShaderByteCode.c_str(), vShaderByteCode.length(), &inputLayout);
+	}
+	else {
+		D3D11_INPUT_ELEMENT_DESC inputDesc[1] =
+		{
+			{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		};
+
+		hr = device->CreateInputLayout(inputDesc, 1, vShaderByteCode.c_str(), vShaderByteCode.length(), &inputLayout);
+	}
+
 
 	return !FAILED(hr);
 }
@@ -344,22 +388,41 @@ bool Model::SetUpSampler(ID3D11Device*& device)
 	return !FAILED(hr);
 }
 
-bool Model::CreateVertexBuffer(ID3D11Device*& device)
+bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 {
 	D3D11_BUFFER_DESC bufferDesc;
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = 0;
-	bufferDesc.ByteWidth = UINT(verts.size() * sizeof(SimpleVertex));
-	bufferDesc.StructureByteStride = sizeof(SimpleVertex);
-
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = verts.data();
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
+	HRESULT hr;
+	if (!particle) {
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+		bufferDesc.CPUAccessFlags = 0;
+		bufferDesc.MiscFlags = 0;
+		bufferDesc.ByteWidth = UINT(verts.size() * sizeof(SimpleVertex));
+		bufferDesc.StructureByteStride = sizeof(SimpleVertex);
 
-	HRESULT hr = device->CreateBuffer(&bufferDesc, &data, &vertexBuffer);
+		data.pSysMem = verts.data();
+		data.SysMemPitch = 0;
+		data.SysMemSlicePitch = 0;
+
+		hr = device->CreateBuffer(&bufferDesc, &data, &vertexBuffer);
+	}
+	else {
+		DirectX::XMFLOAT3 points = DirectX::XMFLOAT3(20.0f, 0.0f, 0.0f);
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		bufferDesc.MiscFlags = 0;
+		bufferDesc.ByteWidth = UINT(sizeof(points));
+		bufferDesc.StructureByteStride = sizeof(DirectX::XMFLOAT3);
+
+		data.pSysMem = &points;
+		data.SysMemPitch = 0;
+		data.SysMemSlicePitch = 0;
+
+		hr = device->CreateBuffer(&bufferDesc, &data, &vertexBuffer);
+	}
+
 
 	return !FAILED(hr);
 }
@@ -421,7 +484,7 @@ bool Model::CreateConstantBuffer(Graphics& gfx, DirectX::XMMATRIX transform)
 	return !FAILED(hr);
 }
 
-bool Model::ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader*& v, ID3D11HullShader*& h, ID3D11DomainShader*& d, ID3D11PixelShader*& p, ID3D11ComputeShader*& c)
+bool Model::ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader*& v, ID3D11HullShader*& h, ID3D11DomainShader*& d, ID3D11PixelShader*& p, ID3D11ComputeShader*& c, ID3D11GeometryShader*& g)
 {
 
 	std::string shaderData;
@@ -472,6 +535,13 @@ bool Model::ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader
 		break;
 	case COMPUTE_SHADER:
 		if (FAILED(gfx->GetDevice()->CreateComputeShader(shaderData.c_str(), shaderData.length(), nullptr, &c)))
+		{
+			std::cerr << "Failed to create pixel shader!" << std::endl;
+			return false;
+		}
+		break;
+	case GEOMETRY_SHADER:
+		if (FAILED(gfx->GetDevice()->CreateGeometryShader(shaderData.c_str(), shaderData.length(), nullptr, &g)))
 		{
 			std::cerr << "Failed to create pixel shader!" << std::endl;
 			return false;

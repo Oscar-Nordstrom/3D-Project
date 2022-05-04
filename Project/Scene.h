@@ -49,6 +49,7 @@ private:
 	Timer timer;
 	Camera cam;
 	CubeMap cMap;
+	SceneObjectTest particle;
 	SceneObjectTest cube;
 	SceneObjectTest ground;
 	SceneObjectTest soldier1;

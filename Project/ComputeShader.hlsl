@@ -22,10 +22,7 @@ cbuffer camcb : register(b2)
 
 RWTexture2D<unorm float4> backbuffer : register(u0);
 
-
-
 [numthreads(20, 20, 1)]
-
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     

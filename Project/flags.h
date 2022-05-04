@@ -7,6 +7,7 @@
 #define DOMAIN_SHADER 2
 #define PIXEL_SHADER 3
 #define COMPUTE_SHADER 4
+#define GEOMETRY_SHADER 5
 
 #define numGbufs 6
 

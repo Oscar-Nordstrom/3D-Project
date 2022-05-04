@@ -16,7 +16,13 @@
       <FullPath>D:\GitHub\3D-Project\Debug\ComputeShaderCubeMapTest.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\GitHub\3D-Project\Debug\ComputeShaderParticle.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\GitHub\3D-Project\Debug\DomainShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\GitHub\3D-Project\Debug\GeometryShaderParticle.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>D:\GitHub\3D-Project\Debug\HullShader.cso</FullPath>
@@ -31,7 +37,13 @@
       <FullPath>D:\GitHub\3D-Project\Debug\PixelShaderCubeMapTest.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\GitHub\3D-Project\Debug\PixelShaderParticle.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\GitHub\3D-Project\Debug\VertexShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\GitHub\3D-Project\Debug\VertexShaderParticle.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>D:\GitHub\3D-Project\Debug\VertexShadowShader.cso</FullPath>

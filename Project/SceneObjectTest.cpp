@@ -65,26 +65,20 @@ void SceneObjectTest::EnableTesselation()
 	model.EnableTesselation();
 }
 
-
-bool SceneObjectTest::Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx)
+bool SceneObjectTest::Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle)
 {
-
-	if (!model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, transform, gfx)) {
-		assert(false, "Failed to load model.");
-		return false;
+	if (!particle) {
+		assert(model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, transform, gfx), "Failed to load model.");
+	}
+	else {
+		assert(model.LoadAsParticle(vShaderPath, gShaderPath, pShaderPath, transform, gfx), "Failed to load model.");
 	}
 
 	return true;
 }
 
-
-
 void SceneObjectTest::UpdateTransform(float dt)
 {
-	//r += dt;
 	Rotate(0.0f, dt, 0.0f);
 	transform = dx::XMMatrixScaling(sx, sy, sz) * dx::XMMatrixRotationX(rx) * dx::XMMatrixRotationY(ry) * dx::XMMatrixRotationZ(rz) * dx::XMMatrixTranslation(x, y, z);
-	//transform = dx::XMMatrixScaling(sx, sy, sz) * dx::XMMatrixRotationY(r) * dx::XMMatrixTranslation(x, y, z);
 }
-
-

@@ -20,21 +20,22 @@ public:
 	Model();
 	~Model();
 
-	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
+	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
+	bool LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
 	void Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag = NORMAL);
 	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform);
 	void DisableTesselation();
 	void EnableTesselation();
 private:
-	bool LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx);
+	bool LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx);
 	bool LoadObj(string obj, Graphics*& gfx);
-	bool CreateInputLayout(ID3D11Device*& device);
+	bool CreateInputLayout(ID3D11Device*& device, bool particle = false);
 	bool SetUpSampler(ID3D11Device*& device);
-	bool CreateVertexBuffer(ID3D11Device*& device);
+	bool CreateVertexBuffer(ID3D11Device*& device, bool particle = false);
 	bool CreateIndexBuffer(ID3D11Device*& device);
 	bool CreateConstantBuffer(Graphics& gfx, DirectX::XMMATRIX transform);
 
-	bool ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader*& v, ID3D11HullShader*& h, ID3D11DomainShader*& d, ID3D11PixelShader*& p, ID3D11ComputeShader*& c);
+	bool ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader*& v, ID3D11HullShader*& h, ID3D11DomainShader*& d, ID3D11PixelShader*& p, ID3D11ComputeShader*& c, ID3D11GeometryShader*& g);
 	
 private:
 	vector<DirectX::XMFLOAT3> v;
@@ -55,6 +56,7 @@ private:
 	ID3D11DomainShader* dShader;
 	ID3D11PixelShader* pShader;
 	ID3D11ComputeShader* cShader;
+	ID3D11GeometryShader* gShader;
 	ID3D11InputLayout* inputLayout;
 	ID3D11SamplerState* samState;
 	ID3D11SamplerState* shadowSamp;
@@ -64,6 +66,7 @@ private:
 	ID3D11Buffer* constantBufferTessBool;
 	D3D11_PRIMITIVE_TOPOLOGY topology;
 	D3D11_PRIMITIVE_TOPOLOGY topologyTriList;
+	D3D11_PRIMITIVE_TOPOLOGY topologyPoints;;
 
 	bool tesselation;
 

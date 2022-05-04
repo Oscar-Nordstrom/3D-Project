@@ -19,7 +19,7 @@ public:
 	SceneObjectTest(Graphics& gfx);
 	~SceneObjectTest();
 
-	bool Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, Graphics*& gfx);
+	bool Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle = false);
 	bool Update(float dt, Graphics*& gfx);
 	void Move(float dx, float dy, float dz);
 	void Scale(float dx, float dy, float dz);

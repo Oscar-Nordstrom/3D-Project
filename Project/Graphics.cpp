@@ -106,7 +106,17 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 		deviceContext->CSSetUnorderedAccessViews(6, 1, &nullUav, 0);
 	}
 	else if (flag == PARTICLE) {
+		deviceContext->RSSetViewports(1, &viewport);
+		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
+		//deviceContext->OMSetRenderTargets(numGbufs, renderTargets, dsView);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
+		const float color[] = { r, g, b, 1.0f };
+		deviceContext->ClearUnorderedAccessViewFloat(uav, color);
+		for (int i = 0; i < numGbufs; i++) {
+			deviceContext->ClearRenderTargetView(renderTargets[i], color);
+		}
 
+		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
 
 
@@ -143,6 +153,12 @@ void Graphics::EndFrame(int width, int height, int flag)
 		//deviceContext->OMSetRenderTargets(1, &rtv, dsView);
 	}
 	else if (flag == PARTICLE) {
+		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
+		deviceContext->CSSetShaderResources(0, 1, &shaderResources[2]);
+		deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
+		deviceContext->Dispatch(width / 20, height / 20, 1);
+		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
 
 	}
 }

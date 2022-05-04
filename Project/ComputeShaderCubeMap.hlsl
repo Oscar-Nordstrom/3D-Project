@@ -29,7 +29,7 @@ RWTexture2DArray<unorm float4> uav : register(u6);
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
-    float4 final = float4(0.0f, 0.0f, 0.0f, 0.0f);;
+    float4 final = float4(0.0f, 0.0f, 0.0f, 0.0f);
     int2 texPos = int2(0, 0);
     texPos.x = DTid.x;
     texPos.y = DTid.y;
