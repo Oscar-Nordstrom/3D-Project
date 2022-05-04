@@ -1,5 +1,5 @@
 
-Texture2D<float4> colors : register(t0);
+Texture2D<float4> colors : register(t2);
 
 RWTexture2D<unorm float4> backbuffer : register(u0);
 
@@ -13,5 +13,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     float4 matColor = colors.Load(tPos);
 
+    float4 red = float4(1.0f, 0.0f, 0.0f, 0.0f);
+
     backbuffer[DTid.xy] = matColor;
+   // backbuffer[DTid.xy] = red;
 }

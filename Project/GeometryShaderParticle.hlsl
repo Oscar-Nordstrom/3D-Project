@@ -27,7 +27,7 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
     
     float4x4 worldView = mul(input[0].world, input[0].view);
 
-    const static float SIZE = 100.0;
+    const static float SIZE = 10.0;
 
     //Billboarding start
     float3 camObjVec = (input[0].position.xyz - camPos);
@@ -43,28 +43,36 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
 
 
     GSOutput toOutput;
-    toOutput.position = mul(viewProjectionMatrix, float4(topLeft, 1.0f));
+    //toOutput.position = mul(viewProjectionMatrix, float4(topLeft, 1.0f));
+    toOutput.position = float4(topLeft, 1.0f);
     toOutput.normal = normalize(float3(worldView[0][2], worldView[1][2], worldView[2][2]));
     toOutput.uv = float2(0.0f, 0.0f);
     output.Append(toOutput);
 
-    toOutput.position = mul(viewProjectionMatrix, float4(topRight, 1.0f));
+    //toOutput.position = mul(viewProjectionMatrix, float4(topRight, 1.0f));
+    toOutput.position = float4(topRight, 1.0f);
     toOutput.uv = float2(1.0f, 0.0f);
     output.Append(toOutput);
 
-    toOutput.position = mul(viewProjectionMatrix, float4(bottomRight, 1.0f));
+    //toOutput.position = mul(viewProjectionMatrix, float4(bottomRight, 1.0f));
+    toOutput.position = float4(bottomRight, 1.0f);
     toOutput.uv = float2(1.0f, 1.0f);
     output.Append(toOutput);
 
-    toOutput.position = mul(viewProjectionMatrix, float4(topLeft, 1.0f));
+    output.RestartStrip();
+
+    //toOutput.position = mul(viewProjectionMatrix, float4(topLeft, 1.0f));
+    toOutput.position = float4(topLeft, 1.0f);
     toOutput.uv = float2(0.0f, 0.0f);
     output.Append(toOutput);
 
-    toOutput.position = mul(viewProjectionMatrix, float4(bottomRight, 1.0f));
+    //toOutput.position = mul(viewProjectionMatrix, float4(bottomRight, 1.0f));
+    toOutput.position = float4(bottomRight, 1.0f);
     toOutput.uv = float2(1.0f, 1.0f);
     output.Append(toOutput);
 
-    toOutput.position = mul(viewProjectionMatrix, float4(bottomLeft, 1.0f));
+    //toOutput.position = mul(viewProjectionMatrix, float4(bottomLeft, 1.0f));
+    toOutput.position = float4(bottomLeft, 1.0f);
     toOutput.uv = float2(0.0f, 1.0f);
     output.Append(toOutput);
 }

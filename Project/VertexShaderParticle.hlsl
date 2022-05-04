@@ -19,7 +19,7 @@ VsOutput main(VsInput input)
 {
 	VsOutput output;
 	float4 wPosition = float4(input.position, 1.0f);
-	output.position = mul(world, wPosition);
+	output.position = wPosition;
 	output.world = world;
 	output.view = view;
 	output.proj = projection;

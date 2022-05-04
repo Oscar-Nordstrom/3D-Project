@@ -71,7 +71,7 @@ bool SceneObjectTest::Init(string objPath, string vShaderPath, string hShaderPat
 		assert(model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, transform, gfx), "Failed to load model.");
 	}
 	else {
-		assert(model.LoadAsParticle(vShaderPath, gShaderPath, pShaderPath, transform, gfx), "Failed to load model.");
+		assert(model.LoadAsParticle(vShaderPath, gShaderPath, pShaderPath, cShaderPath, transform, gfx), "Failed to load model.");
 	}
 
 	return true;

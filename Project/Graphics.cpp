@@ -154,7 +154,7 @@ void Graphics::EndFrame(int width, int height, int flag)
 	}
 	else if (flag == PARTICLE) {
 		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
-		deviceContext->CSSetShaderResources(0, 1, &shaderResources[2]);
+		deviceContext->CSSetShaderResources(0, numGbufs, shaderResources);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
 		deviceContext->Dispatch(width / 20, height / 20, 1);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);

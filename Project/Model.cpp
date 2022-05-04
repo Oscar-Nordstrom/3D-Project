@@ -62,9 +62,9 @@ bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dSha
 	return true;
 }
 
-bool Model::LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
+bool Model::LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
 {
-	assert(LoadShaders(vShaderPath, NO_SHADER, NO_SHADER, pShaderPath, NO_SHADER, gShaderPath, gfx), "Failed to load shaders.");
+	assert(LoadShaders(vShaderPath, NO_SHADER, NO_SHADER, pShaderPath, cShaderPath, gShaderPath, gfx), "Failed to load shaders.");
 	assert(CreateInputLayout(gfx->GetDevice(), true), "Failed to create input layout.");
 	assert(SetUpSampler(gfx->GetDevice()), "Failed to set up sampler.");
 	assert(CreateVertexBuffer(gfx->GetDevice(), true), "Failed to create vertex buffer.");
@@ -408,13 +408,13 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 		hr = device->CreateBuffer(&bufferDesc, &data, &vertexBuffer);
 	}
 	else {
-		DirectX::XMFLOAT3 points = DirectX::XMFLOAT3(20.0f, 0.0f, 0.0f);
+		DirectX::XMFLOAT3 points = DirectX::XMFLOAT3(30.0f, 0.0f, 10.0f);
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		bufferDesc.MiscFlags = 0;
 		bufferDesc.ByteWidth = UINT(sizeof(points));
-		bufferDesc.StructureByteStride = sizeof(DirectX::XMFLOAT3);
+		bufferDesc.StructureByteStride = 0;
 
 		data.pSysMem = &points;
 		data.SysMemPitch = 0;

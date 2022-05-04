@@ -17,5 +17,6 @@ PixelShaderOutput main(pixleInput input)
 {
 	PixelShaderOutput output;
 	output.color = tex.Sample(samp, input.uv);
+	//output.color = float4(1.0f, 0.0f, 0.0f, 0.0f);
 	return output;
 }

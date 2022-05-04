@@ -21,7 +21,7 @@ public:
 	~Model();
 
 	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
-	bool LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
+	bool LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
 	void Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag = NORMAL);
 	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform);
 	void DisableTesselation();

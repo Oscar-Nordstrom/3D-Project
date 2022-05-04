@@ -49,6 +49,9 @@
     <Filter Include="Source Files\ImGui">
       <UniqueIdentifier>{69501e1b-d71f-49af-9b88-199a19b23597}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders\DefRend">
+      <UniqueIdentifier>{0d08cd6c-b27c-42ea-9cd3-beee5020db1f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -175,21 +178,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="ComputeShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="HullShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="DomainShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="ComputeShaderCubeMap.hlsl">
       <Filter>Resource Files\Shaders\CubeMapping</Filter>
     </FxCompile>
@@ -216,6 +204,21 @@
     </FxCompile>
     <FxCompile Include="ComputeShaderParticle.hlsl">
       <Filter>Resource Files\Shaders\Particles</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShader.hlsl">
+      <Filter>Resource Files\Shaders\DefRend</Filter>
+    </FxCompile>
+    <FxCompile Include="DomainShader.hlsl">
+      <Filter>Resource Files\Shaders\DefRend</Filter>
+    </FxCompile>
+    <FxCompile Include="HullShader.hlsl">
+      <Filter>Resource Files\Shaders\DefRend</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Resource Files\Shaders\DefRend</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Resource Files\Shaders\DefRend</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
