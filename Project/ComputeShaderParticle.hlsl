@@ -1,5 +1,5 @@
 
-Texture2D<float4> colors : register(t2);
+Texture2D<float4> colors : register(t0);
 
 RWTexture2D<unorm float4> backbuffer : register(u0);
 

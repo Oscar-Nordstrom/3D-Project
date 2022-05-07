@@ -18,8 +18,7 @@ cbuffer cBuf : register(b0)
 VsOutput main(VsInput input)
 {
 	VsOutput output;
-	float4 wPosition = float4(input.position, 1.0f);
-	output.position = wPosition;
+	output.position = mul(world, float4(input.position, 1.0f));
 	output.world = world;
 	output.view = view;
 	output.proj = projection;

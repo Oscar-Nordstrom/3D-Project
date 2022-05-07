@@ -51,7 +51,7 @@ Scene::Scene()
 	soldier6.Scale(2.0f, 2.0f, 2.0f);
 
 	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	//cube.Move(0.0f, 1.0f, 0.0f);
+	cube.Move(30.0f, 0.0f, 0.0f);
 	cube.Scale(2.0f, 2.0f, 2.0f);
 
 
@@ -122,8 +122,8 @@ bool Scene::DoFrame()
 	const float t = timer.Mark() * speedfactor;
 	timerCount += t;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
-
-	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetDir()->x) + L", Y: " + std::to_wstring(cam.GetDir()->y) + L", Z: " + std::to_wstring(cam.GetDir()->z);
+	
+	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPos()->x) + L", Y: " + std::to_wstring(cam.GetPos()->y) + L", Z: " + std::to_wstring(cam.GetPos()->z);
 
 	window.SetTitle(dirStr.c_str());
 
@@ -143,9 +143,7 @@ bool Scene::DoFrame()
 	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
 	shadow.SetCamDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
 	//Using the same camera
-
 	shadow.SetShadowMap();
-
 	soldier1.Draw(window.Gfx(), SHADOW);
 	soldier2.Draw(window.Gfx(), SHADOW);
 	soldier3.Draw(window.Gfx(), SHADOW);
@@ -156,7 +154,6 @@ bool Scene::DoFrame()
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
 	//Shadows End
-
 
 
 	//Cube mapping first Start
@@ -196,24 +193,22 @@ bool Scene::DoFrame()
 	//Cube map first end
 
 	//Particles Start
+	window.Gfx()->SetProjection(proj);
+	window.Gfx()->SetCamera(cam.GetMatrix());
+	UpdateCam();
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, PARTICLE);
 	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
 	particle.Draw(window.Gfx(), PARTICLE);
 	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(), PARTICLE);
 	//Particles End
 
-
+	//Final draw Start
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
-
 	ImGuiWindows();
-
-
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
 	UpdateCam();
 	checkInput();
-
-
 	UpdateObjcects(t);
 
 	//Cube map seccond Start
@@ -221,22 +216,20 @@ bool Scene::DoFrame()
 	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 	cMap.SetEnd(window.Gfx());
 	//Cube map seccond End
-
 	soldier1.Draw(window.Gfx());
 	soldier2.Draw(window.Gfx());
 	soldier3.Draw(window.Gfx());
 	soldier4.Draw(window.Gfx());
 	soldier5.Draw(window.Gfx());
 	soldier6.Draw(window.Gfx());
-
 	ground.Draw(window.Gfx());
-
 
 	shadow.BindDepthResource();
 	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight());
+	//Final draw End
 
 	return true;
 }

@@ -153,6 +153,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->IASetPrimitiveTopology(topologyPoints);
 		gfx->GetContext()->IASetInputLayout(inputLayout);
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		UpdateCbuf(*gfx, transform);
 	}
 
@@ -408,7 +409,7 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 		hr = device->CreateBuffer(&bufferDesc, &data, &vertexBuffer);
 	}
 	else {
-		DirectX::XMFLOAT3 points = DirectX::XMFLOAT3(30.0f, 0.0f, 10.0f);
+		DirectX::XMFLOAT3 points = DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f);
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
