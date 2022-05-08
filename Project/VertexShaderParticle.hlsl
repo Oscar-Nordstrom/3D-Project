@@ -3,7 +3,6 @@ struct VsInput {
 };
 struct VsOutput {
 	float4 position : SV_POSITION;
-	float4x4 world : WORLD;
 	float4x4 view : VIEW;
 	float4x4 proj : PROJ;
 };
@@ -19,7 +18,7 @@ VsOutput main(VsInput input)
 {
 	VsOutput output;
 	output.position = mul(world, float4(input.position, 1.0f));
-	output.world = world;
+	//output.position = float4(input.position, 1.0f);
 	output.view = view;
 	output.proj = projection;
 	return output;

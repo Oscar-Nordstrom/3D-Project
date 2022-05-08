@@ -29,6 +29,7 @@ DirectX::XMFLOAT3* Camera::GetDir()
 	return &direction;
 }
 
+
 void Camera::SetPos(DirectX::XMFLOAT3 pos)
 {
 	position = pos;

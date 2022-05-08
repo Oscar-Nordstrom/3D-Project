@@ -63,6 +63,7 @@ private:
 	ShadowMap shadow;
 	ID3D11Buffer* lightBuf;
 	ID3D11Buffer* camBuf;
+	ID3D11Buffer* camBuf2;
 
 	vector<SceneObjectTest*> skybox;
 

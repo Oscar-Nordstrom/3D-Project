@@ -95,6 +95,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		gfx->GetContext()->IASetInputLayout(inputLayout);
+		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 	}
 	else if (flag == SHADOW) {
 		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
@@ -109,6 +110,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		gfx->GetContext()->IASetInputLayout(inputLayout);
+		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 	}
 	else if (flag == CUBE_MAP) {
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
@@ -126,6 +128,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		gfx->GetContext()->IASetInputLayout(inputLayout);
+		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 	}
 	else if (flag == CUBE_MAP_TWO) {
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
@@ -142,6 +145,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		gfx->GetContext()->IASetInputLayout(inputLayout);
+		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 	}
 	else if (flag == PARTICLE) {
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
@@ -150,16 +154,16 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
-		gfx->GetContext()->IASetPrimitiveTopology(topologyPoints);
-		gfx->GetContext()->IASetInputLayout(inputLayout);
-		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
-		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+
 		UpdateCbuf(*gfx, transform);
+
+		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
+		gfx->GetContext()->IASetPrimitiveTopology(topologyPoints);
+		stride = sizeof(DirectX::XMFLOAT3);
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		gfx->GetContext()->IASetInputLayout(inputLayout);
+		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 	}
-
-
-
-	gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 
 
 	if (flag != PARTICLE) {
@@ -169,13 +173,12 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 			}
 		}
 		else {
-
 			gfx->GetContext()->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
 			gfx->GetContext()->DrawIndexed((UINT)indices.size(), 0, 0);
 		}
 	}
 	else {
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		gfx->GetContext()->Draw(1, 0);
 	}
 }
@@ -409,7 +412,7 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 		hr = device->CreateBuffer(&bufferDesc, &data, &vertexBuffer);
 	}
 	else {
-		DirectX::XMFLOAT3 points = DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f);
+		DirectX::XMFLOAT3 points = DirectX::XMFLOAT3(20.0f, 0.0f, 0.0f);
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;

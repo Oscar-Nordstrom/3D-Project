@@ -51,7 +51,7 @@ Scene::Scene()
 	soldier6.Scale(2.0f, 2.0f, 2.0f);
 
 	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	cube.Move(30.0f, 0.0f, 0.0f);
+	//cube.Move(30.0f, 0.0f, 0.0f);
 	cube.Scale(2.0f, 2.0f, 2.0f);
 
 
@@ -89,8 +89,9 @@ Scene::Scene()
 
 Scene::~Scene()
 {
-	lightBuf->Release();
-	camBuf->Release();
+	if(lightBuf)lightBuf->Release();
+	if(camBuf)camBuf->Release();
+	if(camBuf2)camBuf2->Release();
 
 	for (int i = 0; i < 6; i++) {
 		if (skybox[i] != nullptr)
@@ -193,13 +194,13 @@ bool Scene::DoFrame()
 	//Cube map first end
 
 	//Particles Start
-	window.Gfx()->SetProjection(proj);
+	/*window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
 	UpdateCam();
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, PARTICLE);
 	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
 	particle.Draw(window.Gfx(), PARTICLE);
-	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(), PARTICLE);
+	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(), PARTICLE);*/
 	//Particles End
 
 	//Final draw Start
@@ -223,6 +224,10 @@ bool Scene::DoFrame()
 	soldier5.Draw(window.Gfx());
 	soldier6.Draw(window.Gfx());
 	ground.Draw(window.Gfx());
+
+	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
+	window.Gfx()->GetContext()->GSSetConstantBuffers(1, 1, &camBuf2);
+	particle.Draw(window.Gfx(), PARTICLE);
 
 	shadow.BindDepthResource();
 	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
@@ -272,6 +277,22 @@ bool Scene::SetUpCamBuf()
 	data.SysMemSlicePitch = 0;
 
 	HRESULT hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBuf);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	desc.ByteWidth = roundUpTo(sizeof(cam.GetDir()), 16);
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.MiscFlags = 0;
+	desc.StructureByteStride = 0;
+
+	data.pSysMem = cam.GetDir();
+	data.SysMemPitch = 0;
+	data.SysMemSlicePitch = 0;
+
+	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBuf2);
 
 	return !FAILED(hr);
 }
@@ -283,6 +304,12 @@ void Scene::UpdateCam()
 	HRESULT hr = window.Gfx()->GetContext()->Map(camBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
 	CopyMemory(mappedResource.pData, cam.GetPos(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf, 0);//Reenable GPU access to the data
+
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(camBuf2, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, cam.GetDir(), sizeof(DirectX::XMFLOAT3));//Write the new memory
+	window.Gfx()->GetContext()->Unmap(camBuf2, 0);//Reenable GPU access to the data
 }
 
 bool Scene::UpdateObjcects(float t)
