@@ -27,8 +27,8 @@ public:
 private:
 	bool DoFrame();
 	bool SetUpDirLight();
-	bool SetUpCamBuf();
-	void UpdateCam();
+	bool SetUpBufs();
+	void UpdateBufs();
 	bool UpdateObjcects(float t);
 
 	void checkInput();
@@ -43,15 +43,17 @@ private:
 	void EnableTesselation();
 	void DisableTesselation();
 
-	float speedfactor = 1.0f;
+	float speedfactor = 0.0f;
 	float timerCount = 0.0f;
+	float dt;
+	TimeData theTimedata;
 	Window window;
 	Timer timer;
 	Camera cam;
 	CubeMap cMap;
 	SceneObjectTest particle;
 	SceneObjectTest cube;
-	SceneObjectTest ground;
+	//SceneObjectTest ground;
 	SceneObjectTest soldier1;
 	SceneObjectTest soldier2;
 	SceneObjectTest soldier3;
@@ -64,6 +66,7 @@ private:
 	ID3D11Buffer* lightBuf;
 	ID3D11Buffer* camBuf;
 	ID3D11Buffer* camBuf2;
+	ID3D11Buffer* camBufTime;
 
 	vector<SceneObjectTest*> skybox;
 

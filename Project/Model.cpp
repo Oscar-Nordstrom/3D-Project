@@ -13,6 +13,7 @@ Model::Model()
 	samState = nullptr;
 	shadowSamp = nullptr;
 	vertexBuffer = nullptr;
+	nullBuf = nullptr;
 	constantBuffer = nullptr;
 	constantBufferTessBool = nullptr;
 	images = nullptr;
@@ -21,6 +22,7 @@ Model::Model()
 	topology = D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
 
 	tesselation = true;
+
 }
 
 Model::~Model()
@@ -35,6 +37,8 @@ Model::~Model()
 	if (samState)samState->Release();
 	if (shadowSamp)shadowSamp->Release();
 	if (vertexBuffer)vertexBuffer->Release();
+	if (uavBuffer)uavBuffer->Release();
+	//if (nullBuf)nullBuf->Release();
 	if (indexBuffer)indexBuffer->Release();
 	if (constantBuffer)constantBuffer->Release();
 	if (constantBufferTessBool)constantBufferTessBool->Release();
@@ -75,6 +79,7 @@ bool Model::LoadAsParticle(string vShaderPath, string gShaderPath, string pShade
 void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 {
 	UINT stride = sizeof(SimpleVertex);
+	UINT pStride = sizeof(DirectX::XMFLOAT3);
 	UINT offset = 0;
 
 	if (flag == NORMAL) {
@@ -151,7 +156,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
 		gfx->GetContext()->GSSetShader(gShader, nullptr, 0);
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
-		gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
+		//gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
 
@@ -178,8 +183,10 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		}
 	}
 	else {
-		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		gfx->GetContext()->Draw(1, 0);
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &pStride, &offset);
+		gfx->GetContext()->Draw(NUM_PARTICLES, 0);
+
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &nullBuf, &pStride, &offset);
 	}
 }
 
@@ -412,19 +419,37 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 		hr = device->CreateBuffer(&bufferDesc, &data, &vertexBuffer);
 	}
 	else {
-		DirectX::XMFLOAT3 points = DirectX::XMFLOAT3(20.0f, 0.0f, 0.0f);
-		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		float randX, randY, randZ;
+		DirectX::XMFLOAT3 points[NUM_PARTICLES];// = { DirectX::XMFLOAT3(20.0f, 0.0f, 0.0f) };
+		for (int i = 0; i < NUM_PARTICLES; i++) {
+			randX = (rand() % 100) - 49;
+			randY = (rand() % 100) - 49;
+			randZ = (rand() % 100) - 49;
+			points[i] = DirectX::XMFLOAT3(randX, randY, randZ);
+		}
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_UNORDERED_ACCESS;
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.CPUAccessFlags = 0;
 		bufferDesc.MiscFlags = 0;
 		bufferDesc.ByteWidth = UINT(sizeof(points));
 		bufferDesc.StructureByteStride = 0;
 
-		data.pSysMem = &points;
+		data.pSysMem = points;
 		data.SysMemPitch = 0;
 		data.SysMemSlicePitch = 0;
 
 		hr = device->CreateBuffer(&bufferDesc, &data, &vertexBuffer);
+		if (FAILED(hr)) {
+			return false;
+		}
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+		uavDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uavDesc.Buffer.FirstElement = 0;
+		uavDesc.Buffer.NumElements = std::size(points)*3;
+		uavDesc.Buffer.Flags = 0;
+
+		hr = device->CreateUnorderedAccessView(vertexBuffer, &uavDesc, &uavBuffer);
 	}
 
 
@@ -600,6 +625,12 @@ void Model::DisableTesselation()
 void Model::EnableTesselation()
 {
 	tesselation = true;
+}
+
+void Model::SetParticleUpdate(Graphics*& gfx)
+{
+	gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
+	gfx->GetContext()->CSSetUnorderedAccessViews(1, 1, &uavBuffer, nullptr);
 }
 
 /*int Model::FindVert()

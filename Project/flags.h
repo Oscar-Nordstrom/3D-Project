@@ -2,6 +2,8 @@
 
 #define NO_SHADER "NO_SHADER"
 
+#define NUM_PARTICLES 10000
+
 #define VERTEX_SHADER 0
 #define HULL_SHADER 1
 #define DOMAIN_SHADER 2

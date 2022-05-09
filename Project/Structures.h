@@ -13,6 +13,11 @@
 
 #include "flags.h"
 
+struct TimeData {
+	float dt;
+	float time;
+};
+
 struct ShadowVertexData {
 	DirectX::XMMATRIX proj;
 	DirectX::XMMATRIX view;

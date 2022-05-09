@@ -27,6 +27,11 @@ bool SceneObjectTest::Update(float dt, Graphics*& gfx)
 	return true;
 }
 
+void SceneObjectTest::UpdateParticle(Graphics*& gfx)
+{
+	model.SetParticleUpdate(gfx);
+}
+
 void SceneObjectTest::Move(float dx, float dy, float dz)
 {
 	x += dx;

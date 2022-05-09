@@ -29,6 +29,8 @@ Graphics::Graphics(int width, int height, HWND& window)
 
 	SetUpImGui(window);
 
+	
+
 }
 
 Graphics::~Graphics()
@@ -126,6 +128,7 @@ void Graphics::EndFrame(int width, int height, int flag)
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
 		deviceContext->Dispatch(width / 20, height / 20, 1);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
+		deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUav, nullptr);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
 		ImGuiEnd();
 		swapChain->Present(1, 0);
@@ -152,11 +155,24 @@ void Graphics::EndFrame(int width, int height, int flag)
 		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
 		deviceContext->CSSetShaderResources(0, 1, &shaderResources[2]);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
-		deviceContext->Dispatch(width / 20, height / 20, 1);
+		deviceContext->Dispatch(NUM_PARTICLES/2, 1, 1);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
+		deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUav, nullptr);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
 
 	}
+}
+
+void Graphics::UpdateParticles()
+{
+	if (NUM_PARTICLES > 9 && NUM_PARTICLES % 10 == 0) {
+		deviceContext->Dispatch(NUM_PARTICLES/10, 1, 1);
+	}
+	else {
+		assert(false, "Not an even number of particles, or not enough particles.");
+	}
+
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUav, nullptr);
 }
 
 void Graphics::SetProjection(DirectX::XMMATRIX proj)

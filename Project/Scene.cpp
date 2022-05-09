@@ -16,7 +16,7 @@ int roundUpTo(int numToRound, int multiple)
 Scene::Scene()
 	:window(WIDTH, HEIGHT, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx()),
 	soldier1(*window.Gfx()), soldier2(*window.Gfx()), soldier3(*window.Gfx()), soldier4(*window.Gfx()), soldier5(*window.Gfx()), soldier6(*window.Gfx()),
-	cube(*window.Gfx()), ground(*window.Gfx()), particle(*window.gfx)
+	cube(*window.Gfx())/*, ground(*window.Gfx())*/, particle(*window.gfx)
 {
 	float fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
@@ -26,10 +26,10 @@ Scene::Scene()
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
 
-	ground.Init("../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	ground.Scale(200.0f, 200.0f, 0.0f);
-	ground.Rotate(DegToRad(90.0f), 0.0f, 0.0f);
-	ground.Move(0.0f, -5.0f, 0.0f);
+	//ground.Init("../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	//ground.Scale(200.0f, 200.0f, 0.0f);
+	//ground.Rotate(DegToRad(90.0f), 0.0f, 0.0f);
+	//ground.Move(0.0f, -5.0f, 0.0f);
 
 	soldier1.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	soldier1.Move(0.0f, 10.0f, 0.0f);
@@ -51,7 +51,6 @@ Scene::Scene()
 	soldier6.Scale(2.0f, 2.0f, 2.0f);
 
 	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	//cube.Move(30.0f, 0.0f, 0.0f);
 	cube.Scale(2.0f, 2.0f, 2.0f);
 
 
@@ -66,12 +65,12 @@ Scene::Scene()
 	SetUpDirLight();
 	//cam.SetPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
 	cam.SetDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
-	SetUpCamBuf();
+	SetUpBufs();
 
 	shadow.SetCamDir(*cam.GetDir());
 	shadow.SetCamPos(*cam.GetPos());
 
-	gameObjects.push_back(&ground);
+	//gameObjects.push_back(&ground);
 	gameObjects.push_back(&soldier1);
 	gameObjects.push_back(&soldier2);
 	gameObjects.push_back(&soldier3);
@@ -82,9 +81,9 @@ Scene::Scene()
 
 	tesselation = true;
 	tesselationTemp = tesselation;
+	dt = 0;
 
 	particle.Init("No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
-
 }
 
 Scene::~Scene()
@@ -92,6 +91,7 @@ Scene::~Scene()
 	if(lightBuf)lightBuf->Release();
 	if(camBuf)camBuf->Release();
 	if(camBuf2)camBuf2->Release();
+	if (camBufTime)camBufTime->Release();
 
 	for (int i = 0; i < 6; i++) {
 		if (skybox[i] != nullptr)
@@ -121,7 +121,10 @@ bool Scene::DoFrame()
 {
 
 	const float t = timer.Mark() * speedfactor;
+	dt = t;
 	timerCount += t;
+	theTimedata.dt = dt;
+	theTimedata.time = timerCount;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
 	
 	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPos()->x) + L", Y: " + std::to_wstring(cam.GetPos()->y) + L", Z: " + std::to_wstring(cam.GetPos()->z);
@@ -181,7 +184,7 @@ bool Scene::DoFrame()
 		for (int i = 0; i < 6; i++) {
 			skybox[i]->Draw(window.Gfx(), CUBE_MAP);
 		}
-		ground.Draw(window.Gfx(), CUBE_MAP);
+		//ground.Draw(window.Gfx(), CUBE_MAP);
 
 
 		shadow.BindDepthResource();
@@ -193,22 +196,12 @@ bool Scene::DoFrame()
 	}
 	//Cube map first end
 
-	//Particles Start
-	/*window.Gfx()->SetProjection(proj);
-	window.Gfx()->SetCamera(cam.GetMatrix());
-	UpdateCam();
-	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, PARTICLE);
-	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
-	particle.Draw(window.Gfx(), PARTICLE);
-	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight(), PARTICLE);*/
-	//Particles End
-
 	//Final draw Start
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
 	ImGuiWindows();
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
-	UpdateCam();
+	UpdateBufs();
 	checkInput();
 	UpdateObjcects(t);
 
@@ -223,11 +216,13 @@ bool Scene::DoFrame()
 	soldier4.Draw(window.Gfx());
 	soldier5.Draw(window.Gfx());
 	soldier6.Draw(window.Gfx());
-	ground.Draw(window.Gfx());
+	//ground.Draw(window.Gfx());
 
+	//Particle Start
 	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
 	window.Gfx()->GetContext()->GSSetConstantBuffers(1, 1, &camBuf2);
 	particle.Draw(window.Gfx(), PARTICLE);
+	//Particle End
 
 	shadow.BindDepthResource();
 	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
@@ -235,6 +230,11 @@ bool Scene::DoFrame()
 	window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight());
 	//Final draw End
+
+	//Update particles
+	particle.UpdateParticle(window.Gfx());
+	window.Gfx()->GetContext()->CSSetConstantBuffers(3, 1, &camBufTime);
+	window.Gfx()->UpdateParticles();
 
 	return true;
 }
@@ -261,7 +261,7 @@ bool Scene::SetUpDirLight()
 	return !FAILED(hr);
 }
 
-bool Scene::SetUpCamBuf()
+bool Scene::SetUpBufs()
 {
 	D3D11_BUFFER_DESC desc;
 	desc.ByteWidth = roundUpTo(sizeof(cam.GetPos()), 16);
@@ -293,23 +293,55 @@ bool Scene::SetUpCamBuf()
 	data.SysMemSlicePitch = 0;
 
 	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBuf2);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	
+	theTimedata.dt = dt;
+	theTimedata.time = timerCount;
+	desc.ByteWidth = roundUpTo(sizeof(TimeData), 16);
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.MiscFlags = 0;
+	desc.StructureByteStride = 0;
+
+	data.pSysMem = &dt;
+	data.SysMemPitch = 0;
+	data.SysMemSlicePitch = 0;
+
+	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBufTime);
 
 	return !FAILED(hr);
 }
 
-void Scene::UpdateCam()
+void Scene::UpdateBufs()
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;//Create a mapped resource
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	HRESULT hr = window.Gfx()->GetContext()->Map(camBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
 	CopyMemory(mappedResource.pData, cam.GetPos(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf, 0);//Reenable GPU access to the data
-
+	if (FAILED(hr)) {
+		assert(false, "Failed to update buffer.");
+	}
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	hr = window.Gfx()->GetContext()->Map(camBuf2, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
 	CopyMemory(mappedResource.pData, cam.GetDir(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf2, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false, "Failed to update buffer.");
+	}
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(camBufTime, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, &theTimedata, sizeof(TimeData));//Write the new memory
+	window.Gfx()->GetContext()->Unmap(camBufTime, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false, "Failed to update buffer.");
+	}
 }
 
 bool Scene::UpdateObjcects(float t)
@@ -354,10 +386,10 @@ bool Scene::UpdateObjcects(float t)
 		skybox[i]->Draw(window.Gfx());
 	}
 
-	if (!ground.Update(0.0f, window.Gfx())) {
+	/*if (!ground.Update(0.0f, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
-	}
+	}*/
 }
 
 void Scene::checkInput()

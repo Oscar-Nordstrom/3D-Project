@@ -19,6 +19,7 @@ public:
 
 	void StartFrame(float r, float g, float b, int flag = NORMAL);
 	void EndFrame(int width, int height, int flag = NORMAL);
+	void UpdateParticles();
 
 	void SetProjection(DirectX::XMMATRIX proj);
 	void SetCamera(DirectX::XMMATRIX cam);

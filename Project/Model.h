@@ -7,6 +7,8 @@
 #include <map>
 #include <cassert>
 
+#include <iterator>
+
 #include "Structures.h"
 #include "Graphics.h"
 
@@ -26,6 +28,7 @@ public:
 	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform);
 	void DisableTesselation();
 	void EnableTesselation();
+	void SetParticleUpdate(Graphics*& gfx);
 private:
 	bool LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx);
 	bool LoadObj(string obj, Graphics*& gfx);
@@ -48,7 +51,6 @@ private:
 
 
 	MtlImages* images;
-	
 
 	string vShaderByteCode;
 	ID3D11VertexShader* vShader;
@@ -61,6 +63,8 @@ private:
 	ID3D11SamplerState* samState;
 	ID3D11SamplerState* shadowSamp;
 	ID3D11Buffer* vertexBuffer;
+	ID3D11Buffer* nullBuf;
+	ID3D11UnorderedAccessView* uavBuffer;
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* constantBuffer;
 	ID3D11Buffer* constantBufferTessBool;
