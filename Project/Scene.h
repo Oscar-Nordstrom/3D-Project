@@ -43,6 +43,8 @@ private:
 	void EnableTesselation();
 	void DisableTesselation();
 
+
+	TextureHandler* texHandl = new TextureHandler();
 	float speedfactor = 0.0f;
 	float timerCount = 0.0f;
 	float dt;

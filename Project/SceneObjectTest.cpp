@@ -3,15 +3,17 @@
 
 namespace dx = DirectX;
 
-SceneObjectTest::SceneObjectTest(Graphics& gfx)
+SceneObjectTest::SceneObjectTest(Graphics& gfx, TextureHandler*& texHandl)
+	:model(texHandl)
 {
 
 	transform = dx::XMMatrixScaling(sx, sy, sz) * dx::XMMatrixRotationX(rx) * dx::XMMatrixRotationY(ry) * dx::XMMatrixRotationZ(rz) * dx::XMMatrixTranslation(x, y, z);
+	boundingSphere.Center = DirectX::XMFLOAT3(x, y, z);
+	boundingSphere.Radius = LargestSide() / 2.0f;
 }
 
 SceneObjectTest::~SceneObjectTest()
 {
-
 }
 
 
@@ -37,6 +39,7 @@ void SceneObjectTest::Move(float dx, float dy, float dz)
 	x += dx;
 	y += dy;
 	z += dz;
+	boundingSphere.Center = DirectX::XMFLOAT3(x, y, z);
 }
 
 void SceneObjectTest::Scale(float dx, float dy, float dz)
@@ -45,6 +48,7 @@ void SceneObjectTest::Scale(float dx, float dy, float dz)
 	sx += dx;
 	sy += dy;
 	sz += dz;
+	boundingSphere.Radius = LargestSide() / 2.0f;
 }
 
 void SceneObjectTest::Rotate(float dx, float dy, float dz)
@@ -70,6 +74,11 @@ void SceneObjectTest::EnableTesselation()
 	model.EnableTesselation();
 }
 
+DirectX::BoundingSphere SceneObjectTest::GetBoundingSphere()
+{
+	return boundingSphere;
+}
+
 bool SceneObjectTest::Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle)
 {
 	if (!particle) {
@@ -86,4 +95,17 @@ void SceneObjectTest::UpdateTransform(float dt)
 {
 	Rotate(0.0f, dt, 0.0f);
 	transform = dx::XMMatrixScaling(sx, sy, sz) * dx::XMMatrixRotationX(rx) * dx::XMMatrixRotationY(ry) * dx::XMMatrixRotationZ(rz) * dx::XMMatrixTranslation(x, y, z);
+}
+
+float SceneObjectTest::LargestSide() const
+{
+	if (sx > sy && sx > sz) {
+		return sx;
+	}
+	else if (sy > sx && sy > sz) {
+		return sy;
+	}
+	else {
+		return sz;
+	}
 }

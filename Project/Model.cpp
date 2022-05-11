@@ -1,6 +1,7 @@
 #include "Model.h"
 
-Model::Model()
+Model::Model(TextureHandler*& texHandl)
+	:texHandl(texHandl)
 {
 	indexBuffer = nullptr;
 	inputLayout = nullptr;
@@ -38,10 +39,10 @@ Model::~Model()
 	if (shadowSamp)shadowSamp->Release();
 	if (vertexBuffer)vertexBuffer->Release();
 	if (uavBuffer)uavBuffer->Release();
-	//if (nullBuf)nullBuf->Release();
 	if (indexBuffer)indexBuffer->Release();
 	if (constantBuffer)constantBuffer->Release();
 	if (constantBufferTessBool)constantBufferTessBool->Release();
+	if (paprticleTexSrv)paprticleTexSrv->Release();
 
 
 	for (auto o : subs) {
@@ -68,6 +69,8 @@ bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dSha
 
 bool Model::LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
 {
+	texHandl->AddTexture("snowflake.png", gfx->GetDevice());
+	assert(!FAILED(gfx->GetDevice()->CreateShaderResourceView(texHandl->GetImage("snowflake.png").tex, nullptr, &paprticleTexSrv)), "Failed to create particle texture.");
 	assert(LoadShaders(vShaderPath, NO_SHADER, NO_SHADER, pShaderPath, cShaderPath, gShaderPath, gfx), "Failed to load shaders.");
 	assert(CreateInputLayout(gfx->GetDevice(), true), "Failed to create input layout.");
 	assert(SetUpSampler(gfx->GetDevice()), "Failed to set up sampler.");
@@ -162,6 +165,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 
 		UpdateCbuf(*gfx, transform);
 
+		gfx->GetContext()->PSSetShaderResources(0, 1, &paprticleTexSrv);
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
 		gfx->GetContext()->IASetPrimitiveTopology(topologyPoints);
 		stride = sizeof(DirectX::XMFLOAT3);
@@ -255,7 +259,7 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 		if (!foundMtllib && prefix == "mtllib") {
 
 			ss >> mtlFile;
-			images = new MtlImages(mtlFile, gfx->GetDevice());
+			images = new MtlImages(mtlFile, gfx->GetDevice(), texHandl);
 			foundMtllib = true;
 		}
 		else if (prefix == "usemtl") {

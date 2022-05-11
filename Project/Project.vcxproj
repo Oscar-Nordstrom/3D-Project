@@ -187,6 +187,7 @@
     <ClInclude Include="SceneObjectTest.h" />
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Structures.h" />
+    <ClInclude Include="TextureHandler.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
@@ -212,6 +213,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObjectTest.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
+    <ClCompile Include="TextureHandler.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WinMain.cpp" />

@@ -2,6 +2,7 @@
 #include "Graphics.h"
 #include "Model.h"
 #include <DirectXMath.h>
+#include <DirectXCollision.h>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -16,7 +17,7 @@ using namespace std;
 
 class SceneObjectTest {
 public:
-	SceneObjectTest(Graphics& gfx);
+	SceneObjectTest(Graphics& gfx, TextureHandler*& texHandl);
 	~SceneObjectTest();
 
 	bool Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle = false);
@@ -28,13 +29,14 @@ public:
 	void Draw(Graphics*& gfx, int flag = NORMAL);
 	void DisableTesselation();
 	void EnableTesselation();
-private:
-
+	DirectX::BoundingSphere GetBoundingSphere();
 private:
 	void UpdateTransform(float dt);
+	float LargestSide()const;
 private:
 	Model model;
 	DirectX::XMMATRIX transform;
+	DirectX::BoundingSphere boundingSphere;
 
 private:
 	float x = 0.0f;

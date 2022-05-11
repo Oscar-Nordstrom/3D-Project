@@ -15,8 +15,9 @@ int roundUpTo(int numToRound, int multiple)
 
 Scene::Scene()
 	:window(WIDTH, HEIGHT, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx()),
-	soldier1(*window.Gfx()), soldier2(*window.Gfx()), soldier3(*window.Gfx()), soldier4(*window.Gfx()), soldier5(*window.Gfx()), soldier6(*window.Gfx()),
-	cube(*window.Gfx())/*, ground(*window.Gfx())*/, particle(*window.gfx)
+	soldier1(*window.Gfx(), texHandl), soldier2(*window.Gfx(), texHandl), soldier3(*window.Gfx(), texHandl), soldier4(*window.Gfx(), texHandl), 
+	soldier5(*window.Gfx(), texHandl), soldier6(*window.Gfx(), texHandl),
+	cube(*window.Gfx(), texHandl), particle(*window.gfx, texHandl)
 {
 	float fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
@@ -55,7 +56,7 @@ Scene::Scene()
 
 
 	for (int i = 0; i < 6; i++) {
-		skybox.push_back(new SceneObjectTest(*window.Gfx()));
+		skybox.push_back(new SceneObjectTest(*window.Gfx(), texHandl));
 		skybox[i]->Init("../Resources/Obj/plane.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso",NO_SHADER, window.Gfx());
 	}
 	SetUpSkybox();
@@ -70,7 +71,6 @@ Scene::Scene()
 	shadow.SetCamDir(*cam.GetDir());
 	shadow.SetCamPos(*cam.GetPos());
 
-	//gameObjects.push_back(&ground);
 	gameObjects.push_back(&soldier1);
 	gameObjects.push_back(&soldier2);
 	gameObjects.push_back(&soldier3);
@@ -97,6 +97,8 @@ Scene::~Scene()
 		if (skybox[i] != nullptr)
 			delete skybox[i];
 	}
+
+	texHandl->Delete();
 
 }
 
@@ -184,7 +186,6 @@ bool Scene::DoFrame()
 		for (int i = 0; i < 6; i++) {
 			skybox[i]->Draw(window.Gfx(), CUBE_MAP);
 		}
-		//ground.Draw(window.Gfx(), CUBE_MAP);
 
 
 		shadow.BindDepthResource();
@@ -390,6 +391,8 @@ bool Scene::UpdateObjcects(float t)
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}*/
+
+	return true;
 }
 
 void Scene::checkInput()
@@ -513,3 +516,4 @@ void Scene::DisableTesselation()
 		object->DisableTesselation();
 	}
 }
+

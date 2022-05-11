@@ -19,7 +19,7 @@ using namespace std;
 
 class Model {
 public:
-	Model();
+	Model(TextureHandler*& texHandl);
 	~Model();
 
 	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
@@ -51,8 +51,10 @@ private:
 
 
 	MtlImages* images;
+	TextureHandler* texHandl;
 
 	string vShaderByteCode;
+	ID3D11ShaderResourceView* paprticleTexSrv;
 	ID3D11VertexShader* vShader;
 	ID3D11HullShader* hShader;
 	ID3D11DomainShader* dShader;

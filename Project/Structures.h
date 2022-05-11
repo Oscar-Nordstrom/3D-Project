@@ -13,6 +13,8 @@
 
 #include "flags.h"
 
+#include "TextureHandler.h"
+
 struct TimeData {
 	float dt;
 	float time;
@@ -48,20 +50,20 @@ struct TextureRT {
 
 struct MtlImages {
 	std::vector<std::string> names;
-	std::vector<unsigned char*> img;
 	std::vector<ID3D11Texture2D*>textures;
-	std::vector<int> widths;
-	std::vector<int> heights;
+	TextureHandler* texHandl;
 
-	MtlImages(std::string fileName, ID3D11Device*& device) {
+	MtlImages(std::string fileName, ID3D11Device*& device, TextureHandler*& texHandl) {
+		this->texHandl = texHandl;
 		std::stringstream ss;
 		std::ifstream file;
 		std::string line;
 		std::string prefix = "";
 		std::string temp;
 
-		names.push_back("Default");
+		//names.push_back("Default");
 		AddImg("Default.png", device);
+		texHandl->AddTestImage();
 
 		file.open("../Resources/Mtl/" + fileName);
 		if (!file.is_open()) {
@@ -93,29 +95,25 @@ struct MtlImages {
 
 	}
 	~MtlImages() {
-		for (int i = 0; i < textures.size(); i++) {
-			if (textures[i]) {
-				textures[i]->Release();
-			}
-		}
+
 	}
 	bool AddImg(std::string what, ID3D11Device*& device) {
-		int width, height, channels;
-		unsigned char* imgTemp;
-		std::string file = "../Resources/Mtl/" + what;
-		imgTemp = stbi_load(file.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-		if (imgTemp == nullptr) {
-			std::cerr << "Failed to load image.\n";
-			return false;
+		ImageData data;
+		if (!texHandl->TextureExists(what)) {
+			if (!texHandl->AddTexture(what, device)) {
+				return false;
+			}
+			texHandl->AddTestImage();
+			data = texHandl->GetImage(what);
 		}
-		img.push_back(imgTemp);
-		widths.push_back(width);
-		heights.push_back(height);
+		else {
+			data = texHandl->GetImage(what);
+		}
 		
 
-		D3D11_TEXTURE2D_DESC text2D;
-		text2D.Width = widths[widths.size() - 1];
-		text2D.Height = heights[heights.size() - 1];
+		/*D3D11_TEXTURE2D_DESC text2D;
+		text2D.Width = data.width;
+		text2D.Height = data.height;
 		text2D.MipLevels = 1;
 		text2D.ArraySize = 1;
 		text2D.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -127,16 +125,16 @@ struct MtlImages {
 		text2D.MiscFlags = 0;
 
 		D3D11_SUBRESOURCE_DATA text2dData;
-		text2dData.pSysMem = img[img.size()-1];
-		text2dData.SysMemPitch = widths[widths.size() - 1]*4;
+		text2dData.pSysMem = data.img;
+		text2dData.SysMemPitch = data.width * 4;
 		text2dData.SysMemSlicePitch = 0;
 
 		//Create the texture
 		ID3D11Texture2D* tex;
-		HRESULT hr = device->CreateTexture2D(&text2D, &text2dData, &tex);
-		textures.push_back(tex);
+		HRESULT hr = device->CreateTexture2D(&text2D, &text2dData, &tex);*/
+		textures.push_back(data.tex);
 
-		return !FAILED(hr);
+		return true;
 	}
 
 };
@@ -311,15 +309,7 @@ struct Material {
 		return true;
 	}
 	bool CreateSRV(ID3D11Device* device, ID3D11ShaderResourceView* srv[], MtlImages* mtlFileTex) {
-		/*if (FAILED(device->CreateShaderResourceView(textureBuffer[0], nullptr, &srv[0]))) {
-			return false;
-		}
-		if (FAILED(device->CreateShaderResourceView(textureBuffer[1], nullptr, &srv[1]))) {
-			return false;
-		}
-		if (FAILED(device->CreateShaderResourceView(textureBuffer[2], nullptr, &srv[2]))) {
-			return false;
-		}*/
+	
 		if (FAILED(device->CreateShaderResourceView(mtlFileTex->textures[one], nullptr, &srv[0]))) {
 			return false;
 		}
