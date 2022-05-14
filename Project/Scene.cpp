@@ -79,6 +79,8 @@ Scene::Scene()
 	gameObjects.push_back(&soldier6);
 	gameObjects.push_back(&cube);
 
+	qtree = new QuadTree(gameObjects, 0, 100.0f, DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+
 	tesselation = true;
 	tesselationTemp = tesselation;
 	dt = 0;

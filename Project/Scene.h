@@ -8,6 +8,7 @@
 
 #include "Model.h"
 #include "SceneObjectTest.h"
+#include "QuadTree.h"
 
 #include "SceneObject.h"
 #include "Structures.h"
@@ -71,6 +72,8 @@ private:
 	ID3D11Buffer* camBufTime;
 
 	vector<SceneObjectTest*> skybox;
+
+	QuadTree *qtree;
 
 	DirectX::XMMATRIX proj;
 

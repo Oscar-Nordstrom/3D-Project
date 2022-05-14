@@ -183,6 +183,7 @@
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Mouse.h" />
+    <ClInclude Include="QuadTree.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneObjectTest.h" />
     <ClInclude Include="ShadowMap.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObjectTest.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
