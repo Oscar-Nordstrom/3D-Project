@@ -5,6 +5,7 @@
 #include <DirectXCollision.h>
 
 #include "SceneObjectTest.h"
+#include "Camera.h"
 
 enum class Node{ROOT, INNER, LEAF};
 
@@ -14,6 +15,7 @@ class QuadTree {
 public:
 	QuadTree(std::vector<SceneObjectTest*> &objects, int depth, float size, DirectX::XMFLOAT3 pos);
 	~QuadTree();
+	void InsideNodes(Camera& cam, std::vector<QuadTree*>* list);
 private:
 	std::vector<SceneObjectTest*> objects;
 	DirectX::BoundingBox box;

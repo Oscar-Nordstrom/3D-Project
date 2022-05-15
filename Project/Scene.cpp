@@ -23,9 +23,10 @@ Scene::Scene()
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
 	float aspectRatio = static_cast<float>(window.GetWidth()) / static_cast<float>(window.GetHeight());//The aspect ratio
 	float nearZ = 0.1f; //Minimum viewing 
-	float farZ = 1000.0f;//Maximum viewing distance
+	float farZ = 100.0f;//Maximum viewing distance
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
+	this->cam.SetProjection(proj);
 
 	//ground.Init("../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	//ground.Scale(200.0f, 200.0f, 0.0f);
@@ -115,7 +116,7 @@ int Scene::Start()
 			return -1;
 		}
 
-
+		
 
 		Sleep(1);
 	}
@@ -130,10 +131,20 @@ bool Scene::DoFrame()
 	theTimedata.dt = dt;
 	theTimedata.time = timerCount;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
+
+	intersectingNodes.clear();
+	qtree->InsideNodes(cam, &intersectingNodes);
+
+	if (intersectingNodes.size() > 0) {
+		timerString = L"Yes";
+	}
+	else {
+		timerString = L"No";
+	}
 	
 	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPos()->x) + L", Y: " + std::to_wstring(cam.GetPos()->y) + L", Z: " + std::to_wstring(cam.GetPos()->z);
 
-	window.SetTitle(dirStr.c_str());
+	window.SetTitle(timerString.c_str());
 
 	//Enable/Disable tesselation
 	if (tesselationTemp != tesselation) {
@@ -495,6 +506,10 @@ void Scene::ImGuiWindows()
 		ImGui::SliderFloat("Speed Factor", &speedfactor, 0.0f, 4.0f);
 		ImGui::Checkbox("Tesselation", &tesselation);
 
+	}
+	ImGui::End();
+	if (ImGui::Begin("Player")) {
+		ImGui::SliderFloat("PLayer Speed", &cam.speed, 0.0f, 1.0f);
 	}
 	ImGui::End();
 }

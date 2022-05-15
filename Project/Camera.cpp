@@ -29,6 +29,11 @@ DirectX::XMFLOAT3* Camera::GetDir()
 	return &direction;
 }
 
+DirectX::BoundingFrustum Camera::GetFrustum()
+{
+	updateFrustum();
+	return this->frustum;
+}
 
 void Camera::SetPos(DirectX::XMFLOAT3 pos)
 {
@@ -45,6 +50,11 @@ void Camera::SetUpDir(DirectX::XMFLOAT3 dir)
 	upDirection = dir;
 }
 
+void Camera::SetProjection(DirectX::XMMATRIX proj)
+{
+	this->frustum.CreateFromMatrix(this->frustum, proj);
+}
+
 void Camera::Reset()
 {
 	position = DirectX::XMFLOAT3(0.0f, 0.0f, -3.0f);
@@ -52,7 +62,6 @@ void Camera::Reset()
 	upDirection = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
 	speed = 0.1f;
 }
-
 
 void Camera::Rotate(float rot)
 {
@@ -62,7 +71,6 @@ void Camera::Rotate(float rot)
 	direction.x = tempDir.x * cos(rot) - tempDir.z * sin(rot);
 	direction.z = tempDir.x * sin(rot) + tempDir.z * cos(rot);
 }
-
 
 void Camera::forward()
 {
@@ -99,6 +107,34 @@ void Camera::up()
 void Camera::down()
 {
 	position.y -= speed;
+}
+
+void Camera::updateFrustum()
+{
+	this->frustum.Origin = this->position;
+	DirectX::XMFLOAT3 axisFloat = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+	DirectX::XMVECTOR axis = DirectX::XMLoadFloat3(&axisFloat);
+	DirectX::XMVECTOR newRot = DirectX::XMLoadFloat3(&this->direction);
+	DirectX::XMFLOAT3 right = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+	float angle = acos(this->direction.x * right.x + this->direction.y * right.y + this->direction.z * right.z);
+	if (direction.z < 0) {
+		angle = (DegToRad(360)-angle);
+	}
+	angle += DegToRad(180);
+	newRot = DirectX::XMQuaternionRotationNormal(axis, angle);
+	if (DirectX::Internal::XMQuaternionIsUnit(newRot)) {
+		DirectX::XMFLOAT4 orientation;
+		DirectX::XMStoreFloat4(&orientation, newRot);
+		this->frustum.Orientation = orientation;
+	}
+
+
+}
+
+float Camera::DegToRad(float deg)
+{
+	double pi = 3.14159265359;
+	return (deg * (pi / 180));
 }
 
 

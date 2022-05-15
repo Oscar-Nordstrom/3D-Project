@@ -69,3 +69,18 @@ QuadTree::~QuadTree()
 		}
 	}
 }
+
+void QuadTree::InsideNodes(Camera& cam, std::vector<QuadTree*>* list)
+{
+	if (this->box.Intersects(cam.GetFrustum())) {
+		/*if (this->type != Node::LEAF) {
+			for (int i = 0; i < 4; i++) {
+				nodes[i]->InsideNodes(cam, list);
+			}
+		}
+		else {
+			list->push_back(this);
+		}*/
+		list->push_back(this);
+	}
+}

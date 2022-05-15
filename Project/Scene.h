@@ -73,7 +73,8 @@ private:
 
 	vector<SceneObjectTest*> skybox;
 
-	QuadTree *qtree;
+	QuadTree* qtree;
+	std::vector<QuadTree*> intersectingNodes;
 
 	DirectX::XMMATRIX proj;
 
