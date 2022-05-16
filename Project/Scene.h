@@ -81,4 +81,8 @@ private:
 	bool tesselation;
 	bool tesselationTemp;
 
+	float nearZ;
+	float farZ;
+	float fov;
+
 };

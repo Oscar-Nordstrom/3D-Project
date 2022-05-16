@@ -82,7 +82,6 @@ DirectX::XMMATRIX CubeMap::GetProj()
 	return proj;
 }
 
-
 bool CubeMap::setUpTextures(ID3D11Device*& device)
 {
 	D3D11_TEXTURE2D_DESC texDesc = {};
@@ -155,8 +154,6 @@ bool CubeMap::SetUpUavs(ID3D11Device*& device)
 	}
 	return true;
 }
-
-
 
 bool CubeMap::CreateDepthStencilView(ID3D11Device*& device)
 {

@@ -29,10 +29,31 @@ DirectX::XMFLOAT3* Camera::GetDir()
 	return &direction;
 }
 
-DirectX::BoundingFrustum Camera::GetFrustum()
+/*DirectX::BoundingFrustum Camera::GetFrustum()
 {
 	updateFrustum();
 	return this->frustum;
+}*/
+
+DirectX::XMFLOAT3 Camera::GetForward()
+{
+	return this->direction;
+}
+
+DirectX::XMFLOAT3 Camera::GetUp()
+{
+	return DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+}
+
+DirectX::XMFLOAT3 Camera::GetRight()
+{
+	return DirectX::XMFLOAT3(direction.z, direction.y, -direction.x);
+}
+
+float Camera::GetAngle()
+{
+	//updateFrustum();
+	return this->angle * 57.29578f;
 }
 
 void Camera::SetPos(DirectX::XMFLOAT3 pos)
@@ -52,7 +73,7 @@ void Camera::SetUpDir(DirectX::XMFLOAT3 dir)
 
 void Camera::SetProjection(DirectX::XMMATRIX proj)
 {
-	this->frustum.CreateFromMatrix(this->frustum, proj);
+	//this->frustum.CreateFromMatrix(this->frustum, proj);
 }
 
 void Camera::Reset()
@@ -109,18 +130,32 @@ void Camera::down()
 	position.y -= speed;
 }
 
-void Camera::updateFrustum()
+void Camera::Update(float nearZ, float farZ, float width, float height, float fov)
+{
+	this->frustum.SetFrustum(this->position, nearZ, farZ, width, height, fov, this->GetForward(), this->GetUp(), this->GetRight());
+}
+
+bool Camera::Intersect(DirectX::BoundingBox box)
+{
+	return this->frustum.intersect(box);
+}
+
+bool Camera::Intersect(DirectX::BoundingSphere sphere)
+{
+	return this->frustum.intersect(sphere);
+}
+
+/*void Camera::updateFrustum()
 {
 	this->frustum.Origin = this->position;
 	DirectX::XMFLOAT3 axisFloat = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
 	DirectX::XMVECTOR axis = DirectX::XMLoadFloat3(&axisFloat);
 	DirectX::XMVECTOR newRot = DirectX::XMLoadFloat3(&this->direction);
 	DirectX::XMFLOAT3 right = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-	float angle = acos(this->direction.x * right.x + this->direction.y * right.y + this->direction.z * right.z);
+	angle = acos(this->direction.x * right.x + this->direction.y * right.y + this->direction.z * right.z);
 	if (direction.z < 0) {
 		angle = (DegToRad(360)-angle);
 	}
-	angle += DegToRad(180);
 	newRot = DirectX::XMQuaternionRotationNormal(axis, angle);
 	if (DirectX::Internal::XMQuaternionIsUnit(newRot)) {
 		DirectX::XMFLOAT4 orientation;
@@ -129,7 +164,7 @@ void Camera::updateFrustum()
 	}
 
 
-}
+}*/
 
 float Camera::DegToRad(float deg)
 {

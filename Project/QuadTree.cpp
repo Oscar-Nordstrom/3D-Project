@@ -21,10 +21,10 @@ QuadTree::QuadTree(std::vector<SceneObjectTest*>& objects, int depth, float size
 	}
 
 	//Set bounding box position and size
-	DirectX::XMFLOAT3 f1 = DirectX::XMFLOAT3(pos.x - (size / 2), pos.y - size, pos.z - (size / 2));
-	DirectX::XMFLOAT3 f2 = DirectX::XMFLOAT3(pos.x + (size / 2), pos.y + size, pos.z + (size / 2));
-	DirectX::XMVECTOR v1 = DirectX::XMLoadFloat3(&f1);
-	DirectX::XMVECTOR v2 = DirectX::XMLoadFloat3(&f2);
+	p1 = DirectX::XMFLOAT3(pos.x - (size / 2), pos.y - size, pos.z - (size / 2));
+	p2 = DirectX::XMFLOAT3(pos.x + (size / 2), pos.y + size, pos.z + (size / 2));
+	DirectX::XMVECTOR v1 = DirectX::XMLoadFloat3(&p1);
+	DirectX::XMVECTOR v2 = DirectX::XMLoadFloat3(&p2);
 	this->box.CreateFromPoints(this->box, v1, v2);
 
 	if (this->type == Node::LEAF) {
@@ -72,15 +72,26 @@ QuadTree::~QuadTree()
 
 void QuadTree::InsideNodes(Camera& cam, std::vector<QuadTree*>* list)
 {
-	if (this->box.Intersects(cam.GetFrustum())) {
-		/*if (this->type != Node::LEAF) {
+	if (cam.Intersect(this->box)) {
+		if (this->type != Node::LEAF) {
 			for (int i = 0; i < 4; i++) {
 				nodes[i]->InsideNodes(cam, list);
 			}
 		}
 		else {
 			list->push_back(this);
-		}*/
+		}
 		list->push_back(this);
 	}
+}
+
+DirectX::BoundingBox QuadTree::GetBox() const
+{
+	return this->box;
+}
+
+void QuadTree::GetPoints(DirectX::XMFLOAT3* points)
+{
+	points[0] = p1;
+	points[1] = p2;
 }

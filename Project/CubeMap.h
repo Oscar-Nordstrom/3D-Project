@@ -6,7 +6,7 @@
 #include "flags.h"
 #include <cassert>
 
-#define NUM_TEX 6
+
 
 class CubeMap {
 public:

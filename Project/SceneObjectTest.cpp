@@ -42,6 +42,22 @@ void SceneObjectTest::Move(float dx, float dy, float dz)
 	boundingSphere.Center = DirectX::XMFLOAT3(x, y, z);
 }
 
+void SceneObjectTest::SetPos(float x, float y, float z)
+{
+	this->x = x;
+	this->y = y;
+	this->z = z;
+	boundingSphere.Center = DirectX::XMFLOAT3(this->x, this->y, this->z);
+}
+
+void SceneObjectTest::SetPos(DirectX::XMFLOAT3 pos)
+{
+	this->x = pos.x;
+	this->y = pos.y;
+	this->z = pos.z;
+	boundingSphere.Center = DirectX::XMFLOAT3(this->x, this->y, this->z);
+}
+
 void SceneObjectTest::Scale(float dx, float dy, float dz)
 {
 

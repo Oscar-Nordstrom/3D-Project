@@ -12,6 +12,7 @@
 #define GEOMETRY_SHADER 5
 
 #define numGbufs 6
+#define NUM_TEX 6
 
 #define CTRL 17
 #define SPACE 32

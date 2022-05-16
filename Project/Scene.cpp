@@ -19,11 +19,11 @@ Scene::Scene()
 	soldier5(*window.Gfx(), texHandl), soldier6(*window.Gfx(), texHandl),
 	cube(*window.Gfx(), texHandl), particle(*window.gfx, texHandl)
 {
-	float fov = 90.0f; //90 degrees field of view
+	fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
 	float aspectRatio = static_cast<float>(window.GetWidth()) / static_cast<float>(window.GetHeight());//The aspect ratio
-	float nearZ = 0.1f; //Minimum viewing 
-	float farZ = 100.0f;//Maximum viewing distance
+	nearZ = 0.1f; //Minimum viewing 
+	farZ = 100.0f;//Maximum viewing distance
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
 	this->cam.SetProjection(proj);
@@ -135,12 +135,22 @@ bool Scene::DoFrame()
 	intersectingNodes.clear();
 	qtree->InsideNodes(cam, &intersectingNodes);
 
-	if (intersectingNodes.size() > 0) {
-		timerString = L"Yes";
+	/////////////////////////////////////////////////////////////////FRUSTUM TEST/////////////////////////////////////////////////////////////////
+	cam.Update(nearZ, farZ, (float)WIDTH, (float)HEIGHT, fov);
+	if (cam.Intersect(qtree->GetBox())) {
+		timerString = L"Yes ";
 	}
 	else {
-		timerString = L"No";
+		timerString = L"No ";
 	}
+
+	/*if (intersectingNodes.size() > 0) {
+		timerString = L"Yes ";
+	}
+	else {
+		timerString = L"No ";
+	}*/
+	timerString += std::to_wstring(cam.GetAngle());
 	
 	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPos()->x) + L", Y: " + std::to_wstring(cam.GetPos()->y) + L", Z: " + std::to_wstring(cam.GetPos()->z);
 

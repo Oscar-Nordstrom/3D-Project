@@ -52,6 +52,12 @@
     <Filter Include="Resource Files\Shaders\DefRend">
       <UniqueIdentifier>{0d08cd6c-b27c-42ea-9cd3-beee5020db1f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Col">
+      <UniqueIdentifier>{95475cd2-02f0-4a4e-94f1-83cca2d7153f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Col">
+      <UniqueIdentifier>{7bcd46f4-0e7f-478e-81c8-7c5947a3202b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -116,6 +122,12 @@
     </ClCompile>
     <ClCompile Include="QuadTree.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Frustum.cpp">
+      <Filter>Source Files\Col</Filter>
+    </ClCompile>
+    <ClCompile Include="HelpOp.cpp">
+      <Filter>Source Files\Other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -187,6 +199,12 @@
     </ClInclude>
     <ClInclude Include="QuadTree.h">
       <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>Header Files\Col</Filter>
+    </ClInclude>
+    <ClInclude Include="HelpOp.h">
+      <Filter>Header Files\Other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -24,6 +24,8 @@ public:
 	bool Update(float dt, Graphics*& gfx);
 	void UpdateParticle(Graphics*& gfx);
 	void Move(float dx, float dy, float dz);
+	void SetPos(float x, float y, float z);
+	void SetPos(DirectX::XMFLOAT3 pos);
 	void Scale(float dx, float dy, float dz);
 	void Rotate(float dx, float dy, float dz);
 	void Draw(Graphics*& gfx, int flag = NORMAL);

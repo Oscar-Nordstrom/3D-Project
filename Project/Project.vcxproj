@@ -179,7 +179,9 @@
     </ClInclude>
     <ClInclude Include="CubeMap.h" />
     <ClInclude Include="flags.h" />
+    <ClInclude Include="Frustum.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="HelpOp.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Mouse.h" />
@@ -207,7 +209,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="CubeMap.cpp" />
+    <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="HelpOp.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mouse.cpp" />
