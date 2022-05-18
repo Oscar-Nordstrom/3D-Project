@@ -110,7 +110,6 @@ bool ShadowMap::CreateDepthStencil()
 	dsDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	dsDesc.Flags = 0;
 	dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	dsDesc.Texture2D.MipSlice = 0;
 
 	HRESULT hr = gfx->GetDevice()->CreateDepthStencilView(dsTexture, &dsDesc, &dsView);
 

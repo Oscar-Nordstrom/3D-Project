@@ -119,14 +119,13 @@ bool Scene::DoFrame()
 
 
 	//Shadows Start
-	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
+	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 49.0f, 0.0f));
 	shadow.SetCamDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
-	//Using the same camera
 	shadow.SetShadowMap();
+
 	for (auto p : objectsToDraw) {
 		p->Draw(window.Gfx(), SHADOW);
 	}
-
 
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
@@ -153,7 +152,7 @@ bool Scene::DoFrame()
 		for (int i = 0; i < 6; i++) {
 			skybox[i].Draw(window.Gfx(), CUBE_MAP);
 		}
-
+		ground.Draw(window.Gfx(), CUBE_MAP);
 
 		shadow.BindDepthResource();
 		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
@@ -185,6 +184,7 @@ bool Scene::DoFrame()
 	for (int i = 0; i < 6; i++) {
 		skybox[i].Draw(window.Gfx());
 	}
+	ground.Draw(window.Gfx());
 
 	//Particle Start
 	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
@@ -321,7 +321,10 @@ bool Scene::UpdateObjcects(float t)
 			return false;
 		}
 	}
-
+	if (!ground.Update(0.0f, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
 	if (!cube.Update(0.0f, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
@@ -535,11 +538,15 @@ void Scene::SetUpGameObjects()
 	soldiers[22].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, 30.0f));
 	soldiers[23].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, -30.0f));
 
-
+	ground.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground.Scale(100.0f, 100.0f, 0.0f);
+	ground.Rotate(DegToRad(90), 0.0f, 0.0f);
+	ground.Move(0.0f, -20.0f, 0.0f);
+	gameObjects.push_back(&ground);
+	
 
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
-
 
 	for (int i = 0; i < 6; i++) {
 		skybox[i].Init(texHandl, "../Resources/Obj/plane.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());

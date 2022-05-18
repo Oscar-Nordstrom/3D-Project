@@ -63,6 +63,7 @@ private:
 	SceneObjectTest cube;
 	
 	SceneObjectTest soldiers[NUM_SOLDIERS];
+	SceneObjectTest ground;
 	std::vector<SceneObjectTest*>gameObjects;
 	DirectionalLight dLight;
 	ShadowMap shadow;

@@ -61,8 +61,10 @@ struct MtlImages {
 		std::string prefix = "";
 		std::string temp;
 
-		//names.push_back("Default");
-		AddImg("Default.png", device);
+		
+		if (AddImg("Default.png", device)) {
+			names.push_back("Default");
+		};
 		texHandl->AddTestImage();
 
 		file.open("../Resources/Mtl/" + fileName);
