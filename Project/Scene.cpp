@@ -14,10 +14,10 @@ int roundUpTo(int numToRound, int multiple)
 }
 
 Scene::Scene()
-	:window(WIDTH, HEIGHT, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx()),
-	soldier1(*window.Gfx(), texHandl), soldier2(*window.Gfx(), texHandl), soldier3(*window.Gfx(), texHandl), soldier4(*window.Gfx(), texHandl), 
+	:window(WIDTH, HEIGHT, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx())
+	/*,soldier1(*window.Gfx(), texHandl), soldier2(*window.Gfx(), texHandl), soldier3(*window.Gfx(), texHandl), soldier4(*window.Gfx(), texHandl),
 	soldier5(*window.Gfx(), texHandl), soldier6(*window.Gfx(), texHandl),
-	cube(*window.Gfx(), texHandl), particle(*window.gfx, texHandl)
+	cube(*window.Gfx(), texHandl), particle(*window.gfx, texHandl)*/
 {
 	fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
@@ -26,41 +26,10 @@ Scene::Scene()
 	farZ = 100.0f;//Maximum viewing distance
 	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	window.Gfx()->SetProjection(proj);
-	this->cam.SetProjection(proj);
+	this->cam.SetProjection(proj);;
 
-	//ground.Init("../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	//ground.Scale(200.0f, 200.0f, 0.0f);
-	//ground.Rotate(DegToRad(90.0f), 0.0f, 0.0f);
-	//ground.Move(0.0f, -5.0f, 0.0f);
+	SetUpGameObjects();
 
-	soldier1.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	soldier1.Move(0.0f, 10.0f, 0.0f);
-	soldier1.Scale(2.0f, 2.0f, 2.0f);
-	soldier2.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	soldier2.Move(0.0f, 20.0f, 0.0f);
-	soldier2.Scale(2.0f, 2.0f, 2.0f);
-	soldier3.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	soldier3.Move(10.0f, 0.0f, 0.0f);
-	soldier3.Scale(2.0f, 2.0f, 2.0f);
-	soldier4.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	soldier4.Move(-10.0f, 0.0f, 0.0f);
-	soldier4.Scale(2.0f, 2.0f, 2.0f);
-	soldier5.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	soldier5.Move(0.0f, 0.0f, 10.0f);
-	soldier5.Scale(2.0f, 2.0f, 2.0f);
-	soldier6.Init("../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	soldier6.Move(0.0f, 0.0f, -10.0f);
-	soldier6.Scale(2.0f, 2.0f, 2.0f);
-
-	cube.Init("../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	cube.Scale(2.0f, 2.0f, 2.0f);
-
-
-	for (int i = 0; i < 6; i++) {
-		skybox.push_back(new SceneObjectTest(*window.Gfx(), texHandl));
-		skybox[i]->Init("../Resources/Obj/plane.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso",NO_SHADER, window.Gfx());
-	}
-	SetUpSkybox();
 
 	dLight.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
@@ -72,21 +41,18 @@ Scene::Scene()
 	shadow.SetCamDir(*cam.GetDir());
 	shadow.SetCamPos(*cam.GetPos());
 
-	gameObjects.push_back(&soldier1);
-	gameObjects.push_back(&soldier2);
-	gameObjects.push_back(&soldier3);
-	gameObjects.push_back(&soldier4);
-	gameObjects.push_back(&soldier5);
-	gameObjects.push_back(&soldier6);
-	gameObjects.push_back(&cube);
+
 
 	qtree = new QuadTree(gameObjects, 0, 100.0f, DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	tesselation = true;
 	tesselationTemp = tesselation;
+	quadTreeOn = true;
+	frustumCheckOn = true;
 	dt = 0;
 
-	particle.Init("No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
+	particle.Init(texHandl, "No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
+
 }
 
 Scene::~Scene()
@@ -96,10 +62,10 @@ Scene::~Scene()
 	if(camBuf2)camBuf2->Release();
 	if (camBufTime)camBufTime->Release();
 
-	for (int i = 0; i < 6; i++) {
+	/*for (int i = 0; i < 6; i++) {
 		if (skybox[i] != nullptr)
 			delete skybox[i];
-	}
+	}*/
 
 	texHandl->Delete();
 
@@ -132,26 +98,10 @@ bool Scene::DoFrame()
 	theTimedata.time = timerCount;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
 
-	intersectingNodes.clear();
-	qtree->InsideNodes(cam, &intersectingNodes);
-
-	/////////////////////////////////////////////////////////////////FRUSTUM TEST/////////////////////////////////////////////////////////////////
 	cam.Update(nearZ, farZ, (float)WIDTH, (float)HEIGHT, fov);
-	if (cam.Intersect(qtree->GetBox())) {
-		timerString = L"Yes ";
-	}
-	else {
-		timerString = L"No ";
-	}
 
-	/*if (intersectingNodes.size() > 0) {
-		timerString = L"Yes ";
-	}
-	else {
-		timerString = L"No ";
-	}*/
-	timerString += std::to_wstring(cam.GetAngle());
-	
+	HandleCulling();
+
 	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPos()->x) + L", Y: " + std::to_wstring(cam.GetPos()->y) + L", Z: " + std::to_wstring(cam.GetPos()->z);
 
 	window.SetTitle(timerString.c_str());
@@ -173,12 +123,10 @@ bool Scene::DoFrame()
 	shadow.SetCamDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
 	//Using the same camera
 	shadow.SetShadowMap();
-	soldier1.Draw(window.Gfx(), SHADOW);
-	soldier2.Draw(window.Gfx(), SHADOW);
-	soldier3.Draw(window.Gfx(), SHADOW);
-	soldier4.Draw(window.Gfx(), SHADOW);
-	soldier5.Draw(window.Gfx(), SHADOW);
-	soldier6.Draw(window.Gfx(), SHADOW);
+	for (auto p : objectsToDraw) {
+		p->Draw(window.Gfx(), SHADOW);
+	}
+
 
 	window.Gfx()->SetProjection(proj);
 	window.Gfx()->SetCamera(cam.GetMatrix());
@@ -199,15 +147,11 @@ bool Scene::DoFrame()
 
 		cMap.Set(window.Gfx()->GetContext(), i);
 
-
-		soldier1.Draw(window.Gfx(), CUBE_MAP);
-		soldier2.Draw(window.Gfx(), CUBE_MAP);
-		soldier3.Draw(window.Gfx(), CUBE_MAP);
-		soldier4.Draw(window.Gfx(), CUBE_MAP);
-		soldier5.Draw(window.Gfx(), CUBE_MAP);
-		soldier6.Draw(window.Gfx(), CUBE_MAP);
+		for (auto p : objectsToDraw) {
+			p->Draw(window.Gfx(), CUBE_MAP);
+		}
 		for (int i = 0; i < 6; i++) {
-			skybox[i]->Draw(window.Gfx(), CUBE_MAP);
+			skybox[i].Draw(window.Gfx(), CUBE_MAP);
 		}
 
 
@@ -234,13 +178,13 @@ bool Scene::DoFrame()
 	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 	cMap.SetEnd(window.Gfx());
 	//Cube map seccond End
-	soldier1.Draw(window.Gfx());
-	soldier2.Draw(window.Gfx());
-	soldier3.Draw(window.Gfx());
-	soldier4.Draw(window.Gfx());
-	soldier5.Draw(window.Gfx());
-	soldier6.Draw(window.Gfx());
-	//ground.Draw(window.Gfx());
+
+	for (auto p : objectsToDraw) {
+		p->Draw(window.Gfx());
+	}
+	for (int i = 0; i < 6; i++) {
+		skybox[i].Draw(window.Gfx());
+	}
 
 	//Particle Start
 	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
@@ -370,29 +314,12 @@ void Scene::UpdateBufs()
 
 bool Scene::UpdateObjcects(float t)
 {
-	if (!soldier1.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier2.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier3.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier4.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier5.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!soldier6.Update(t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
+
+	for (int i = 0; i < NUM_SOLDIERS; i++) {
+		if (!soldiers[i].Update(t, window.Gfx())) {
+			std::cerr << "Failed to update object.\n";
+			return false;
+		}
 	}
 
 	if (!cube.Update(0.0f, window.Gfx())) {
@@ -401,20 +328,11 @@ bool Scene::UpdateObjcects(float t)
 	}
 
 	for (int i = 0; i < 6; i++) {
-		if (!skybox[i]->Update(0.0f, window.Gfx())) {
+		if (!skybox[i].Update(0.0f, window.Gfx())) {
 			std::cerr << "Failed to update object.\n";
 			return false;
 		}
 	}
-	for (int i = 0; i < 6; i++) {
-		skybox[i]->Draw(window.Gfx());
-	}
-
-	/*if (!ground.Update(0.0f, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}*/
-
 	return true;
 }
 
@@ -488,25 +406,25 @@ void Scene::cubeMapSetCam(int num)
 
 void Scene::SetUpSkybox()
 {
-	skybox[0]->Scale(100.0f, 100.0f, 0.0f);
-	skybox[1]->Scale(100.0f, 100.0f, 0.0f);
-	skybox[2]->Scale(100.0f, 100.0f, 0.0f);
-	skybox[3]->Scale(100.0f, 100.0f, 0.0f);
-	skybox[4]->Scale(100.0f, 100.0f, 0.0f);
-	skybox[5]->Scale(100.0f, 100.0f, 0.0f);
+	skybox[0].Scale(100.0f, 100.0f, 0.0f);
+	skybox[1].Scale(100.0f, 100.0f, 0.0f);
+	skybox[2].Scale(100.0f, 100.0f, 0.0f);
+	skybox[3].Scale(100.0f, 100.0f, 0.0f);
+	skybox[4].Scale(100.0f, 100.0f, 0.0f);
+	skybox[5].Scale(100.0f, 100.0f, 0.0f);
 
-	skybox[0]->Move(0.0f, 0.0f, 50.0f); //Front
-	skybox[1]->Move(0.0f, 0.0f, -50.0f); //Back
-	skybox[2]->Move(50.0f, 0.0f, 0.0f); //Right
-	skybox[3]->Move(-50.0f, 0.0f, 0.0f); //Left
-	skybox[4]->Move(0.0f, 50.0f, 0.0f); //Up
-	skybox[5]->Move(0.0f, -50.0f, 0.0f); //Down
+	skybox[0].Move(0.0f, 0.0f, 50.0f); //Front
+	skybox[1].Move(0.0f, 0.0f, -50.0f); //Back
+	skybox[2].Move(50.0f, 0.0f, 0.0f); //Right
+	skybox[3].Move(-50.0f, 0.0f, 0.0f); //Left
+	skybox[4].Move(0.0f, 50.0f, 0.0f); //Up
+	skybox[5].Move(0.0f, -50.0f, 0.0f); //Down
 
-	skybox[1]->Rotate(0.0f, DegToRad(180.0f), 0.0f);
-	skybox[2]->Rotate(0.0f, DegToRad(90.0f), 0.0f);
-	skybox[3]->Rotate(0.0f, DegToRad(-90.0f), 0.0f);
-	skybox[4]->Rotate(DegToRad(-90.0f), 0.0f, 0.0f);
-	skybox[5]->Rotate(DegToRad(90.0f), 0.0f, 0.0f);
+	skybox[1].Rotate(0.0f, DegToRad(180.0f), 0.0f);
+	skybox[2].Rotate(0.0f, DegToRad(90.0f), 0.0f);
+	skybox[3].Rotate(0.0f, DegToRad(-90.0f), 0.0f);
+	skybox[4].Rotate(DegToRad(-90.0f), 0.0f, 0.0f);
+	skybox[5].Rotate(DegToRad(90.0f), 0.0f, 0.0f);
 }
 
 void Scene::ImGuiWindows()
@@ -515,11 +433,14 @@ void Scene::ImGuiWindows()
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::SliderFloat("Speed Factor", &speedfactor, 0.0f, 4.0f);
 		ImGui::Checkbox("Tesselation", &tesselation);
+		ImGui::Checkbox("QuadTree", &quadTreeOn);
+		ImGui::Checkbox("Frustum Collision Check", &frustumCheckOn);
 
 	}
 	ImGui::End();
 	if (ImGui::Begin("Player")) {
-		ImGui::SliderFloat("PLayer Speed", &cam.speed, 0.0f, 1.0f);
+		ImGui::SliderFloat("Player Speed", &cam.speed, 0.0f, 1.0f);
+		ImGui::SliderFloat("Frustum buffer zone", cam.GetFrustumBuffer(), 0.0, 20.0f);
 	}
 	ImGui::End();
 }
@@ -542,5 +463,87 @@ void Scene::DisableTesselation()
 	for (SceneObjectTest* object : gameObjects) {
 		object->DisableTesselation();
 	}
+}
+
+void Scene::HandleCulling()
+{
+	if (quadTreeOn) {
+		intersectingNodes.clear();
+		for (auto p : objectsToDraw) {
+			p->Remove();
+		}
+		objectsToDraw.clear();
+		qtree->InsideNodes(cam, &intersectingNodes);
+		std::vector<SceneObjectTest*> objectsTemp;
+		for (auto p : intersectingNodes) {
+			std::vector<SceneObjectTest*> vec = p->GetObjects();
+			for (auto q : vec) {
+				bool col = cam.GetFrustum()->intersect(q->GetBoundingSphere());
+				if (!frustumCheckOn) {
+					col = true;
+				}
+				if (!q->IsAdded() && col) {
+					objectsToDraw.push_back(q);
+					q->Add();
+				}
+			}
+		}
+	}
+	else{
+		objectsToDraw.clear();
+		for (auto p : gameObjects) {
+			objectsToDraw.push_back(p);
+		}
+	}
+	
+}
+
+void Scene::SetUpGameObjects()
+{
+	for (int i = 0; i < NUM_SOLDIERS; i++) {
+		soldiers[i].Init(texHandl, "../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+		soldiers[i].Scale(2.0f, 2.0f, 2.0f);
+		gameObjects.push_back(&soldiers[i]);
+	}
+	soldiers[0].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, 40.0f));
+	soldiers[1].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, -40.0f));
+	soldiers[2].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, 40.0f));
+	soldiers[3].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, -40.0f));
+
+	soldiers[4].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, 30.0f));
+	soldiers[5].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, -30.0f));
+	soldiers[6].SetPos(DirectX::XMFLOAT3(-30.0f, 0.0f, 30.0f));
+	soldiers[7].SetPos(DirectX::XMFLOAT3(-30.0f, 0.0f, -30.0f));
+
+	soldiers[8].SetPos(DirectX::XMFLOAT3(20.0f, 0.0f, 20.0f));
+	soldiers[9].SetPos(DirectX::XMFLOAT3(20.0f, 0.0f, -20.0f));
+	soldiers[10].SetPos(DirectX::XMFLOAT3(-20.0f, 0.0f, 20.0f));
+	soldiers[11].SetPos(DirectX::XMFLOAT3(-20.0f, 0.0f, -20.0f));
+
+	soldiers[12].SetPos(DirectX::XMFLOAT3(10.0f, 0.0f, 10.0f));
+	soldiers[13].SetPos(DirectX::XMFLOAT3(10.0f, 0.0f, -10.0f));
+	soldiers[14].SetPos(DirectX::XMFLOAT3(-10.0f, 0.0f, 10.0f));
+	soldiers[15].SetPos(DirectX::XMFLOAT3(-10.0f, 0.0f, -10.0f));
+
+	soldiers[16].SetPos(DirectX::XMFLOAT3(40.0f, 20.0f, 40.0f));
+	soldiers[17].SetPos(DirectX::XMFLOAT3(40.0f, 20.0f, -40.0f));
+	soldiers[18].SetPos(DirectX::XMFLOAT3(-40.0f, 20.0f, 40.0f));
+	soldiers[19].SetPos(DirectX::XMFLOAT3(-40.0f, 20.0f, -40.0f));
+
+	soldiers[20].SetPos(DirectX::XMFLOAT3(30.0f, 20.0f, 30.0f));
+	soldiers[21].SetPos(DirectX::XMFLOAT3(30.0f, 20.0f, -30.0f));
+	soldiers[22].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, 30.0f));
+	soldiers[23].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, -30.0f));
+
+
+
+	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	cube.Scale(2.0f, 2.0f, 2.0f);
+
+
+	for (int i = 0; i < 6; i++) {
+		skybox[i].Init(texHandl, "../Resources/Obj/plane.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	}
+	SetUpSkybox();
 }
 

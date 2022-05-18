@@ -18,11 +18,13 @@ public:
 	void SetFrustum(DirectX::XMFLOAT3 camPos, float nearZ, float farZ, float width, float height, float fov, DirectX::XMFLOAT3 forward, DirectX::XMFLOAT3 up, DirectX::XMFLOAT3 right);
     bool intersect(DirectX::BoundingBox box);
 	bool intersect(DirectX::BoundingSphere sphere);
+    float* GetBuffer();
 private:
 	DirectX::XMFLOAT3 point;
 	DirectX::XMFLOAT3 upLeft, upRight, downLeft, downRight;
 	Plane nearPlane, farPlane, topPlane, rightPlane, bottomPlane, leftPlane;
 	std::vector<Plane*>planes;
+    float buffer;
 /*private:
     float operator*(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b) {
         return a.x * b.x + a.y * b.y + a.z * b.z;

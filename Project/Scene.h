@@ -20,6 +20,8 @@
 
 #include "flags.h"
 
+#define NUM_SOLDIERS 24
+
 class Scene {
 public:
 	Scene();
@@ -43,6 +45,9 @@ private:
 
 	void EnableTesselation();
 	void DisableTesselation();
+	void HandleCulling();
+
+	void SetUpGameObjects();
 
 
 	TextureHandler* texHandl = new TextureHandler();
@@ -56,13 +61,8 @@ private:
 	CubeMap cMap;
 	SceneObjectTest particle;
 	SceneObjectTest cube;
-	//SceneObjectTest ground;
-	SceneObjectTest soldier1;
-	SceneObjectTest soldier2;
-	SceneObjectTest soldier3;
-	SceneObjectTest soldier4;
-	SceneObjectTest soldier5;
-	SceneObjectTest soldier6;
+	
+	SceneObjectTest soldiers[NUM_SOLDIERS];
 	std::vector<SceneObjectTest*>gameObjects;
 	DirectionalLight dLight;
 	ShadowMap shadow;
@@ -71,15 +71,19 @@ private:
 	ID3D11Buffer* camBuf2;
 	ID3D11Buffer* camBufTime;
 
-	vector<SceneObjectTest*> skybox;
+	SceneObjectTest skybox[6];
 
 	QuadTree* qtree;
 	std::vector<QuadTree*> intersectingNodes;
+	std::vector<SceneObjectTest*>objectsToDraw;
 
 	DirectX::XMMATRIX proj;
 
+	//Settings
 	bool tesselation;
 	bool tesselationTemp;
+	bool quadTreeOn;
+	bool frustumCheckOn;
 
 	float nearZ;
 	float farZ;

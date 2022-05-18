@@ -17,10 +17,10 @@ using namespace std;
 
 class SceneObjectTest {
 public:
-	SceneObjectTest(Graphics& gfx, TextureHandler*& texHandl);
+	SceneObjectTest(/*Graphics& gfx, TextureHandler*& texHandl*/);
 	~SceneObjectTest();
 
-	bool Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle = false);
+	bool Init(TextureHandler*& texHandl, string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle = false);
 	bool Update(float dt, Graphics*& gfx);
 	void UpdateParticle(Graphics*& gfx);
 	void Move(float dx, float dy, float dz);
@@ -32,6 +32,9 @@ public:
 	void DisableTesselation();
 	void EnableTesselation();
 	DirectX::BoundingSphere GetBoundingSphere();
+	void Add();
+	void Remove();
+	bool IsAdded()const;
 private:
 	void UpdateTransform(float dt);
 	float LargestSide()const;
@@ -39,6 +42,7 @@ private:
 	Model model;
 	DirectX::XMMATRIX transform;
 	DirectX::BoundingSphere boundingSphere;
+	bool added;
 
 private:
 	float x = 0.0f;

@@ -14,6 +14,8 @@ public:
 	DirectX::XMFLOAT3* GetPos();
 	DirectX::XMFLOAT3* GetDir();
 	//DirectX::BoundingFrustum GetFrustum();
+	Frustum* GetFrustum();
+	float* GetFrustumBuffer();
 	DirectX::XMFLOAT3 GetForward();
 	DirectX::XMFLOAT3 GetUp();
 	DirectX::XMFLOAT3 GetRight();
@@ -47,6 +49,7 @@ private:
 	DirectX::XMFLOAT3 upDirection;
 
 	Frustum frustum;
+
 
 	//DirectX::BoundingFrustum frustum;
 

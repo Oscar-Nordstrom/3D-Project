@@ -3,13 +3,15 @@
 
 namespace dx = DirectX;
 
-SceneObjectTest::SceneObjectTest(Graphics& gfx, TextureHandler*& texHandl)
-	:model(texHandl)
+SceneObjectTest::SceneObjectTest(/*Graphics& gfx, TextureHandler*& texHandl*/)
+	//:model(texHandl)
 {
 
 	transform = dx::XMMatrixScaling(sx, sy, sz) * dx::XMMatrixRotationX(rx) * dx::XMMatrixRotationY(ry) * dx::XMMatrixRotationZ(rz) * dx::XMMatrixTranslation(x, y, z);
 	boundingSphere.Center = DirectX::XMFLOAT3(x, y, z);
 	boundingSphere.Radius = LargestSide() / 2.0f;
+
+	this->added = false;
 }
 
 SceneObjectTest::~SceneObjectTest()
@@ -95,8 +97,29 @@ DirectX::BoundingSphere SceneObjectTest::GetBoundingSphere()
 	return boundingSphere;
 }
 
-bool SceneObjectTest::Init(string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle)
+void SceneObjectTest::Add()
 {
+	this->added = true;
+}
+
+void SceneObjectTest::Remove()
+{
+	this->added = false;
+}
+
+bool SceneObjectTest::IsAdded() const
+{
+	return this->added;
+}
+
+bool SceneObjectTest::Init(TextureHandler*& texHandl, string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle)
+{
+	this->model.SetTexHandl(texHandl);
+
+	/*transform = dx::XMMatrixScaling(sx, sy, sz) * dx::XMMatrixRotationX(rx) * dx::XMMatrixRotationY(ry) * dx::XMMatrixRotationZ(rz) * dx::XMMatrixTranslation(x, y, z);
+	boundingSphere.Center = DirectX::XMFLOAT3(x, y, z);
+	boundingSphere.Radius = LargestSide() / 2.0f;*/
+
 	if (!particle) {
 		assert(model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, transform, gfx), "Failed to load model.");
 	}

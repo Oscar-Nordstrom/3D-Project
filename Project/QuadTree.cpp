@@ -95,3 +95,8 @@ void QuadTree::GetPoints(DirectX::XMFLOAT3* points)
 	points[0] = p1;
 	points[1] = p2;
 }
+
+std::vector<SceneObjectTest*> QuadTree::GetObjects()
+{
+	return objects;
+}

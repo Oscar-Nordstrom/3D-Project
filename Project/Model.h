@@ -19,7 +19,7 @@ using namespace std;
 
 class Model {
 public:
-	Model(TextureHandler*& texHandl);
+	Model(/*TextureHandler*& texHandl*/);
 	~Model();
 
 	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
@@ -29,6 +29,7 @@ public:
 	void DisableTesselation();
 	void EnableTesselation();
 	void SetParticleUpdate(Graphics*& gfx);
+	void SetTexHandl(TextureHandler*& texHandl);
 private:
 	bool LoadShaders(string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx);
 	bool LoadObj(string obj, Graphics*& gfx);

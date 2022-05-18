@@ -1,8 +1,9 @@
 #include "Model.h"
 
-Model::Model(TextureHandler*& texHandl)
-	:texHandl(texHandl)
+Model::Model(/*TextureHandler*& texHandl*/)
+	//:texHandl(texHandl)
 {
+	this->texHandl = nullptr;
 	indexBuffer = nullptr;
 	inputLayout = nullptr;
 	pShader = nullptr;
@@ -635,6 +636,11 @@ void Model::SetParticleUpdate(Graphics*& gfx)
 {
 	gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 	gfx->GetContext()->CSSetUnorderedAccessViews(1, 1, &uavBuffer, nullptr);
+}
+
+void Model::SetTexHandl(TextureHandler*& texHandl)
+{
+	this->texHandl = texHandl;
 }
 
 /*int Model::FindVert()

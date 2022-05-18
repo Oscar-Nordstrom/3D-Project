@@ -18,7 +18,7 @@ public:
 	void InsideNodes(Camera& cam, std::vector<QuadTree*>* list);
 	DirectX::BoundingBox GetBox()const;
 	void GetPoints(DirectX::XMFLOAT3* points);
-
+	std::vector<SceneObjectTest*> GetObjects();
 private:
 	std::vector<SceneObjectTest*> objects;
 	DirectX::BoundingBox box;

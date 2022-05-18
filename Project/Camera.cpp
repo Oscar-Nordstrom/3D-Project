@@ -35,6 +35,16 @@ DirectX::XMFLOAT3* Camera::GetDir()
 	return this->frustum;
 }*/
 
+Frustum* Camera::GetFrustum()
+{
+	return &this->frustum;
+}
+
+float* Camera::GetFrustumBuffer()
+{
+	return frustum.GetBuffer();
+}
+
 DirectX::XMFLOAT3 Camera::GetForward()
 {
 	return this->direction;

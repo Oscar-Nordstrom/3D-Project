@@ -2,6 +2,7 @@
 
 Frustum::Frustum()
 {
+	this->buffer = 0.0f;
 }
 
 Frustum::~Frustum()
@@ -24,10 +25,10 @@ void Frustum::SetFrustum(DirectX::XMFLOAT3 camPos, float nearZ, float farZ, floa
 	this->topPlane.point = camPos;
 	this->bottomPlane.point = camPos;
 
-	this->upLeft = camPos + (forward * nearZ) + (up * (height / 2)) - (right * (width / 2));
-	this->upRight = camPos + (forward * nearZ) + (up * (height / 2)) + (right * (width / 2));
-	this->downLeft = camPos + (forward * nearZ) - (up * (height / 2)) - (right * (width / 2));
-	this->downRight = camPos + (forward * nearZ) - (up * (height / 2)) + (right * (width / 2));
+	this->upLeft = camPos + (forward * nearZ) + (up * (height + buffer / 2)) - (right * (width + buffer / 2));
+	this->upRight = camPos + (forward * nearZ) + (up * (height + buffer / 2)) + (right * (width + buffer / 2));
+	this->downLeft = camPos + (forward * nearZ) - (up * (height + buffer / 2)) - (right * (width + buffer / 2));
+	this->downRight = camPos + (forward * nearZ) - (up * (height + buffer / 2)) + (right * (width + buffer / 2));
 
 	this->leftPlane.normal = normalize(cross(normalize(upLeft - camPos), up));
 	this->rightPlane.normal = normalize(cross(up, normalize(upRight - camPos)));
@@ -76,5 +77,10 @@ bool Frustum::intersect(DirectX::BoundingSphere sphere)
 		}
 	}
 	return true;
+}
+
+float* Frustum::GetBuffer()
+{
+	return &this->buffer;
 }
 
