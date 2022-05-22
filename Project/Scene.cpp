@@ -38,9 +38,6 @@ Scene::Scene()
 	cam.SetDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
 	SetUpBufs();
 
-	shadow.SetCamDir(*cam.GetDir());
-	shadow.SetCamPos(*cam.GetPos());
-
 
 
 	qtree = new QuadTree(gameObjects, 0, 100.0f, DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -118,18 +115,19 @@ bool Scene::DoFrame()
 	}
 
 
-	//Shadows Start
-	shadow.SetCamPos(DirectX::XMFLOAT3(0.0f, 49.0f, 0.0f));
-	shadow.SetCamDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
-	shadow.SetShadowMap();
-
+	//Shadows Start First
+	shadow.SetDirLight(&dLight);
+	shadow.StartFirst(*cam.GetPos(), DIRECTIONAL_LIGHT);
+	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
 	for (auto p : objectsToDraw) {
 		p->Draw(window.Gfx(), SHADOW);
 	}
+	shadow.EndFirst();
+	//Shadows End First
+	//Shadows Start Second
 
-	window.Gfx()->SetProjection(proj);
-	window.Gfx()->SetCamera(cam.GetMatrix());
-	//Shadows End
+	
+	//Shadows End Second
 
 
 	//Cube mapping first Start
@@ -154,7 +152,6 @@ bool Scene::DoFrame()
 		}
 		ground.Draw(window.Gfx(), CUBE_MAP);
 
-		shadow.BindDepthResource();
 		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
@@ -166,8 +163,8 @@ bool Scene::DoFrame()
 	//Final draw Start
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
 	ImGuiWindows();
-	window.Gfx()->SetProjection(proj);
-	window.Gfx()->SetCamera(cam.GetMatrix());
+	UpdateProjection();
+	UpdateCamera();
 	UpdateBufs();
 	checkInput();
 	UpdateObjcects(t);
@@ -192,7 +189,6 @@ bool Scene::DoFrame()
 	particle.Draw(window.Gfx(), PARTICLE);
 	//Particle End
 
-	shadow.BindDepthResource();
 	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
@@ -552,5 +548,15 @@ void Scene::SetUpGameObjects()
 		skybox[i].Init(texHandl, "../Resources/Obj/plane.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	}
 	SetUpSkybox();
+}
+
+void Scene::UpdateCamera()
+{
+	window.Gfx()->SetCamera(cam.GetMatrix());
+}
+
+void Scene::UpdateProjection()
+{
+	window.Gfx()->SetProjection(proj);
 }
 

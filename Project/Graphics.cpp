@@ -28,9 +28,6 @@ Graphics::Graphics(int width, int height, HWND& window)
 	deviceContext->PSSetSamplers(0, 1, &samState);
 
 	SetUpImGui(window);
-
-	
-
 }
 
 Graphics::~Graphics()
@@ -106,6 +103,9 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 		deviceContext->CSSetUnorderedAccessViews(6, 1, &nullUav, 0);
 	}
+	else if (flag == SHADOW) {
+		deviceContext->RSSetViewports(1, &viewport);
+	}
 	else if (flag == PARTICLE) {
 		deviceContext->RSSetViewports(1, &viewport);
 		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
@@ -116,8 +116,6 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 		}
 		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
-
-
 }
 
 void Graphics::EndFrame(int width, int height, int flag)

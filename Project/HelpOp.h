@@ -11,6 +11,7 @@ XMFLOAT3 operator/(XMFLOAT3 a, float b);
 XMFLOAT3 operator+(XMFLOAT3 a, XMFLOAT3 b);
 XMFLOAT3 operator-(XMFLOAT3 a);
 XMFLOAT3 operator-(XMFLOAT3 a, XMFLOAT3 b);
+void operator+=(XMFLOAT3& a, XMFLOAT3 b);
 float operator*(XMFLOAT3 a, XMFLOAT3 b);
 
 XMFLOAT3 cross(XMFLOAT3 a, XMFLOAT3 b);

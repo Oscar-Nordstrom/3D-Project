@@ -14,6 +14,9 @@
 #define numGbufs 6
 #define NUM_TEX 6
 
+#define DIRECTIONAL_LIGHT 7
+#define SPOT_LIGHT 8
+
 #define CTRL 17
 #define SPACE 32
 #define LEFT_ARROW 37

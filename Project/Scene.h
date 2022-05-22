@@ -49,6 +49,9 @@ private:
 
 	void SetUpGameObjects();
 
+	void UpdateCamera();
+	void UpdateProjection();
+
 
 	TextureHandler* texHandl = new TextureHandler();
 	float speedfactor = 0.0f;

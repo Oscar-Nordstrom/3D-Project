@@ -1,26 +1,27 @@
 #include "Model.h"
 
-Model::Model(/*TextureHandler*& texHandl*/)
-	//:texHandl(texHandl)
+Model::Model()
 {
-	this->texHandl = nullptr;
-	indexBuffer = nullptr;
-	inputLayout = nullptr;
+	images = nullptr;
 	pShader = nullptr;
 	hShader = nullptr;
 	dShader = nullptr;
 	vShader = nullptr;
 	cShader = nullptr;
 	gShader = nullptr;
-	samState = nullptr;
-	shadowSamp = nullptr;
-	vertexBuffer = nullptr;
 	nullBuf = nullptr;
+	samState = nullptr;
+	texHandl = nullptr;
+	uavBuffer = nullptr;
+	shadowSamp = nullptr;
+	indexBuffer = nullptr;
+	inputLayout = nullptr;
+	vertexBuffer = nullptr;
 	constantBuffer = nullptr;
+	paprticleTexSrv = nullptr;
 	constantBufferTessBool = nullptr;
-	images = nullptr;
-	topologyTriList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	topologyPoints = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+	topologyTriList = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	topology = D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
 
 	tesselation = true;
@@ -97,7 +98,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		UpdateCbuf(*gfx, transform);
 
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
-		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
+		//gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 		gfx->GetContext()->HSSetConstantBuffers(1, 1, &constantBufferTessBool);
@@ -107,16 +108,16 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 	}
 	else if (flag == SHADOW) {
-		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
+
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->GSSetShader(nullptr, nullptr, 0);
 
 		UpdateCbuf(*gfx, transform);
 
 		gfx->GetContext()->IASetPrimitiveTopology(topologyTriList);
-
 		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		gfx->GetContext()->IASetInputLayout(inputLayout);
 		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);

@@ -30,6 +30,13 @@ XMFLOAT3 operator-(XMFLOAT3 a, XMFLOAT3 b)
 	return XMFLOAT3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
+void operator+=(XMFLOAT3& a, XMFLOAT3 b)
+{
+	a.x += b.x;
+	a.y += b.y;
+	a.z += b.z;
+}
+
 float operator*(XMFLOAT3 a, XMFLOAT3 b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
