@@ -180,7 +180,7 @@ Camera::Camera()
 	this->rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	this->rotVector = XMLoadFloat3(&this->rot);
 	this->speed = 1.0f;
-	this->rotSpeed = 2.0f;
+	this->rotSpeed = 1.0f;
 	this->UpdateViewMatrix();
 	this->UpdateFrustum();
 }

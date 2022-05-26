@@ -20,6 +20,7 @@
 #define DIRECTIONAL_LIGHT 7
 #define SPOT_LIGHT 8
 
+#define SHIFT 16
 #define CTRL 17
 #define SPACE 32
 #define LEFT_ARROW 37

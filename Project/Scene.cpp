@@ -339,7 +339,7 @@ bool Scene::UpdateObjcects(float t)
 
 void Scene::checkInput()
 {
-
+	//Move
 	if (window.Kbd()->KeyIsPressed('W')) {
 		cam.Move(this->cam.GetForwardVec());
 	}
@@ -352,33 +352,26 @@ void Scene::checkInput()
 	else if (window.Kbd()->KeyIsPressed('A')) {
 		cam.Move(this->cam.GetLeftVec());
 	}
-	this->UpdateMouseDelta();
-	if (this->mouseDX > 0.0f || this->mouseDY > 0.0f) {
-		cam.Rotate(this->mouseDY *0.01f, this->mouseDX * 0.01f, 0.0f);
-		this->mouseDX = 0.0f;
-		this->mouseDY = 0.0f;
-	}
-	//Rotate
-	/*if (window.Kbd()->KeyIsPressed(LEFT_ARROW)) {
-		cam.Rotate(0.0f, -0.01f, 0.0f);
-	}
-	else if (window.Kbd()->KeyIsPressed(RIGHT_ARROW)) {
-		cam.Rotate(0.0f, 0.01f, 0.0f);
-	}
-	else if (window.Kbd()->KeyIsPressed(UP_ARROW)) {
-		cam.Rotate(-0.01f, 0.0f, 0.0f);
-	}
-	else if (window.Kbd()->KeyIsPressed(DOWN_ARROW)) {
-		cam.Rotate(0.01f, 0.0f, 0.0f);
-	}*/
-	//Up/down
 	if (window.Kbd()->KeyIsPressed(SPACE)) {
 		cam.Move(0.0f, 1.0f, 0.0f);
 	}
 	else if (window.Kbd()->KeyIsPressed(CTRL)) {
 		cam.Move(0.0f, -1.0f, 0.0f);
 	}
-	//cam.Move(move);
+	//Rotate
+	if (window.Kbd()->KeyIsPressed(SHIFT)) {
+		this->UpdateMouseDelta();
+		if (this->mouseDX > 0.0f || this->mouseDX < 0.0f || this->mouseDY > 0.0f || this->mouseDY < 0.0f) {
+			cam.Rotate(this->mouseDY * 0.01f, this->mouseDX * 0.01f, 0.0f);
+			this->mouseDX = 0.0f;
+			this->mouseDY = 0.0f;
+		}
+	}
+	else {
+		this->mouseXtemp = window.mouse.GetPosX();
+		this->mouseYtemp = window.mouse.GetPosY();
+	}
+	
 }
 
 void Scene::cubeMapSetCam(int num)
@@ -579,17 +572,13 @@ void Scene::UpdateProjection()
 
 void Scene::UpdateMouseDelta()
 {
-	if (window.mouse.GetPosX() > this->mouseXtemp) {
+	if (window.mouse.GetPosX() > this->mouseXtemp || window.mouse.GetPosX() < this->mouseXtemp) {
 		this->mouseDX = window.mouse.GetPosX() - this->mouseXtemp;
 		this->mouseXtemp = window.mouse.GetPosX();
 	}
-	else if (window.mouse.GetPosX() < this->mouseXtemp) {
-		this->mouseDX = this->mouseXtemp - window.mouse.GetPosX();
-		this->mouseXtemp = window.mouse.GetPosX();
+	if (window.mouse.GetPosY() > this->mouseYtemp || window.mouse.GetPosY() < this->mouseYtemp) {
+		this->mouseDY = window.mouse.GetPosY() - this->mouseYtemp;
+		this->mouseYtemp = window.mouse.GetPosY();
 	}
-	//if (window.mouse.GetPosY() > this->mouseYtemp || window.mouse.GetPosY() < this->mouseYtemp) {
-	//	this->mouseDY = window.mouse.GetPosY() - this->mouseYtemp;
-	//	this->mouseYtemp = window.mouse.GetPosY();
-	//}
 }
 
