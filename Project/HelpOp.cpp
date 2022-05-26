@@ -41,6 +41,35 @@ float operator*(XMFLOAT3 a, XMFLOAT3 b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
+XMFLOAT3 operator*(XMFLOAT3 a, XMFLOAT3X3 b)
+{
+	XMFLOAT3 ret;
+	ret.x = (a.x * b._11 + a.y * b._21 + a.z * b._31);
+	ret.y = (a.x * b._12 + a.y * b._22 + a.z * b._32);
+	ret.z = (a.x * b._13 + a.y * b._23 + a.z * b._33);
+	return ret;
+}
+
+XMFLOAT3 operator*(XMFLOAT3X3 a, XMFLOAT3 b)
+{
+	XMFLOAT3 ret;
+	ret.x = (a._11 * b.x + a._12 * b.y + a._13 * b.z);
+	ret.x = (a._21 * b.x + a._22 * b.y + a._23 * b.z);
+	ret.x = (a._31 * b.x + a._32 * b.y + a._33 * b.z);
+	return ret;
+}
+
+bool operator==(const XMFLOAT3& a, const XMFLOAT3& b)
+{
+	if (a.x == b.x && a.y == b.z && a.z == b.z) {
+		return true;
+	}
+	return false;
+}
+
+
+
+
 
 XMFLOAT3 cross(XMFLOAT3 a, XMFLOAT3 b) {
 	XMFLOAT3 result;

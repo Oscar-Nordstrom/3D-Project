@@ -12,8 +12,8 @@ CubeMap::CubeMap(Graphics*& gfx)
 
 	pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-	cam.SetPos(pos);
-	cam.SetDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
+	cam.SetPosition(pos);
+	cam.SetRotation(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
 
 	float fov = 90.0f; //90 degrees field of view
 	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians

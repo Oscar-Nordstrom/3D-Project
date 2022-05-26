@@ -93,4 +93,7 @@ private:
 	float farZ;
 	float fov;
 
+	float mouseDX, mouseDY, mouseXtemp, mouseYtemp;
+	void UpdateMouseDelta();
+
 };

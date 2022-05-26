@@ -1,8 +1,16 @@
 #include "Camera.h"
 
-Camera::Camera()
+
+
+/*Camera::Camera()
 {
 	Reset();
+}
+
+Camera::Camera(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 dir)
+{
+	SetPos(pos);
+	SetDir(dir);
 }
 
 Camera::~Camera()
@@ -29,11 +37,6 @@ DirectX::XMFLOAT3* Camera::GetDir()
 	return &direction;
 }
 
-/*DirectX::BoundingFrustum Camera::GetFrustum()
-{
-	updateFrustum();
-	return this->frustum;
-}*/
 
 Frustum* Camera::GetFrustum()
 {
@@ -52,12 +55,14 @@ DirectX::XMFLOAT3 Camera::GetForward()
 
 DirectX::XMFLOAT3 Camera::GetUp()
 {
-	return DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+	DirectX::XMFLOAT3 up;
+	up = normalize(cross(GetForward(), GetRight()));
+	return up;
 }
 
 DirectX::XMFLOAT3 Camera::GetRight()
 {
-	return DirectX::XMFLOAT3(direction.z, direction.y, -direction.x);
+	return normalize(DirectX::XMFLOAT3(direction.z, direction.y, -direction.x));
 }
 
 float Camera::GetAngle()
@@ -94,13 +99,18 @@ void Camera::Reset()
 	speed = 0.1f;
 }
 
-void Camera::Rotate(float rot)
+void Camera::RotateSide(float rot)
 {
-	rot = -rot;
 	DirectX::XMFLOAT3 tempDir = direction;
+	direction.x = tempDir.x * cos(rot) + tempDir.z * sin(rot);
+	direction.y = tempDir.y;
+	direction.z = -tempDir.x * sin(rot) + tempDir.z * cos(rot);
+}
 
-	direction.x = tempDir.x * cos(rot) - tempDir.z * sin(rot);
-	direction.z = tempDir.x * sin(rot) + tempDir.z * cos(rot);
+void Camera::RotateVertical(float rot)
+{
+
+
 }
 
 void Camera::forward()
@@ -142,7 +152,8 @@ void Camera::down()
 
 void Camera::Update(float nearZ, float farZ, float width, float height, float fov)
 {
-	this->frustum.SetFrustum(this->position, nearZ, farZ, width, height, fov, this->GetForward(), this->GetUp(), this->GetRight());
+	this->upDirection = GetUp();
+	this->frustum.SetFrustum(this->position, nearZ, farZ, width, height, fov, this->GetForward(), GetUp(), this->GetRight());
 }
 
 bool Camera::Intersect(DirectX::BoundingBox box)
@@ -155,33 +166,252 @@ bool Camera::Intersect(DirectX::BoundingSphere sphere)
 	return this->frustum.intersect(sphere);
 }
 
-/*void Camera::updateFrustum()
-{
-	this->frustum.Origin = this->position;
-	DirectX::XMFLOAT3 axisFloat = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
-	DirectX::XMVECTOR axis = DirectX::XMLoadFloat3(&axisFloat);
-	DirectX::XMVECTOR newRot = DirectX::XMLoadFloat3(&this->direction);
-	DirectX::XMFLOAT3 right = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-	angle = acos(this->direction.x * right.x + this->direction.y * right.y + this->direction.z * right.z);
-	if (direction.z < 0) {
-		angle = (DegToRad(360)-angle);
-	}
-	newRot = DirectX::XMQuaternionRotationNormal(axis, angle);
-	if (DirectX::Internal::XMQuaternionIsUnit(newRot)) {
-		DirectX::XMFLOAT4 orientation;
-		DirectX::XMStoreFloat4(&orientation, newRot);
-		this->frustum.Orientation = orientation;
-	}
-
-
-}*/
-
 float Camera::DegToRad(float deg)
 {
 	double pi = 3.14159265359;
 	return (deg * (pi / 180));
 }
+*/
 
+Camera::Camera()
+{
+	this->pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	this->posVector = XMLoadFloat3(&this->pos);
+	this->rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->speed = 1.0f;
+	this->rotSpeed = 2.0f;
+	this->UpdateViewMatrix();
+	this->UpdateFrustum();
+}
 
+Camera::~Camera()
+{
+}
 
+void Camera::SetProj(float fov, int width, int height, float nearZ, float farZ)
+{
+	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	float fovRadius = (fov / 360.0f) * XM_2PI;
+	this->projectionMatrix = XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
+	this->width = width;
+	this->height = height;
+	this->fov = fov;
+	this->nearZ = nearZ;
+	this->farZ = farZ;
+}
 
+const XMMATRIX& Camera::GettViewMatrix() const
+{
+	return this->viewMatrix;
+}
+
+const XMMATRIX& Camera::GettProjectionMatrix() const
+{
+	return this->projectionMatrix;
+}
+
+const XMVECTOR& Camera::GetPositionVector() const
+{
+	return this->posVector;
+}
+
+const XMFLOAT3& Camera::GetPositionFloat3() const
+{
+	return this->pos;
+}
+
+const XMVECTOR& Camera::GetRotationVector() const
+{
+	return this->rotVector;
+}
+
+const XMFLOAT3& Camera::GetRotationFloat3() const
+{
+	return this->rot;
+}
+
+const XMVECTOR& Camera::GetForwardVec()
+{
+	return this->forward;
+}
+
+const XMVECTOR& Camera::GetBackVec()
+{
+	return this->back;
+}
+
+const XMVECTOR& Camera::GetUpVec()
+{
+	return this->up;
+}
+
+const XMVECTOR& Camera::GetDownVec()
+{
+	return this->down;
+}
+
+const XMVECTOR& Camera::GetLeftVec()
+{
+	return this->left;
+}
+
+const XMVECTOR& Camera::GetRightVec()
+{
+	return this->right;
+}
+
+float& Camera::GetSpeed()
+{
+	return this->speed;
+}
+
+float& Camera::GetRotSpeed()
+{
+	return this->rotSpeed;
+}
+
+float* Camera::GetFrustumBuffer()
+{
+	return frustum.GetBuffer();
+}
+
+Frustum* Camera::GetFrustum()
+{
+	return &this->frustum;
+}
+
+void Camera::SetPosition(const XMVECTOR& pos)
+{
+	XMStoreFloat3(&this->pos, pos);
+	this->posVector = pos;
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetPosition(const XMFLOAT3& pos)
+{
+	this->pos = pos;
+	this->posVector = XMLoadFloat3(&this->pos);
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetPosition(float x, float y, float z)
+{
+	this->pos.x = x;
+	this->pos.y = y;
+	this->pos.z = z;
+	this->posVector = XMLoadFloat3(&this->pos);
+	this->UpdateViewMatrix();
+}
+
+void Camera::Move(const XMVECTOR& pos)
+{
+	this->posVector += pos * this->speed;
+	XMStoreFloat3(&this->pos, this->posVector);
+	this->UpdateViewMatrix();
+}
+
+void Camera::Move(const XMFLOAT3& pos)
+{
+	this->pos.x += pos.x * this->speed;
+	this->pos.y += pos.y * this->speed;
+	this->pos.z += pos.z * this->speed;
+	this->posVector = XMLoadFloat3(&this->pos);
+	this->UpdateViewMatrix();
+}
+
+void Camera::Move(float x, float y, float z)
+{
+	this->pos.x += x * this->speed;
+	this->pos.y += y * this->speed;
+	this->pos.z += z * this->speed;
+	this->posVector = XMLoadFloat3(&this->pos);
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetRotation(const XMVECTOR& rot)
+{
+	XMStoreFloat3(&this->rot, rot);
+	this->posVector = rot;
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetRotation(const XMFLOAT3& rot)
+{
+	this->rot = rot;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetRotation(float x, float y, float z)
+{
+	this->rot.x = x;
+	this->rot.y = y;
+	this->rot.z = z;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::Rotate(const XMVECTOR& rot)
+{
+	this->rotVector += rot * rotSpeed;
+	XMStoreFloat3(&this->rot, this->rotVector);
+	this->UpdateViewMatrix();
+}
+
+void Camera::Rotate(const XMFLOAT3& rot)
+{
+	this->rot.x += rot.x * rotSpeed;
+	this->rot.y += rot.y * rotSpeed;
+	this->rot.z += rot.z * rotSpeed;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::Rotate(float x, float y, float z)
+{
+	this->rot.x += x * rotSpeed;
+	this->rot.y += y * rotSpeed;
+	this->rot.z += z * rotSpeed;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+bool Camera::Intersect(DirectX::BoundingBox box)
+{
+	return this->frustum.intersect(box);
+}
+
+bool Camera::Intersect(DirectX::BoundingSphere sphere)
+{
+	return this->frustum.intersect(sphere);
+}
+
+void Camera::UpdateViewMatrix()
+{
+	XMMATRIX camRotMatrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z);
+	XMVECTOR camTarget = XMVector3TransformCoord(this->DefaultForwardVector, camRotMatrix);
+	camTarget += this->posVector;
+	XMVECTOR upDir = XMVector3TransformCoord(this->DefaultUpVector, camRotMatrix);
+	this->viewMatrix = XMMatrixLookAtLH(this->posVector, camTarget, upDir);
+
+	//Updating directions
+	XMMATRIX vecRotMatrix = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
+	this->forward = XMVector3TransformCoord(this->DefaultForwardVector, vecRotMatrix);
+	this->back = XMVector3TransformCoord(this->DefaultBackVector, vecRotMatrix);
+	this->left = XMVector3TransformCoord(this->DefaultLeftVector, vecRotMatrix);
+	this->right = XMVector3TransformCoord(this->DefaultRightVector, vecRotMatrix);
+	this->up = upDir;
+	this->down = -upDir;
+
+	UpdateFrustum();
+}
+
+void Camera::UpdateFrustum()
+{
+	XMFLOAT3 forwardFloat3, upFloat3, rightFloat3;
+	XMStoreFloat3(&forwardFloat3, forward);
+	XMStoreFloat3(&upFloat3, up);
+	XMStoreFloat3(&rightFloat3, right);
+	this->frustum.SetFrustum(this->pos, nearZ, farZ, width, height, fov, forwardFloat3, upFloat3, rightFloat3);
+}

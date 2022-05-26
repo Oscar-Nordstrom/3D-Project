@@ -14,17 +14,32 @@ public:
 	~ShadowMap();
 	void StartFirst(DirectX::XMFLOAT3 pos, int flag = SPOT_LIGHT);
 	void EndFirst();
+	void UpdateWhatShadow(int whatLight, int flag);
 	void SetDirLight(DirectionalLight* dLight);
-	void SetSpotLight(SpotLight* sLight);
+	//Needs 3 lights
+	void SetSpotLights(SpotLight* spotLights[]);
 private:
+	ID3D11DepthStencilView* GetDsView(int what);
+	ID3D11ShaderResourceView*& GetShadowSRV();
+	ID3D11ShaderResourceView*& DepthToSRV();
+	void SetViewPort();
 	bool CreateDepthStencil();
 	bool LoadShaders();
 
+	int lightTurn;
+
 	Graphics*& gfx;
-	Camera cam;
-	ID3D11VertexShader* vertexShadowShader;
-	ID3D11Texture2D* dsTexture;
-	ID3D11DepthStencilView* dsView;
 	DirectionalLight* dLight;
-	SpotLight* sLight;
+	SpotLight* sLight1;
+	SpotLight* sLight2;
+	SpotLight* sLight3;
+
+	std::vector<ID3D11DepthStencilView*> dsViews;
+	ID3D11Texture2D* dsTexture;
+	ID3D11VertexShader* vertexShadowShader;
+	//ID3D11PixelShader* pixelShadowShader; //Used later
+	ID3D11Resource* shadowRes;
+	ID3D11ShaderResourceView* shadowSRV;
+	D3D11_VIEWPORT shadowViewPort;
+
 };

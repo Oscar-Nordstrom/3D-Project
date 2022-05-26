@@ -13,6 +13,10 @@ XMFLOAT3 operator-(XMFLOAT3 a);
 XMFLOAT3 operator-(XMFLOAT3 a, XMFLOAT3 b);
 void operator+=(XMFLOAT3& a, XMFLOAT3 b);
 float operator*(XMFLOAT3 a, XMFLOAT3 b);
+XMFLOAT3 operator*(XMFLOAT3 a, XMFLOAT3X3 b);
+XMFLOAT3 operator*(XMFLOAT3X3 a, XMFLOAT3 b);
+
+bool operator==(const XMFLOAT3& a, const XMFLOAT3& b);
 
 XMFLOAT3 cross(XMFLOAT3 a, XMFLOAT3 b);
 float length(XMFLOAT3 a);

@@ -26,9 +26,10 @@ struct ShadowVertexData {
 };
 
 struct DirectionalLight {
-	DirectionalLight(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f))
+	DirectionalLight(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f))
 		:direction(dir), color(color)
 	{
+		
 	}
 	DirectX::XMFLOAT4 color;
 	DirectX::XMFLOAT3 direction;

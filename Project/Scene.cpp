@@ -15,18 +15,18 @@ int roundUpTo(int numToRound, int multiple)
 
 Scene::Scene()
 	:window(WIDTH, HEIGHT, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx())
-	/*,soldier1(*window.Gfx(), texHandl), soldier2(*window.Gfx(), texHandl), soldier3(*window.Gfx(), texHandl), soldier4(*window.Gfx(), texHandl),
-	soldier5(*window.Gfx(), texHandl), soldier6(*window.Gfx(), texHandl),
-	cube(*window.Gfx(), texHandl), particle(*window.gfx, texHandl)*/
 {
-	fov = 90.0f; //90 degrees field of view
-	float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
-	float aspectRatio = static_cast<float>(window.GetWidth()) / static_cast<float>(window.GetHeight());//The aspect ratio
-	nearZ = 0.1f; //Minimum viewing 
-	farZ = 100.0f;//Maximum viewing distance
-	proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
-	window.Gfx()->SetProjection(proj);
-	this->cam.SetProjection(proj);;
+	//fov = 90.0f; //90 degrees field of view
+	//float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
+	//float aspectRatio = static_cast<float>(window.GetWidth()) / static_cast<float>(window.GetHeight());//The aspect ratio
+	//nearZ = 0.1f; //Minimum viewing 
+	//farZ = 100.0f;//Maximum viewing distance
+	//proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
+	cam.SetPosition(0.0f, 0.0f, -3.0f),
+	cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 100.0f);
+	window.Gfx()->SetProjection(cam.GettProjectionMatrix());
+	window.Gfx()->SetCamera(cam.GettViewMatrix());
+
 
 	SetUpGameObjects();
 
@@ -35,7 +35,7 @@ Scene::Scene()
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
 	SetUpDirLight();
 	//cam.SetPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
-	cam.SetDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
+	//cam.SetDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
 	SetUpBufs();
 
 
@@ -49,6 +49,9 @@ Scene::Scene()
 	dt = 0;
 
 	particle.Init(texHandl, "No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
+
+	this->mouseXtemp = window.mouse.GetPosX();
+	this->mouseYtemp = window.mouse.GetPosY();
 
 }
 
@@ -95,13 +98,12 @@ bool Scene::DoFrame()
 	theTimedata.time = timerCount;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
 
-	cam.Update(nearZ, farZ, (float)WIDTH, (float)HEIGHT, fov);
+	//cam.Update(nearZ, farZ, (float)WIDTH, (float)HEIGHT, fov);
 
 	HandleCulling();
-
-	std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPos()->x) + L", Y: " + std::to_wstring(cam.GetPos()->y) + L", Z: " + std::to_wstring(cam.GetPos()->z);
-
-	window.SetTitle(timerString.c_str());
+	//std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPositionFloat3().x) + L", Y: " + std::to_wstring(cam.GetPositionFloat3().y) + L", Z: " + std::to_wstring(cam.GetPositionFloat3().z);
+	std::wstring mouseString = L"Mouse pos: " + std::to_wstring(window.mouse.GetPosX()) + L", " + std::to_wstring(window.mouse.GetPosY());
+	window.SetTitle(mouseString.c_str());
 
 	//Enable/Disable tesselation
 	if (tesselationTemp != tesselation) {
@@ -117,7 +119,7 @@ bool Scene::DoFrame()
 
 	//Shadows Start First
 	shadow.SetDirLight(&dLight);
-	shadow.StartFirst(*cam.GetPos(), DIRECTIONAL_LIGHT);
+	shadow.StartFirst(cam.GetPositionFloat3(), DIRECTIONAL_LIGHT);
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
 	for (auto p : objectsToDraw) {
 		p->Draw(window.Gfx(), SHADOW);
@@ -139,8 +141,8 @@ bool Scene::DoFrame()
 
 		//Render to current uavs
 		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
-		window.Gfx()->SetProjection(cMap.GetProj());
-		window.Gfx()->SetCamera(cMap.GetCam().GetMatrix());
+		window.Gfx()->SetProjection(cMap.GetProj());/////////////////Cmaps cam has a projection, set that!
+		window.Gfx()->SetCamera(cMap.GetCam().GettViewMatrix());
 
 		cMap.Set(window.Gfx()->GetContext(), i);
 
@@ -228,7 +230,7 @@ bool Scene::SetUpDirLight()
 bool Scene::SetUpBufs()
 {
 	D3D11_BUFFER_DESC desc;
-	desc.ByteWidth = roundUpTo(sizeof(cam.GetPos()), 16);
+	desc.ByteWidth = roundUpTo(sizeof(cam.GetPositionFloat3()), 16);
 	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -236,7 +238,7 @@ bool Scene::SetUpBufs()
 	desc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = cam.GetPos();
+	data.pSysMem = &cam.GetPositionFloat3();
 	data.SysMemPitch = 0;
 	data.SysMemSlicePitch = 0;
 
@@ -245,14 +247,14 @@ bool Scene::SetUpBufs()
 		return false;
 	}
 
-	desc.ByteWidth = roundUpTo(sizeof(cam.GetDir()), 16);
+	desc.ByteWidth = roundUpTo(sizeof(cam.GetRotationFloat3()), 16);
 	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	desc.MiscFlags = 0;
 	desc.StructureByteStride = 0;
 
-	data.pSysMem = cam.GetDir();
+	data.pSysMem = &cam.GetRotationFloat3();
 	data.SysMemPitch = 0;
 	data.SysMemSlicePitch = 0;
 
@@ -285,7 +287,7 @@ void Scene::UpdateBufs()
 	D3D11_MAPPED_SUBRESOURCE mappedResource;//Create a mapped resource
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	HRESULT hr = window.Gfx()->GetContext()->Map(camBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
-	CopyMemory(mappedResource.pData, cam.GetPos(), sizeof(DirectX::XMFLOAT3));//Write the new memory
+	CopyMemory(mappedResource.pData, &cam.GetPositionFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
 		assert(false, "Failed to update buffer.");
@@ -293,7 +295,7 @@ void Scene::UpdateBufs()
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	hr = window.Gfx()->GetContext()->Map(camBuf2, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
-	CopyMemory(mappedResource.pData, cam.GetDir(), sizeof(DirectX::XMFLOAT3));//Write the new memory
+	CopyMemory(mappedResource.pData, &cam.GetRotationFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf2, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
 		assert(false, "Failed to update buffer.");
@@ -337,31 +339,44 @@ bool Scene::UpdateObjcects(float t)
 
 void Scene::checkInput()
 {
+
 	if (window.Kbd()->KeyIsPressed('W')) {
-		cam.forward();
+		cam.Move(this->cam.GetForwardVec());
 	}
 	else if (window.Kbd()->KeyIsPressed('S')) {
-		cam.backward();
+		cam.Move(this->cam.GetBackVec());
 	}
 	if (window.Kbd()->KeyIsPressed('D')) {
-		cam.right();
+		cam.Move(this->cam.GetRightVec());
 	}
 	else if (window.Kbd()->KeyIsPressed('A')) {
-		cam.left();
+		cam.Move(this->cam.GetLeftVec());
+	}
+	this->UpdateMouseDelta();
+	if (this->mouseDX > 0.0f || this->mouseDY > 0.0f) {
+		cam.Rotate(this->mouseDY *0.01f, this->mouseDX * 0.01f, 0.0f);
+		this->mouseDX = 0.0f;
+		this->mouseDY = 0.0f;
 	}
 	//Rotate
-	if (window.Kbd()->KeyIsPressed(LEFT_ARROW)) {
-		cam.Rotate(-0.05f);
+	/*if (window.Kbd()->KeyIsPressed(LEFT_ARROW)) {
+		cam.Rotate(0.0f, -0.01f, 0.0f);
 	}
 	else if (window.Kbd()->KeyIsPressed(RIGHT_ARROW)) {
-		cam.Rotate(0.05f);
+		cam.Rotate(0.0f, 0.01f, 0.0f);
 	}
+	else if (window.Kbd()->KeyIsPressed(UP_ARROW)) {
+		cam.Rotate(-0.01f, 0.0f, 0.0f);
+	}
+	else if (window.Kbd()->KeyIsPressed(DOWN_ARROW)) {
+		cam.Rotate(0.01f, 0.0f, 0.0f);
+	}*/
 	//Up/down
 	if (window.Kbd()->KeyIsPressed(SPACE)) {
-		cam.up();
+		cam.Move(0.0f, 1.0f, 0.0f);
 	}
 	else if (window.Kbd()->KeyIsPressed(CTRL)) {
-		cam.down();
+		cam.Move(0.0f, -1.0f, 0.0f);
 	}
 	//cam.Move(move);
 }
@@ -377,28 +392,28 @@ void Scene::cubeMapSetCam(int num)
 	switch (num)
 	{
 	case 0:
-		cMap.GetCam().SetDir(DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f));
-		cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f));
+		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
 		break;
 	case 1:
-		cMap.GetCam().SetDir(DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f));
-		cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f));
+		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
 		break;
 	case 2:
-		cMap.GetCam().SetDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
-		cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f));
+		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f));
 		break;
 	case 3:
-		cMap.GetCam().SetDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
-		cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
+		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
+		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
 		break;
 	case 4:
-		cMap.GetCam().SetDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
-		cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
+		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
 		break;
 	case 5:
-		cMap.GetCam().SetDir(DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f));
-		cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f));
+		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
 		break;
 	}
 }
@@ -438,7 +453,8 @@ void Scene::ImGuiWindows()
 	}
 	ImGui::End();
 	if (ImGui::Begin("Player")) {
-		ImGui::SliderFloat("Player Speed", &cam.speed, 0.0f, 1.0f);
+		ImGui::SliderFloat("Player Speed", &cam.GetSpeed(), 0.0f, 1.0f);
+		ImGui::SliderFloat("Rotation Speed", &cam.GetRotSpeed(), 0.0f, 5.0f);
 		ImGui::SliderFloat("Frustum buffer zone", cam.GetFrustumBuffer(), 0.0, 20.0f);
 	}
 	ImGui::End();
@@ -552,11 +568,28 @@ void Scene::SetUpGameObjects()
 
 void Scene::UpdateCamera()
 {
-	window.Gfx()->SetCamera(cam.GetMatrix());
+	window.Gfx()->SetCamera(cam.GettViewMatrix());
 }
 
 void Scene::UpdateProjection()
 {
-	window.Gfx()->SetProjection(proj);
+	window.Gfx()->SetProjection(cam.GettProjectionMatrix());
+	//window.Gfx()->SetProjection(proj);
+}
+
+void Scene::UpdateMouseDelta()
+{
+	if (window.mouse.GetPosX() > this->mouseXtemp) {
+		this->mouseDX = window.mouse.GetPosX() - this->mouseXtemp;
+		this->mouseXtemp = window.mouse.GetPosX();
+	}
+	else if (window.mouse.GetPosX() < this->mouseXtemp) {
+		this->mouseDX = this->mouseXtemp - window.mouse.GetPosX();
+		this->mouseXtemp = window.mouse.GetPosX();
+	}
+	//if (window.mouse.GetPosY() > this->mouseYtemp || window.mouse.GetPosY() < this->mouseYtemp) {
+	//	this->mouseDY = window.mouse.GetPosY() - this->mouseYtemp;
+	//	this->mouseYtemp = window.mouse.GetPosY();
+	//}
 }
 
