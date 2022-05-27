@@ -3,13 +3,12 @@
 
 namespace dx = DirectX;
 
-SceneObjectTest::SceneObjectTest(/*Graphics& gfx, TextureHandler*& texHandl*/)
-	//:model(texHandl)
+SceneObjectTest::SceneObjectTest()
 {
 
 	transform = dx::XMMatrixScaling(sx, sy, sz) * dx::XMMatrixRotationX(rx) * dx::XMMatrixRotationY(ry) * dx::XMMatrixRotationZ(rz) * dx::XMMatrixTranslation(x, y, z);
 	boundingSphere.Center = DirectX::XMFLOAT3(x, y, z);
-	boundingSphere.Radius = LargestSide() / 2.0f;
+	boundingSphere.Radius = LargestSide();// / 2.0f;
 
 	this->added = false;
 }
@@ -110,6 +109,21 @@ void SceneObjectTest::Remove()
 bool SceneObjectTest::IsAdded() const
 {
 	return this->added;
+}
+
+float SceneObjectTest::GetX() const
+{
+	return this->x;
+}
+
+float SceneObjectTest::GetY() const
+{
+	return this->y;
+}
+
+float SceneObjectTest::GetZ() const
+{
+	return this->z;
 }
 
 bool SceneObjectTest::Init(TextureHandler*& texHandl, string objPath, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, Graphics*& gfx, bool particle)

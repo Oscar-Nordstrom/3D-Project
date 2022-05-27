@@ -24,6 +24,12 @@ public:
 	const XMVECTOR& GetDownVec();
 	const XMVECTOR& GetLeftVec();
 	const XMVECTOR& GetRightVec();
+	const XMFLOAT3& GetForwardFloat3();
+	const XMFLOAT3& GetBackFloat3();
+	const XMFLOAT3& GetUpFloat3();
+	const XMFLOAT3& GetDownFloat3();
+	const XMFLOAT3& GetLeftFloat3();
+	const XMFLOAT3& GetRightFloat3();
 	float* GetFrustumBuffer();
 	Frustum* GetFrustum();
 	float& GetSpeed();
@@ -66,6 +72,7 @@ private:
 	const XMVECTOR DefaultRightVector = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 
 	XMVECTOR forward,back,left,right,up,down;
+	XMFLOAT3 forwardFloat3, backFloat3, leftFloat3, rightFloat3, upFloat3, downFloat3;
 
 };
 

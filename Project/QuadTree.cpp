@@ -25,7 +25,7 @@ QuadTree::QuadTree(std::vector<SceneObjectTest*>& objects, int depth, float size
 	p2 = DirectX::XMFLOAT3(pos.x + (size / 2), pos.y + size, pos.z + (size / 2));
 	DirectX::XMVECTOR v1 = DirectX::XMLoadFloat3(&p1);
 	DirectX::XMVECTOR v2 = DirectX::XMLoadFloat3(&p2);
-	this->box.CreateFromPoints(this->box, v1, v2);
+	DirectX::BoundingBox::CreateFromPoints(this->box, v1, v2);
 
 	if (this->type == Node::LEAF) {
 		//Add game objects that intercet this node
@@ -49,7 +49,7 @@ QuadTree::QuadTree(std::vector<SceneObjectTest*>& objects, int depth, float size
 				newPos = DirectX::XMFLOAT3(pos.x + (newSize / 2), pos.y, pos.z + (newSize / 2));
 				break;
 			case 2://Bottom left
-				newPos = DirectX::XMFLOAT3(pos.x - (newSize / 2), pos.y, pos.z + (newSize / 2));
+				newPos = DirectX::XMFLOAT3(pos.x - (newSize / 2), pos.y, pos.z - (newSize / 2));
 				break;
 			case 3://Bottom right
 				newPos = DirectX::XMFLOAT3(pos.x + (newSize / 2), pos.y, pos.z - (newSize / 2));
@@ -81,7 +81,7 @@ void QuadTree::InsideNodes(Camera& cam, std::vector<QuadTree*>* list)
 		else {
 			list->push_back(this);
 		}
-		list->push_back(this);
+		//list->push_back(this);
 	}
 }
 

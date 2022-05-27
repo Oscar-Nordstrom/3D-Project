@@ -35,6 +35,10 @@ public:
 	void Add();
 	void Remove();
 	bool IsAdded()const;
+	float GetX()const;
+	float GetY()const;
+	float GetZ()const;
+
 private:
 	void UpdateTransform(float dt);
 	float LargestSide()const;

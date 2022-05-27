@@ -47,11 +47,14 @@ Scene::Scene()
 	quadTreeOn = true;
 	frustumCheckOn = true;
 	dt = 0;
+	this->updateCulling = true;
 
 	particle.Init(texHandl, "No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
 
 	this->mouseXtemp = window.mouse.GetPosX();
 	this->mouseYtemp = window.mouse.GetPosY();
+
+	HandleCulling();
 
 }
 
@@ -100,10 +103,12 @@ bool Scene::DoFrame()
 
 	//cam.Update(nearZ, farZ, (float)WIDTH, (float)HEIGHT, fov);
 
-	HandleCulling();
+	
 	//std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPositionFloat3().x) + L", Y: " + std::to_wstring(cam.GetPositionFloat3().y) + L", Z: " + std::to_wstring(cam.GetPositionFloat3().z);
-	std::wstring mouseString = L"Mouse pos: " + std::to_wstring(window.mouse.GetPosX()) + L", " + std::to_wstring(window.mouse.GetPosY());
-	window.SetTitle(mouseString.c_str());
+	//std::wstring mouseString = L"Mouse pos: " + std::to_wstring(window.mouse.GetPosX()) + L", " + std::to_wstring(window.mouse.GetPosY());
+	std::wstring numObjectsString = L"Num objects: " + std::to_wstring(this->objectsToDraw.size());
+	//std::wstring numNodesString = L"Num nodes: " + std::to_wstring(this->intersectingNodes.size());
+	window.SetTitle(numObjectsString.c_str());
 
 	//Enable/Disable tesselation
 	if (tesselationTemp != tesselation) {
@@ -116,6 +121,10 @@ bool Scene::DoFrame()
 		tesselationTemp = tesselation;
 	}
 
+	if (updateCulling) {
+		HandleCulling();
+		this->updateCulling = false;
+	}
 
 	//Shadows Start First
 	shadow.SetDirLight(&dLight);
@@ -247,14 +256,14 @@ bool Scene::SetUpBufs()
 		return false;
 	}
 
-	desc.ByteWidth = roundUpTo(sizeof(cam.GetRotationFloat3()), 16);
+	desc.ByteWidth = roundUpTo(sizeof(cam.GetForwardFloat3()), 16);
 	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	desc.MiscFlags = 0;
 	desc.StructureByteStride = 0;
 
-	data.pSysMem = &cam.GetRotationFloat3();
+	data.pSysMem = &cam.GetForwardFloat3();
 	data.SysMemPitch = 0;
 	data.SysMemSlicePitch = 0;
 
@@ -295,7 +304,7 @@ void Scene::UpdateBufs()
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	hr = window.Gfx()->GetContext()->Map(camBuf2, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
-	CopyMemory(mappedResource.pData, &cam.GetRotationFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
+	CopyMemory(mappedResource.pData, &cam.GetForwardFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf2, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
 		assert(false, "Failed to update buffer.");
@@ -342,21 +351,27 @@ void Scene::checkInput()
 	//Move
 	if (window.Kbd()->KeyIsPressed('W')) {
 		cam.Move(this->cam.GetForwardVec());
+		this->updateCulling = true;
 	}
 	else if (window.Kbd()->KeyIsPressed('S')) {
 		cam.Move(this->cam.GetBackVec());
+		this->updateCulling = true;
 	}
 	if (window.Kbd()->KeyIsPressed('D')) {
 		cam.Move(this->cam.GetRightVec());
+		this->updateCulling = true;
 	}
 	else if (window.Kbd()->KeyIsPressed('A')) {
 		cam.Move(this->cam.GetLeftVec());
+		this->updateCulling = true;
 	}
 	if (window.Kbd()->KeyIsPressed(SPACE)) {
 		cam.Move(0.0f, 1.0f, 0.0f);
+		this->updateCulling = true;
 	}
 	else if (window.Kbd()->KeyIsPressed(CTRL)) {
 		cam.Move(0.0f, -1.0f, 0.0f);
+		this->updateCulling = true;
 	}
 	//Rotate
 	if (window.Kbd()->KeyIsPressed(SHIFT)) {
@@ -365,6 +380,7 @@ void Scene::checkInput()
 			cam.Rotate(this->mouseDY * 0.01f, this->mouseDX * 0.01f, 0.0f);
 			this->mouseDX = 0.0f;
 			this->mouseDY = 0.0f;
+			this->updateCulling = true;
 		}
 	}
 	else {
@@ -473,6 +489,7 @@ void Scene::DisableTesselation()
 	}
 }
 
+
 void Scene::HandleCulling()
 {
 	if (quadTreeOn) {
@@ -503,7 +520,6 @@ void Scene::HandleCulling()
 			objectsToDraw.push_back(p);
 		}
 	}
-	
 }
 
 void Scene::SetUpGameObjects()

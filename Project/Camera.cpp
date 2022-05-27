@@ -261,6 +261,36 @@ const XMVECTOR& Camera::GetRightVec()
 	return this->right;
 }
 
+const XMFLOAT3& Camera::GetForwardFloat3()
+{
+	return this->forwardFloat3;
+}
+
+const XMFLOAT3& Camera::GetBackFloat3()
+{
+	return this->backFloat3;
+}
+
+const XMFLOAT3& Camera::GetUpFloat3()
+{
+	return this->upFloat3;
+}
+
+const XMFLOAT3& Camera::GetDownFloat3()
+{
+	return this->downFloat3;
+}
+
+const XMFLOAT3& Camera::GetLeftFloat3()
+{
+	return this->leftFloat3;
+}
+
+const XMFLOAT3& Camera::GetRightFloat3()
+{
+	return this->rightFloat3;
+}
+
 float& Camera::GetSpeed()
 {
 	return this->speed;
@@ -403,15 +433,17 @@ void Camera::UpdateViewMatrix()
 	this->right = XMVector3TransformCoord(this->DefaultRightVector, vecRotMatrix);
 	this->up = upDir;
 	this->down = -upDir;
+	XMStoreFloat3(&this->forwardFloat3, this->forward);
+	XMStoreFloat3(&this->backFloat3, this->back);
+	XMStoreFloat3(&this->leftFloat3, this->left);
+	XMStoreFloat3(&this->rightFloat3, this->right);
+	XMStoreFloat3(&this->upFloat3, this->up);
+	XMStoreFloat3(&this->downFloat3, this->down);
 
 	UpdateFrustum();
 }
 
 void Camera::UpdateFrustum()
 {
-	XMFLOAT3 forwardFloat3, upFloat3, rightFloat3;
-	XMStoreFloat3(&forwardFloat3, forward);
-	XMStoreFloat3(&upFloat3, up);
-	XMStoreFloat3(&rightFloat3, right);
-	this->frustum.SetFrustum(this->pos, nearZ, farZ, width, height, fov, forwardFloat3, upFloat3, rightFloat3);
+	this->frustum.SetFrustum(this->pos, this->nearZ, this->farZ, this->width, this->height, this->fov, this->forwardFloat3, this->upFloat3, this->rightFloat3);
 }

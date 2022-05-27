@@ -52,6 +52,7 @@ private:
 	void UpdateCamera();
 	void UpdateProjection();
 
+	void UpdateMouseDelta();
 
 	TextureHandler* texHandl = new TextureHandler();
 	float speedfactor = 0.0f;
@@ -89,11 +90,13 @@ private:
 	bool quadTreeOn;
 	bool frustumCheckOn;
 
+	bool updateCulling;
+
 	float nearZ;
 	float farZ;
 	float fov;
 
 	float mouseDX, mouseDY, mouseXtemp, mouseYtemp;
-	void UpdateMouseDelta();
+	
 
 };
