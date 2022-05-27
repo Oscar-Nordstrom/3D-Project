@@ -359,21 +359,21 @@ void Camera::Move(float x, float y, float z)
 	this->UpdateViewMatrix();
 }
 
-void Camera::SetRotation(const XMVECTOR& rot)
+void Camera::SetRotationRad(const XMVECTOR& rot)
 {
 	XMStoreFloat3(&this->rot, rot);
 	this->posVector = rot;
 	this->UpdateViewMatrix();
 }
 
-void Camera::SetRotation(const XMFLOAT3& rot)
+void Camera::SetRotationRad(const XMFLOAT3& rot)
 {
 	this->rot = rot;
 	this->rotVector = XMLoadFloat3(&this->rot);
 	this->UpdateViewMatrix();
 }
 
-void Camera::SetRotation(float x, float y, float z)
+void Camera::SetRotationRad(float x, float y, float z)
 {
 	this->rot.x = x;
 	this->rot.y = y;
@@ -382,14 +382,14 @@ void Camera::SetRotation(float x, float y, float z)
 	this->UpdateViewMatrix();
 }
 
-void Camera::Rotate(const XMVECTOR& rot)
+void Camera::RotateRad(const XMVECTOR& rot)
 {
 	this->rotVector += rot * rotSpeed;
 	XMStoreFloat3(&this->rot, this->rotVector);
 	this->UpdateViewMatrix();
 }
 
-void Camera::Rotate(const XMFLOAT3& rot)
+void Camera::RotateRad(const XMFLOAT3& rot)
 {
 	this->rot.x += rot.x * rotSpeed;
 	this->rot.y += rot.y * rotSpeed;
@@ -398,11 +398,79 @@ void Camera::Rotate(const XMFLOAT3& rot)
 	this->UpdateViewMatrix();
 }
 
-void Camera::Rotate(float x, float y, float z)
+void Camera::RotateRad(float x, float y, float z)
 {
 	this->rot.x += x * rotSpeed;
 	this->rot.y += y * rotSpeed;
 	this->rot.z += z * rotSpeed;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetRotationDeg(const XMVECTOR& rot)
+{
+	XMFLOAT3 rotation;
+	XMStoreFloat3(&rotation, rot);
+	rotation.x = XMConvertToRadians(rotation.x);
+	rotation.y = XMConvertToRadians(rotation.y);
+	rotation.z = XMConvertToRadians(rotation.z);
+	
+	this->rot = rotation;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetRotationDeg(const XMFLOAT3& rot)
+{
+	XMFLOAT3 rotation = rot;
+	rotation.x = XMConvertToRadians(rotation.x);
+	rotation.y = XMConvertToRadians(rotation.y);
+	rotation.z = XMConvertToRadians(rotation.z);
+
+	this->rot = rotation;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetRotationDeg(float x, float y, float z)
+{
+	this->rot.x = XMConvertToRadians(x);
+	this->rot.y = XMConvertToRadians(y);
+	this->rot.z = XMConvertToRadians(z);
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::RotateDeg(const XMVECTOR& rot)
+{
+	XMFLOAT3 rotation;
+	XMStoreFloat3(&rotation, rot);
+	rotation.x =+ XMConvertToRadians(rotation.x) * rotSpeed;
+	rotation.y =+ XMConvertToRadians(rotation.y) * rotSpeed;
+	rotation.z =+ XMConvertToRadians(rotation.z) * rotSpeed;
+
+	this->rot = rotation;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::RotateDeg(const XMFLOAT3& rot)
+{
+	XMFLOAT3 rotation = rot;
+	rotation.x =+ XMConvertToRadians(rotation.x) * rotSpeed;
+	rotation.y =+ XMConvertToRadians(rotation.y) * rotSpeed;
+	rotation.z =+ XMConvertToRadians(rotation.z) * rotSpeed;
+
+	this->rot = rotation;
+	this->rotVector = XMLoadFloat3(&this->rot);
+	this->UpdateViewMatrix();
+}
+
+void Camera::RotateDeg(float x, float y, float z)
+{
+	this->rot.x =+ XMConvertToRadians(x) * rotSpeed;
+	this->rot.y =+ XMConvertToRadians(y) * rotSpeed;
+	this->rot.z =+ XMConvertToRadians(z) * rotSpeed;
 	this->rotVector = XMLoadFloat3(&this->rot);
 	this->UpdateViewMatrix();
 }

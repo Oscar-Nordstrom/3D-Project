@@ -127,6 +127,10 @@ bool Scene::DoFrame()
 	}
 
 	//Shadows Start First
+	DirectX::XMFLOAT3 tempPos = cam.GetPositionFloat3();
+	DirectX::XMFLOAT3 tempDir = cam.GetRotationFloat3();
+	cam.SetPosition(0.0f, 20.0f, 0.0f);
+	cam.SetRotationDeg(90, 0.0f , 0.0f);
 	shadow.SetDirLight(&dLight);
 	shadow.StartFirst(cam.GetPositionFloat3(), DIRECTIONAL_LIGHT);
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
@@ -134,6 +138,8 @@ bool Scene::DoFrame()
 		p->Draw(window.Gfx(), SHADOW);
 	}
 	shadow.EndFirst();
+	cam.SetPosition(tempPos);
+	cam.SetRotationRad(tempDir);
 	//Shadows End First
 	//Shadows Start Second
 
@@ -377,7 +383,7 @@ void Scene::checkInput()
 	if (window.Kbd()->KeyIsPressed(SHIFT)) {
 		this->UpdateMouseDelta();
 		if (this->mouseDX > 0.0f || this->mouseDX < 0.0f || this->mouseDY > 0.0f || this->mouseDY < 0.0f) {
-			cam.Rotate(this->mouseDY * 0.01f, this->mouseDX * 0.01f, 0.0f);
+			cam.RotateRad(this->mouseDY * 0.01f, this->mouseDX * 0.01f, 0.0f);
 			this->mouseDX = 0.0f;
 			this->mouseDY = 0.0f;
 			this->updateCulling = true;
@@ -401,28 +407,22 @@ void Scene::cubeMapSetCam(int num)
 	switch (num)
 	{
 	case 0:
-		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f));
-		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		cMap.GetCam().SetRotationDeg(0.0f, -90.0f, 0.0f);
 		break;
 	case 1:
-		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f));
-		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		cMap.GetCam().SetRotationDeg(0.0f, 90.0f, 0.0f);
 		break;
 	case 2:
-		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
-		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f));
+		cMap.GetCam().SetRotationDeg(-90.0f, 0.0f, 0.0f);
 		break;
 	case 3:
-		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
-		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
+		cMap.GetCam().SetRotationDeg(90.0f, 0.0f, 0.0f);
 		break;
 	case 4:
-		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));
-		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		cMap.GetCam().SetRotationDeg(0.0f, 0.0f, 0.0f);
 		break;
 	case 5:
-		cMap.GetCam().SetRotation(DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f));
-		//cMap.GetCam().SetUpDir(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));
+		cMap.GetCam().SetRotationDeg(0.0f, 180.0f, 0.0f);
 		break;
 	}
 }
@@ -488,7 +488,6 @@ void Scene::DisableTesselation()
 		object->DisableTesselation();
 	}
 }
-
 
 void Scene::HandleCulling()
 {

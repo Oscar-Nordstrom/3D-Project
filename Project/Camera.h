@@ -16,7 +16,9 @@ public:
 	const XMMATRIX& GettProjectionMatrix()const;
 	const XMVECTOR& GetPositionVector()const;
 	const XMFLOAT3& GetPositionFloat3()const;
+	//In radians
 	const XMVECTOR& GetRotationVector()const;
+	//In radians
 	const XMFLOAT3& GetRotationFloat3()const;
 	const XMVECTOR& GetForwardVec();
 	const XMVECTOR& GetBackVec();
@@ -41,12 +43,18 @@ public:
 	void Move(const XMVECTOR& pos);
 	void Move(const XMFLOAT3& pos);
 	void Move(float x, float y, float z);
-	void SetRotation(const XMVECTOR& rot);
-	void SetRotation(const XMFLOAT3& rot);
-	void SetRotation(float x, float y, float z);
-	void Rotate(const XMVECTOR& rot);
-	void Rotate(const XMFLOAT3& rot);
-	void Rotate(float x, float y, float z);
+	void SetRotationRad(const XMVECTOR& rot);
+	void SetRotationRad(const XMFLOAT3& rot);
+	void SetRotationRad(float x, float y, float z);
+	void RotateRad(const XMVECTOR& rot);
+	void RotateRad(const XMFLOAT3& rot);
+	void RotateRad(float x, float y, float z);
+	void SetRotationDeg(const XMVECTOR& rot);
+	void SetRotationDeg(const XMFLOAT3& rot);
+	void SetRotationDeg(float x, float y, float z);
+	void RotateDeg(const XMVECTOR& rot);
+	void RotateDeg(const XMFLOAT3& rot);
+	void RotateDeg(float x, float y, float z);
 
 	bool Intersect(DirectX::BoundingBox box);
 	bool Intersect(DirectX::BoundingSphere sphere);
