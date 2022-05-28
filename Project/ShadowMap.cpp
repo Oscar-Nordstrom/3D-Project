@@ -51,10 +51,10 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 	DirectX::XMMATRIX projection;
 	DirectX::XMMATRIX cam;
 	if (flag == DIRECTIONAL_LIGHT) {
-
+		projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
 	}
 	else if (flag == SPOT_LIGHT) {
-		projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(45), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
+		projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
 		switch (whatLight)
 		{
 		case 0:
@@ -72,8 +72,7 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 		assert(false, "Need a spot light or a direction light.");
 	}
 
-	//gfx->SetProjection(projection);
-	//gfx->SetCamera(cam);
+	gfx->SetProjection(projection);
 }
 
 void ShadowMap::SetDirLight(DirectionalLight* dLight)

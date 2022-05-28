@@ -16,12 +16,6 @@ int roundUpTo(int numToRound, int multiple)
 Scene::Scene()
 	:window(WIDTH, HEIGHT, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx())
 {
-	//fov = 90.0f; //90 degrees field of view
-	//float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
-	//float aspectRatio = static_cast<float>(window.GetWidth()) / static_cast<float>(window.GetHeight());//The aspect ratio
-	//nearZ = 0.1f; //Minimum viewing 
-	//farZ = 100.0f;//Maximum viewing distance
-	//proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 	cam.SetPosition(0.0f, 0.0f, -3.0f),
 	cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 100.0f);
 	window.Gfx()->SetProjection(cam.GettProjectionMatrix());
@@ -65,11 +59,6 @@ Scene::~Scene()
 	if(camBuf2)camBuf2->Release();
 	if (camBufTime)camBufTime->Release();
 
-	/*for (int i = 0; i < 6; i++) {
-		if (skybox[i] != nullptr)
-			delete skybox[i];
-	}*/
-
 	texHandl->Delete();
 
 }
@@ -101,14 +90,12 @@ bool Scene::DoFrame()
 	theTimedata.time = timerCount;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
 
-	//cam.Update(nearZ, farZ, (float)WIDTH, (float)HEIGHT, fov);
-
 	
 	//std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPositionFloat3().x) + L", Y: " + std::to_wstring(cam.GetPositionFloat3().y) + L", Z: " + std::to_wstring(cam.GetPositionFloat3().z);
 	//std::wstring mouseString = L"Mouse pos: " + std::to_wstring(window.mouse.GetPosX()) + L", " + std::to_wstring(window.mouse.GetPosY());
-	std::wstring numObjectsString = L"Num objects: " + std::to_wstring(this->objectsToDraw.size());
+	//std::wstring numObjectsString = L"Num objects: " + std::to_wstring(this->objectsToDraw.size());
 	//std::wstring numNodesString = L"Num nodes: " + std::to_wstring(this->intersectingNodes.size());
-	window.SetTitle(numObjectsString.c_str());
+	window.SetTitle(timerString.c_str());
 
 	//Enable/Disable tesselation
 	if (tesselationTemp != tesselation) {
@@ -133,6 +120,8 @@ bool Scene::DoFrame()
 	cam.SetRotationDeg(90, 0.0f , 0.0f);
 	shadow.SetDirLight(&dLight);
 	shadow.StartFirst(cam.GetPositionFloat3(), DIRECTIONAL_LIGHT);
+	shadow.UpdateWhatShadow(0, DIRECTIONAL_LIGHT);
+	UpdateCamera();
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
 	for (auto p : objectsToDraw) {
 		p->Draw(window.Gfx(), SHADOW);
@@ -140,6 +129,7 @@ bool Scene::DoFrame()
 	shadow.EndFirst();
 	cam.SetPosition(tempPos);
 	cam.SetRotationRad(tempDir);
+	UpdateCamera();
 	//Shadows End First
 	//Shadows Start Second
 
