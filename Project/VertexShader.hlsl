@@ -4,11 +4,6 @@ cbuffer cBuf : register(b0)
     float4x4 view;
     float4x4 projection;
 };
-cbuffer cBuf : register(b1)
-{
-    float4x4 lightView;
-    float4x4 lightProjection;
-};
 
 struct VertexShaderInput
 {
@@ -34,19 +29,11 @@ VSOut main(VertexShaderInput input)
     
     VSOut output;
     
-   wPosition = mul(world, wPosition); //World space
-    
+    wPosition = mul(world, wPosition); //World space
     position = mul(world, position);//World space
-    //position = mul(view, position);//View space
-    //position = mul(projection, position);//Clip space
-
-    
     normal = mul(world, normal); //World space 
-    
     //Light
     output.lightPosition = wPosition;
-   // output.lightPosition = mul(lightView, wPosition);
-   // output.lightPosition = mul(lightProjection, output.lightPosition);
     
     output.position = position;
     output.wPosition = wPosition;

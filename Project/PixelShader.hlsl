@@ -23,40 +23,44 @@ Texture2D<float4> tex3 : register(t2); //Ambient
 SamplerState samp1 : register(s0);
 SamplerState shadowSamp : register(s1);
 
-Texture2D<float4> shadowMap : register(t3);
-
+//Texture2D<float4> shadowMap : register(t3);
+Texture2DArray<float4> shadowMaps : register(t3);
 
 
 PixelShaderOutput main(PixelShaderInput input)
 {
     
- 
+    bool lit = false;
+    int numLights = 1;
     float shadowCoeff = 1.0f;
-    //Convert to NDC
-    input.lightPosition.xy /= input.lightPosition.w;//OK
-    //Translate to UV (0-1)
-    float2 smTex = float2(input.lightPosition.x * 0.5f + 0.5f, input.lightPosition.y * (-0.5f) + 0.5f); //OK
-    //Compute pixel depth for shadowing
-    float depth = input.lightPosition.z / input.lightPosition.w;//OK
-    //Sample
-    float4 sampled = shadowMap.Sample(shadowSamp, smTex); //Maybe need another sampler?
-    //Check if shadowd
-    if (sampled.r < depth)//Is this right?
-    {
-        //If the light sees is less than what we see, there is a shadow
-      shadowCoeff = 0.0f;
+    for (int i = 0; i < numLights; i++) {
+        if (lit) {
+            break;
+        }
+        //Convert to NDC
+        input.lightPosition.xy /= input.lightPosition.w;
+        //Translate to UV (0-1)
+        float2 smTex = float2(input.lightPosition.x * 0.5f + 0.5f, input.lightPosition.y * (-0.5f) + 0.5f);
+        //Compute pixel depth for shadowing
+        float depth = input.lightPosition.z / input.lightPosition.w;
+        //Sample
+        float4 sampled = shadowMaps.SampleLevel(shadowSamp, float3(smTex, i), 0);
+        //Check if shadowd
+        if (sampled.r < depth)
+        {
+            //If the light sees is less than what we see, there is a shadow
+            shadowCoeff = 0.0f;
+        }
+        else {
+            lit = true;
+        }
     }
-    
-
-    
-    
-
   
 
     PixelShaderOutput output;
     
-    output.color = tex1.Sample(samp1, input.uv);// * shadowCoeff;
-    output.specular = tex2.Sample(samp1, input.uv);// * shadowCoeff;
+    output.color = tex1.Sample(samp1, input.uv) * shadowCoeff;
+    output.specular = tex2.Sample(samp1, input.uv) * shadowCoeff;
     output.ambient = tex3.Sample(samp1, input.uv);
     output.position = input.position;
     output.wPosition = input.wPosition;

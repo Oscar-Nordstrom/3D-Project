@@ -25,7 +25,7 @@ Scene::Scene()
 	SetUpGameObjects();
 
 
-	dLight.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
+	dLight.color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
 	SetUpDirLight();
 	//cam.SetPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
@@ -57,6 +57,9 @@ Scene::~Scene()
 	if(lightBuf)lightBuf->Release();
 	if(camBuf)camBuf->Release();
 	if(camBuf2)camBuf2->Release();
+	for (int i = 0; i < NUM_LIGHTS; i++) {
+		if (shadowMapBufs[i])shadowMapBufs[i]->Release();
+	}
 	if (camBufTime)camBufTime->Release();
 
 	texHandl->Delete();
@@ -116,25 +119,27 @@ bool Scene::DoFrame()
 	//Shadows Start First
 	DirectX::XMFLOAT3 tempPos = cam.GetPositionFloat3();
 	DirectX::XMFLOAT3 tempDir = cam.GetRotationFloat3();
-	cam.SetPosition(0.0f, 20.0f, 0.0f);
-	cam.SetRotationDeg(90, 0.0f , 0.0f);
-	shadow.SetDirLight(&dLight);
-	shadow.StartFirst(cam.GetPositionFloat3(), DIRECTIONAL_LIGHT);
-	shadow.UpdateWhatShadow(0, DIRECTIONAL_LIGHT);
-	UpdateCamera();
-	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
-	for (auto p : objectsToDraw) {
-		p->Draw(window.Gfx(), SHADOW);
+	for (int i = 0; i < NUM_LIGHTS; i++) {
+		cam.SetPosition(0.0f, 49.0f, 0.0f);
+		cam.SetRotationDeg(90, 0.0f, 0.0f);
+		shadow.SetDirLight(&dLight);
+		shadow.StartFirst(cam.GetPositionFloat3(), DIRECTIONAL_LIGHT);
+		shadow.UpdateWhatShadow(0, DIRECTIONAL_LIGHT);
+		UpdateCamera();
+		shadowBufferData[i].view = cam.GettViewMatrix();
+		shadowBufferData[i].proj = cam.GettProjectionMatrix();
+		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
+		for (auto p : objectsToDraw) {
+			p->Draw(window.Gfx(), SHADOW);
+		}
+		shadow.EndFirst();
 	}
-	shadow.EndFirst();
+	
 	cam.SetPosition(tempPos);
 	cam.SetRotationRad(tempDir);
 	UpdateCamera();
 	//Shadows End First
-	//Shadows Start Second
-
 	
-	//Shadows End Second
 
 
 	//Cube mapping first Start
@@ -182,6 +187,13 @@ bool Scene::DoFrame()
 	cMap.SetEnd(window.Gfx());
 	//Cube map seccond End
 
+	//Shadows Start Second
+	window.Gfx()->GetContext()->DSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
+	shadow.StartSeccond();
+	shadow.EndSeccond();
+
+	//Shadows End Second
+
 	for (auto p : objectsToDraw) {
 		p->Draw(window.Gfx());
 	}
@@ -199,6 +211,7 @@ bool Scene::DoFrame()
 	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
+	window.Gfx()->GetContext()->CSSetConstantBuffers(3, 1, &camBuf2);
 	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight());
 	//Final draw End
 
@@ -268,6 +281,24 @@ bool Scene::SetUpBufs()
 		return false;
 	}
 
+	for (int i = 0; i < NUM_LIGHTS; i++) {
+		desc.ByteWidth = roundUpTo(sizeof(shadowBufferData[i]), 16);
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
+
+		data.pSysMem = &shadowBufferData[i];
+		data.SysMemPitch = 0;
+		data.SysMemSlicePitch = 0;
+
+		hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &shadowMapBufs[i]);
+		if (FAILED(hr)) {
+			return false;
+		}
+	}
+	
 	
 	theTimedata.dt = dt;
 	theTimedata.time = timerCount;
@@ -304,6 +335,16 @@ void Scene::UpdateBufs()
 	window.Gfx()->GetContext()->Unmap(camBuf2, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
 		assert(false, "Failed to update buffer.");
+	}
+
+	for (int i = 0; i < NUM_LIGHTS; i++) {
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+		hr = window.Gfx()->GetContext()->Map(shadowMapBufs[i], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+		CopyMemory(mappedResource.pData, &shadowBufferData[i], sizeof(ShadowShaderBuffer));//Write the new memory
+		window.Gfx()->GetContext()->Unmap(shadowMapBufs[i], 0);//Reenable GPU access to the data
+		if (FAILED(hr)) {
+			assert(false, "Failed to update buffer.");
+		}
 	}
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
@@ -557,9 +598,11 @@ void Scene::SetUpGameObjects()
 
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
+	gameObjects.push_back(&cube);
 
 	for (int i = 0; i < 6; i++) {
 		skybox[i].Init(texHandl, "../Resources/Obj/plane.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+		gameObjects.push_back(&skybox[i]);
 	}
 	SetUpSkybox();
 }

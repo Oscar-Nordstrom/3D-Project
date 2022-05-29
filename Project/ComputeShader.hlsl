@@ -19,6 +19,9 @@ cbuffer camcb : register(b2)
 {
     float4 camPos;
 }
+cbuffer cBuf2 : register(b3) {
+    float4 cameraDirection;
+}
 
 RWBuffer<float> particles;
 
@@ -63,7 +66,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     if (diff >= 0.0f)
     {
         float3 r = -normalize(reflect(-d, normal.xyz));
-        float3 v = normalize(camPos.xyz - wPosition.xyz);
+        float3 v = normalize(cameraDirection.xyz);//normalize(camPos.xyz - wPosition.xyz);
         float spec = dot(r, v);
         if (spec >= 0.0f)
         {

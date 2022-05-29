@@ -20,9 +20,9 @@ struct TimeData {
 	float time;
 };
 
-struct ShadowVertexData {
-	DirectX::XMMATRIX proj;
+struct ShadowShaderBuffer {
 	DirectX::XMMATRIX view;
+	DirectX::XMMATRIX proj;
 };
 
 struct DirectionalLight {

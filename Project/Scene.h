@@ -71,6 +71,9 @@ private:
 	std::vector<SceneObjectTest*>gameObjects;
 	DirectionalLight dLight;
 	ShadowMap shadow;
+	ShadowShaderBuffer shadowBufferData[NUM_LIGHTS];
+	ID3D11Buffer* shadowMapBufs[NUM_LIGHTS];
+
 	ID3D11Buffer* lightBuf;
 	ID3D11Buffer* camBuf;
 	ID3D11Buffer* camBuf2;

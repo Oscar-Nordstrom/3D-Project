@@ -22,8 +22,6 @@ ShadowMap::~ShadowMap()
 	}
 	if (dsTexture)dsTexture->Release();
 	if (vertexShadowShader)vertexShadowShader->Release();
-	//if(pixelShadowShader)pixelShadowShader->Release();//Used later
-	if (shadowRes)shadowRes->Release();
 	if (shadowSRV)shadowSRV->Release();
 }
 
@@ -34,12 +32,23 @@ void ShadowMap::StartFirst(DirectX::XMFLOAT3 pos, int flag)
 	}
 	gfx->GetContext()->RSSetViewports(1, &shadowViewPort);
 	gfx->GetContext()->VSSetShader(vertexShadowShader, nullptr, 0);
+	ID3D11ShaderResourceView* const pSRV[4] = { NULL,NULL,NULL,NULL };//Might change this
+	gfx->GetContext()->PSSetShaderResources(1, 4, pSRV);
 	gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
-	ID3D11ShaderResourceView* const pSRV[1] = { NULL };//Might change this
-	gfx->GetContext()->PSSetShaderResources(4, 1, pSRV);
+	if (shadowSRV)shadowSRV->Release();
 }
 
 void ShadowMap::EndFirst()
+{
+}
+
+void ShadowMap::StartSeccond()
+{
+	DepthToSRV();
+	gfx->GetContext()->PSSetShaderResources(3, 1, &shadowSRV);
+}
+
+void ShadowMap::EndSeccond()
 {
 }
 
@@ -51,7 +60,8 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 	DirectX::XMMATRIX projection;
 	DirectX::XMMATRIX cam;
 	if (flag == DIRECTIONAL_LIGHT) {
-		projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
+		//projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
+		projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
 	}
 	else if (flag == SPOT_LIGHT) {
 		projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
@@ -113,8 +123,8 @@ ID3D11ShaderResourceView*& ShadowMap::DepthToSRV()
 		dsViews[i]->GetResource(&shadowRes);
 		hr = gfx->GetDevice()->CreateShaderResourceView(shadowRes, &srvDesc, &shadowSRV);
 		assert(!FAILED(hr), "Failed to convert dsView to SRV");
+		shadowRes->Release();
 	}
-	shadowRes->Release();
 	return shadowSRV;
 }
 

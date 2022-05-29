@@ -14,6 +14,8 @@ public:
 	~ShadowMap();
 	void StartFirst(DirectX::XMFLOAT3 pos, int flag = SPOT_LIGHT);
 	void EndFirst();
+	void StartSeccond();
+	void EndSeccond();
 	void UpdateWhatShadow(int whatLight, int flag);
 	void SetDirLight(DirectionalLight* dLight);
 	//Needs 3 lights
