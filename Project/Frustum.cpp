@@ -15,7 +15,7 @@ void Frustum::SetFrustum(DirectX::XMFLOAT3 camPos, float nearZ, float farZ, floa
 	width = nearZ * tan(fov / 2) * aspect;
 	height = nearZ * tan(fov / 2);
 	this->point = camPos;
-	this->nearPlane.point = camPos + (nearZ*forward);
+	this->nearPlane.point = camPos + (nearZ * forward);
 	this->farPlane.point = camPos + (farZ * forward);
 	this->nearPlane.normal = -forward;
 	this->farPlane.normal = forward;
@@ -25,6 +25,7 @@ void Frustum::SetFrustum(DirectX::XMFLOAT3 camPos, float nearZ, float farZ, floa
 	this->topPlane.point = camPos;
 	this->bottomPlane.point = camPos;
 
+	//buffer is 0 as default, but can be adjusten frim ImGui
 	this->upLeft = camPos + (forward * nearZ) + (up * (height + buffer / 2)) - (right * (width + buffer / 2));
 	this->upRight = camPos + (forward * nearZ) + (up * (height + buffer / 2)) + (right * (width + buffer / 2));
 	this->downLeft = camPos + (forward * nearZ) - (up * (height + buffer / 2)) - (right * (width + buffer / 2));

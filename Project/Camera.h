@@ -37,8 +37,8 @@ public:
 	float& GetSpeed();
 	float& GetRotSpeed();
 
-	void SetPosition(const XMVECTOR& pos);
-	void SetPosition(const XMFLOAT3& pos);
+	void SetPosition( XMVECTOR& pos);
+	void SetPosition( XMFLOAT3& pos);
 	void SetPosition(float x, float y, float z);
 	void Move(const XMVECTOR& pos);
 	void Move(const XMFLOAT3& pos);
@@ -46,14 +46,14 @@ public:
 	void SetRotationRad(const XMVECTOR& rot);
 	void SetRotationRad(const XMFLOAT3& rot);
 	void SetRotationRad(float x, float y, float z);
-	void RotateRad(const XMVECTOR& rot);
-	void RotateRad(const XMFLOAT3& rot);
+	void RotateRad( XMVECTOR& rot);
+	void RotateRad( XMFLOAT3& rot);
 	void RotateRad(float x, float y, float z);
 	void SetRotationDeg(const XMVECTOR& rot);
 	void SetRotationDeg(const XMFLOAT3& rot);
 	void SetRotationDeg(float x, float y, float z);
-	void RotateDeg(const XMVECTOR& rot);
-	void RotateDeg(const XMFLOAT3& rot);
+	void RotateDeg( XMVECTOR& rot);
+	void RotateDeg( XMFLOAT3& rot);
 	void RotateDeg(float x, float y, float z);
 
 	bool Intersect(DirectX::BoundingBox box);
@@ -62,6 +62,12 @@ public:
 private:
 	void UpdateViewMatrix();
 	void UpdateFrustum();
+	void CheckRotation(XMVECTOR& rot);
+	void CheckRotation(XMFLOAT3& rot);
+	void CheckRotation(float& x, float& y, float& z);
+	void CheckRotationDeg(XMVECTOR& rot);
+	void CheckRotationDeg(XMFLOAT3& rot);
+	void CheckRotationDeg(float& x, float& y, float& z);
 	XMVECTOR posVector;
 	XMVECTOR rotVector;
 	XMFLOAT3 pos;
@@ -70,6 +76,7 @@ private:
 	XMMATRIX projectionMatrix;
 
 	Frustum frustum;
+	DirectX::BoundingFrustum testFrustum;
 	float speed, rotSpeed, nearZ, farZ, width, height, fov;
 
 	const XMVECTOR DefaultForwardVector = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);

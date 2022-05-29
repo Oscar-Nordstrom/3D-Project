@@ -49,6 +49,11 @@ struct TextureRT {
 	ID3D11ShaderResourceView* srv;
 };
 
+struct MtlData {
+	float Ns;
+	DirectX::XMFLOAT3 kd, ks, ka;
+};
+
 struct MtlImages {
 	std::vector<std::string> names;
 	std::vector<ID3D11Texture2D*>textures;
@@ -188,14 +193,19 @@ struct Matrices
 };
 
 struct Material {
-	float Ns;
-	std::string map_Kd;
-	std::string map_Ks;
-	std::string map_Ka;
+	MtlData theMtlData;
+	std::string map_Kd, map_Ks, map_Ka;
 	int one, two, three;
-	Material(float Ns, std::string map_Kd, std::string map_Ks, std::string map_Ka)
-		:Ns(Ns), map_Kd(map_Kd), map_Ks(map_Ks), map_Ka(map_Ka)
+	Material(float Ns, DirectX::XMFLOAT3 kd, DirectX::XMFLOAT3 ks, DirectX::XMFLOAT3 ka, std::string map_Kd, std::string map_Ks, std::string map_Ka)
+		:map_Kd(map_Kd), map_Ks(map_Ks), map_Ka(map_Ka)
 	{
+		theMtlData.Ns = Ns;
+		theMtlData.kd = kd;
+		theMtlData.ks = ks;
+		theMtlData.ka = ka;
+		one = -1;
+		two = -1;
+		three = -1;
 	}
 	int roundUpTo(int numToRound, int multiple)
 	{
@@ -326,7 +336,7 @@ struct Material {
 	}
 	bool SetUpCbuf(ID3D11Device* device, ID3D11Buffer*& cbuf) {
 		D3D11_BUFFER_DESC desc;
-		desc.ByteWidth = roundUpTo(sizeof(Ns), 16);
+		desc.ByteWidth = roundUpTo(sizeof(MtlData), 16);
 		desc.Usage = D3D11_USAGE_IMMUTABLE;
 		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		desc.CPUAccessFlags = 0;
@@ -334,7 +344,7 @@ struct Material {
 		desc.StructureByteStride = 0;
 
 		D3D11_SUBRESOURCE_DATA data;
-		data.pSysMem = &Ns;
+		data.pSysMem = &theMtlData;
 		data.SysMemPitch = 0;
 		data.SysMemSlicePitch = 0;
 
@@ -394,7 +404,10 @@ struct SubMesh {
 	bool LoadMtl(ID3D11Device* device, ID3D11DeviceContext* context, MtlImages* mtlFileTex, std::string fileName) {
 
 		float Ns = 0.0f;
-
+		DirectX::XMFLOAT3 neg = { -1.0f, -1.0f, -1.0f };
+		DirectX::XMFLOAT3 kd = { 0.1f, 0.1f, 0.1f };
+		DirectX::XMFLOAT3 ks = { 0.0f, 0.0f, 0.0f };
+		DirectX::XMFLOAT3 ka = { 0.1f, 0.1f, 0.1f };
 		std::string map_Kd = "";
 		std::string map_Ks = "";
 		std::string map_Ka = "";
@@ -406,6 +419,9 @@ struct SubMesh {
 		std::string prefix = "";
 		std::string check;
 		bool found = false;
+		bool foundMapKd = false;
+		bool foundMapKa = false;
+		bool foundMapKs = false;
 		file.open("../Resources/Mtl/" + fileName);
 		if (!file.is_open()) {
 			std::cerr << "Failed to open mesh file.\n";
@@ -434,18 +450,36 @@ struct SubMesh {
 				if (prefix == "Ns") {
 					ss >> Ns;
 				}
+				else if (prefix == "Kd") {
+					ss >> kd.x >> kd.y >> kd.z;
+				}
+				else if (prefix == "Ks") {
+					ss >> ks.x >> ks.y >> ks.z;
+				}
+				else if (prefix == "Ka") {
+					ss >> ka.x >> ka.y >> ka.z;
+				}
 				else if (prefix == "map_Kd") {
 					ss >> map_Kd;
+					foundMapKd = true;
 				}
 				else if (prefix == "map_Ks") {
 					ss >> map_Ks;
+					foundMapKs = true;
 				}
 				else if (prefix == "map_Ka") {
 					ss >> map_Ka;
+					foundMapKa = true;
 				}
 			}
 		}
-		Material mat(Ns, map_Kd, map_Ks, map_Ka);
+		if (foundMapKs) {
+			ks = neg;
+		}
+		if (foundMapKa) {
+			ka = neg;
+		}
+		Material mat(Ns, kd, ka, ks, map_Kd, map_Ks, map_Ka);
 		if (!mat.SetupTexture(device, mtlFileTex)) {
 			return false;
 		}

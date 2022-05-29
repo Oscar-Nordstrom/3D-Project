@@ -130,10 +130,6 @@ bool SceneObjectTest::Init(TextureHandler*& texHandl, string objPath, string vSh
 {
 	this->model.SetTexHandl(texHandl);
 
-	/*transform = dx::XMMatrixScaling(sx, sy, sz) * dx::XMMatrixRotationX(rx) * dx::XMMatrixRotationY(ry) * dx::XMMatrixRotationZ(rz) * dx::XMMatrixTranslation(x, y, z);
-	boundingSphere.Center = DirectX::XMFLOAT3(x, y, z);
-	boundingSphere.Radius = LargestSide() / 2.0f;*/
-
 	if (!particle) {
 		assert(model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, transform, gfx), "Failed to load model.");
 	}

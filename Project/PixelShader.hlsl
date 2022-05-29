@@ -17,9 +17,15 @@ struct PixelShaderOutput
     float4 specular : SV_Target5;
 };
 
-Texture2D<float4> tex1 : register(t0); //Diffuse
-Texture2D<float4> tex2 : register(t1); //Specular
-Texture2D<float4> tex3 : register(t2); //Ambient
+cbuffer lightcb : register(b1)
+{
+    float4 lightColor;
+    float3 lightDir;
+}
+
+Texture2D<float4> map_Kd : register(t0); //Diffuse
+Texture2D<float4> map_Ks : register(t1); //Specular
+Texture2D<float4> map_Ka : register(t2); //Ambient
 SamplerState samp1 : register(s0);
 SamplerState shadowSamp : register(s1);
 
@@ -37,10 +43,13 @@ PixelShaderOutput main(PixelShaderInput input)
         if (lit) {
             break;
         }
+        if (dot(normalize(lightDir), input.normal) < 0.0f) {
+            continue;
+        }
         //Convert to NDC
-        input.lightPosition.xy /= input.lightPosition.w;
+        input.lightPosition.xy /= input.lightPosition.w;//OK
         //Translate to UV (0-1)
-        float2 smTex = float2(input.lightPosition.x * 0.5f + 0.5f, input.lightPosition.y * (-0.5f) + 0.5f);
+        float2 smTex = float2(input.lightPosition.x * 0.5f + 0.5f, input.lightPosition.y * (-0.5f) + 0.5f);//OK
         //Compute pixel depth for shadowing
         float depth = input.lightPosition.z / input.lightPosition.w;
         //Sample
@@ -59,9 +68,9 @@ PixelShaderOutput main(PixelShaderInput input)
 
     PixelShaderOutput output;
     
-    output.color = tex1.Sample(samp1, input.uv) * shadowCoeff;
-    output.specular = tex2.Sample(samp1, input.uv) * shadowCoeff;
-    output.ambient = tex3.Sample(samp1, input.uv);
+    output.color = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
+    output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
+    output.ambient = map_Ka.Sample(samp1, input.uv);
     output.position = input.position;
     output.wPosition = input.wPosition;
     output.normal = input.normal;

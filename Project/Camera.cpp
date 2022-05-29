@@ -139,14 +139,14 @@ Frustum* Camera::GetFrustum()
 	return &this->frustum;
 }
 
-void Camera::SetPosition(const XMVECTOR& pos)
+void Camera::SetPosition( XMVECTOR& pos)
 {
 	XMStoreFloat3(&this->pos, pos);
 	this->posVector = pos;
 	this->UpdateViewMatrix();
 }
 
-void Camera::SetPosition(const XMFLOAT3& pos)
+void Camera::SetPosition( XMFLOAT3& pos)
 {
 	this->pos = pos;
 	this->posVector = XMLoadFloat3(&this->pos);
@@ -190,7 +190,7 @@ void Camera::Move(float x, float y, float z)
 void Camera::SetRotationRad(const XMVECTOR& rot)
 {
 	XMStoreFloat3(&this->rot, rot);
-	this->posVector = rot;
+	this->rotVector = rot;
 	this->UpdateViewMatrix();
 }
 
@@ -210,15 +210,17 @@ void Camera::SetRotationRad(float x, float y, float z)
 	this->UpdateViewMatrix();
 }
 
-void Camera::RotateRad(const XMVECTOR& rot)
+void Camera::RotateRad( XMVECTOR& rot)
 {
+	this->CheckRotation(rot);
 	this->rotVector += rot * rotSpeed;
 	XMStoreFloat3(&this->rot, this->rotVector);
 	this->UpdateViewMatrix();
 }
 
-void Camera::RotateRad(const XMFLOAT3& rot)
+void Camera::RotateRad( XMFLOAT3& rot)
 {
+	this->CheckRotation(rot);
 	this->rot.x += rot.x * rotSpeed;
 	this->rot.y += rot.y * rotSpeed;
 	this->rot.z += rot.z * rotSpeed;
@@ -228,11 +230,13 @@ void Camera::RotateRad(const XMFLOAT3& rot)
 
 void Camera::RotateRad(float x, float y, float z)
 {
+	this->CheckRotation(x,y,z);
 	this->rot.x += x * rotSpeed;
 	this->rot.y += y * rotSpeed;
 	this->rot.z += z * rotSpeed;
 	this->rotVector = XMLoadFloat3(&this->rot);
 	this->UpdateViewMatrix();
+
 }
 
 void Camera::SetRotationDeg(const XMVECTOR& rot)
@@ -269,8 +273,9 @@ void Camera::SetRotationDeg(float x, float y, float z)
 	this->UpdateViewMatrix();
 }
 
-void Camera::RotateDeg(const XMVECTOR& rot)
+void Camera::RotateDeg( XMVECTOR& rot)
 {
+	this->CheckRotationDeg(rot);
 	XMFLOAT3 rotation;
 	XMStoreFloat3(&rotation, rot);
 	rotation.x =+ XMConvertToRadians(rotation.x) * rotSpeed;
@@ -282,8 +287,9 @@ void Camera::RotateDeg(const XMVECTOR& rot)
 	this->UpdateViewMatrix();
 }
 
-void Camera::RotateDeg(const XMFLOAT3& rot)
+void Camera::RotateDeg( XMFLOAT3& rot)
 {
+	this->CheckRotationDeg(rot);
 	XMFLOAT3 rotation = rot;
 	rotation.x =+ XMConvertToRadians(rotation.x) * rotSpeed;
 	rotation.y =+ XMConvertToRadians(rotation.y) * rotSpeed;
@@ -296,6 +302,7 @@ void Camera::RotateDeg(const XMFLOAT3& rot)
 
 void Camera::RotateDeg(float x, float y, float z)
 {
+	this->CheckRotationDeg(x,y,z);
 	this->rot.x =+ XMConvertToRadians(x) * rotSpeed;
 	this->rot.y =+ XMConvertToRadians(y) * rotSpeed;
 	this->rot.z =+ XMConvertToRadians(z) * rotSpeed;
@@ -306,11 +313,13 @@ void Camera::RotateDeg(float x, float y, float z)
 bool Camera::Intersect(DirectX::BoundingBox box)
 {
 	return this->frustum.intersect(box);
+	//return this->testFrustum.Intersects(box);
 }
 
 bool Camera::Intersect(DirectX::BoundingSphere sphere)
 {
 	return this->frustum.intersect(sphere);
+	//return this->testFrustum.Intersects(sphere);
 }
 
 void Camera::UpdateViewMatrix()
@@ -342,4 +351,71 @@ void Camera::UpdateViewMatrix()
 void Camera::UpdateFrustum()
 {
 	this->frustum.SetFrustum(this->pos, this->nearZ, this->farZ, this->width, this->height, this->fov, this->forwardFloat3, this->upFloat3, this->rightFloat3);
+	//DirectX::BoundingFrustum::CreateFromMatrix(this->testFrustum, this->projectionMatrix);
+}
+
+void Camera::CheckRotation(XMVECTOR& rot)
+{
+	DirectX::XMFLOAT3 temp;
+	DirectX::XMStoreFloat3(&temp, rot);
+	if (abs(DirectX::XMConvertToDegrees(this->rot.x + temp.x)) > 90.0f) {
+		temp.x = 0.0f;
+	}
+	if (abs(DirectX::XMConvertToDegrees(this->rot.z + temp.z)) > 90.0f) {
+		temp.z = 0.0f;
+	}
+	rot = DirectX::XMLoadFloat3(&temp);
+}
+
+void Camera::CheckRotation(XMFLOAT3& rot)
+{
+	if (abs(DirectX::XMConvertToDegrees(this->rot.x + rot.x)) > 90.0f) {
+		rot.x = 0.0f;
+	}
+	if (abs(DirectX::XMConvertToDegrees(this->rot.z + rot.z)) > 90.0f) {
+		rot.z = 0.0f;
+	}
+}
+
+void Camera::CheckRotation(float& x, float& y, float& z)
+{
+	if (abs(DirectX::XMConvertToDegrees(this->rot.x + x)) > 90.0f) {
+		x = 0.0f;
+	}
+	if (abs(DirectX::XMConvertToDegrees(this->rot.z + z)) > 90.0f) {
+		z = 0.0f;
+	}
+}
+
+void Camera::CheckRotationDeg(XMVECTOR& rot)
+{
+	DirectX::XMFLOAT3 temp;
+	DirectX::XMStoreFloat3(&temp, rot);
+	if (abs(this->rot.x + temp.x) > 90.0f) {
+		temp.x = 0.0f;
+	}
+	if (abs(this->rot.z + temp.z) > 90.0f) {
+		temp.z = 0.0f;
+	}
+	rot = DirectX::XMLoadFloat3(&temp);
+}
+
+void Camera::CheckRotationDeg(XMFLOAT3& rot)
+{
+	if (abs(this->rot.x + rot.x) > 90.0f) {
+		rot.x = 0.0f;
+	}
+	if (abs(this->rot.z + rot.z) > 90.0f) {
+		rot.z = 0.0f;
+	}
+}
+
+void Camera::CheckRotationDeg(float& x, float& y, float& z)
+{
+	if (abs(this->rot.x + x) > 90.0f) {
+		x = 0.0f;
+	}
+	if (abs(this->rot.z + z) > 90.0f) {
+		z = 0.0f;
+	}
 }

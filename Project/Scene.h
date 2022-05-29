@@ -41,8 +41,6 @@ private:
 
 	void ImGuiWindows();
 
-	float DegToRad(float deg);
-
 	void EnableTesselation();
 	void DisableTesselation();
 	void HandleCulling();
@@ -79,7 +77,7 @@ private:
 	ID3D11Buffer* camBuf2;
 	ID3D11Buffer* camBufTime;
 
-	SceneObjectTest skybox[6];
+	//SceneObjectTest skybox[6];
 
 	QuadTree* qtree;
 	std::vector<QuadTree*> intersectingNodes;

@@ -9,6 +9,9 @@ Texture2D<float4> speculars : register(t5);
 cbuffer cb : register(b0)
 {
     float s;//Specular expontent
+    float3 kd;//Diffuse component
+    float3 ks;//Specular component  
+    float3 ka;//Amboient compinent
 }
 cbuffer lightcb : register(b1)
 {
@@ -30,7 +33,7 @@ RWTexture2D<unorm float4> backbuffer : register(u0);
 [numthreads(20, 20, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
-    
+    float3 neg = float3(-1.0f, -1.0f, -1.0f);
     float4 final = float4(0.0f, 0.0f, 0.0f, 0.0f);;
     int2 texPos = int2(0, 0);
     texPos.x = DTid.x;
@@ -43,34 +46,33 @@ void main(uint3 DTid : SV_DispatchThreadID)
     float4 normal = normalize(normals.Load(tPos));
     float4 ambient = ambients.Load(tPos);
     float4 specular = speculars.Load(tPos);
+
     
     float4 finalAmbient = float4(0.0f, 0.0f, 0.0f, 0.0f);
     float4 finalDiffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
     float4 finalSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
     
-    //Do light calculations
     
     //Ambient calculations
     finalAmbient = ambient * matColor;
     
-    float3 d = normalize(dir);
+    float3 d = -normalize(dir);
     normal = normalize(normal);
     //Diffuse calculateions
-    float diff = dot(-d, normal.xyz);
+    float diff = dot(normal.xyz, d);
     if (diff >= 0.0f)
     {
-        finalDiffuse = diff * (matColor + color);
+        finalDiffuse = diff * (matColor + color) * float4(kd.xyz, 0.0f);
     }
-
     //Specular calculations
     if (diff >= 0.0f)
     {
-        float3 r = -normalize(reflect(-d, normal.xyz));
+        float3 r = normalize(reflect(d, normal.xyz));
         float3 v = normalize(cameraDirection.xyz);//normalize(camPos.xyz - wPosition.xyz);
         float spec = dot(r, v);
         if (spec >= 0.0f)
         {
-            finalSpecular = specular * pow(spec, s);
+            //finalSpecular = specular * pow(spec, s);
         }
 
     }

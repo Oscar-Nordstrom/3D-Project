@@ -25,11 +25,9 @@ Scene::Scene()
 	SetUpGameObjects();
 
 
-	dLight.color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	dLight.color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
 	SetUpDirLight();
-	//cam.SetPos(DirectX::XMFLOAT3(0.0f, 10.0f, 0.0f));
-	//cam.SetDir(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f));
 	SetUpBufs();
 
 
@@ -120,7 +118,7 @@ bool Scene::DoFrame()
 	DirectX::XMFLOAT3 tempPos = cam.GetPositionFloat3();
 	DirectX::XMFLOAT3 tempDir = cam.GetRotationFloat3();
 	for (int i = 0; i < NUM_LIGHTS; i++) {
-		cam.SetPosition(0.0f, 49.0f, 0.0f);
+		cam.SetPosition(0.0f, 55.0f, 0.0f);
 		cam.SetRotationDeg(90, 0.0f, 0.0f);
 		shadow.SetDirLight(&dLight);
 		shadow.StartFirst(cam.GetPositionFloat3(), DIRECTIONAL_LIGHT);
@@ -159,9 +157,9 @@ bool Scene::DoFrame()
 		for (auto p : objectsToDraw) {
 			p->Draw(window.Gfx(), CUBE_MAP);
 		}
-		for (int i = 0; i < 6; i++) {
-			skybox[i].Draw(window.Gfx(), CUBE_MAP);
-		}
+		//for (int i = 0; i < 6; i++) {
+		//	skybox[i].Draw(window.Gfx(), CUBE_MAP);
+		//}
 		ground.Draw(window.Gfx(), CUBE_MAP);
 
 		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
@@ -189,6 +187,7 @@ bool Scene::DoFrame()
 
 	//Shadows Start Second
 	window.Gfx()->GetContext()->DSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
+	window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &lightBuf);
 	shadow.StartSeccond();
 	shadow.EndSeccond();
 
@@ -197,9 +196,9 @@ bool Scene::DoFrame()
 	for (auto p : objectsToDraw) {
 		p->Draw(window.Gfx());
 	}
-	for (int i = 0; i < 6; i++) {
-		skybox[i].Draw(window.Gfx());
-	}
+	//for (int i = 0; i < 6; i++) {
+	//	skybox[i].Draw(window.Gfx());
+	//}
 	ground.Draw(window.Gfx());
 
 	//Particle Start
@@ -369,17 +368,17 @@ bool Scene::UpdateObjcects(float t)
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}
-	if (!cube.Update(0.0f, window.Gfx())) {
+	if (!cube.Update(-t, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}
 
-	for (int i = 0; i < 6; i++) {
-		if (!skybox[i].Update(0.0f, window.Gfx())) {
-			std::cerr << "Failed to update object.\n";
-			return false;
-		}
-	}
+	//for (int i = 0; i < 6; i++) {
+	//	if (!skybox[i].Update(0.0f, window.Gfx())) {
+	//		std::cerr << "Failed to update object.\n";
+	//		return false;
+	//	}
+	//}
 	return true;
 }
 
@@ -460,7 +459,7 @@ void Scene::cubeMapSetCam(int num)
 
 void Scene::SetUpSkybox()
 {
-	skybox[0].Scale(100.0f, 100.0f, 0.0f);
+	/*skybox[0].Scale(100.0f, 100.0f, 0.0f);
 	skybox[1].Scale(100.0f, 100.0f, 0.0f);
 	skybox[2].Scale(100.0f, 100.0f, 0.0f);
 	skybox[3].Scale(100.0f, 100.0f, 0.0f);
@@ -474,11 +473,11 @@ void Scene::SetUpSkybox()
 	skybox[4].Move(0.0f, 50.0f, 0.0f); //Up
 	skybox[5].Move(0.0f, -50.0f, 0.0f); //Down
 
-	skybox[1].Rotate(0.0f, DegToRad(180.0f), 0.0f);
-	skybox[2].Rotate(0.0f, DegToRad(90.0f), 0.0f);
-	skybox[3].Rotate(0.0f, DegToRad(-90.0f), 0.0f);
-	skybox[4].Rotate(DegToRad(-90.0f), 0.0f, 0.0f);
-	skybox[5].Rotate(DegToRad(90.0f), 0.0f, 0.0f);
+	skybox[1].Rotate(0.0f, DirectX::XMConvertToRadians(180.0f), 0.0f);
+	skybox[2].Rotate(0.0f, DirectX::XMConvertToRadians(90.0f), 0.0f);
+	skybox[3].Rotate(0.0f, DirectX::XMConvertToRadians(-90.0f), 0.0f);
+	skybox[4].Rotate(DirectX::XMConvertToRadians(-90.0f), 0.0f, 0.0f);
+	skybox[5].Rotate(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f);*/
 }
 
 void Scene::ImGuiWindows()
@@ -498,12 +497,6 @@ void Scene::ImGuiWindows()
 		ImGui::SliderFloat("Frustum buffer zone", cam.GetFrustumBuffer(), 0.0, 20.0f);
 	}
 	ImGui::End();
-}
-
-float Scene::DegToRad(float deg)
-{
-	double pi = 3.14159265359;
-	return (deg * (pi / 180));
 }
 
 void Scene::EnableTesselation()
@@ -591,19 +584,19 @@ void Scene::SetUpGameObjects()
 
 	ground.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	ground.Scale(100.0f, 100.0f, 0.0f);
-	ground.Rotate(DegToRad(90), 0.0f, 0.0f);
+	ground.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground.Move(0.0f, -20.0f, 0.0f);
-	gameObjects.push_back(&ground);
+	//gameObjects.push_back(&ground);
 	
 
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
 	gameObjects.push_back(&cube);
 
-	for (int i = 0; i < 6; i++) {
-		skybox[i].Init(texHandl, "../Resources/Obj/plane.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-		gameObjects.push_back(&skybox[i]);
-	}
+	//for (int i = 0; i < 6; i++) {
+	//	skybox[i].Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	//	//gameObjects.push_back(&skybox[i]);
+	//}
 	SetUpSkybox();
 }
 

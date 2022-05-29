@@ -20,6 +20,7 @@ public:
 	bool intersect(DirectX::BoundingSphere sphere);
     float* GetBuffer();
 private:
+    DirectX::BoundingFrustum frustumCheck;
 	DirectX::XMFLOAT3 point;
 	DirectX::XMFLOAT3 upLeft, upRight, downLeft, downRight;
 	Plane nearPlane, farPlane, topPlane, rightPlane, bottomPlane, leftPlane;
