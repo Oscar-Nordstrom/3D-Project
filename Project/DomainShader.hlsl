@@ -71,14 +71,14 @@ DS_OUTPUT main(HS_CONSTANT_DATA_OUTPUT input, float3 UVW : SV_DomainLocation, co
 
 
 
-	float3 finalNormal = UVW.x * tri[0].normal + UVW.y * tri[1].normal + UVW.z * tri[2].normal;
+	float3 finalNormal = UVW.x * tri[0].normal.xyz + UVW.y * tri[1].normal.xyz + UVW.z * tri[2].normal.xyz;
 	Output.normal = mul(view, float4(finalNormal, 0.0f));
 	Output.normal = mul(projection, Output.normal);
 
 	float2 finalTex = UVW.x * tri[0].uv + UVW.y * tri[1].uv + UVW.z * tri[2].uv;
 	Output.uv = finalTex;
 
-	float3 finalLightPos = UVW.x * tri[0].lightPosition + UVW.y * tri[1].lightPosition + UVW.z * tri[2].lightPosition;
+	float3 finalLightPos = UVW.x * tri[0].lightPosition.xyz + UVW.y * tri[1].lightPosition.xyz + UVW.z * tri[2].lightPosition.xyz;
 	Output.lightPosition = mul(lightView, float4(finalLightPos, 1.0f));
 	Output.lightPosition = mul(lightProjection, Output.lightPosition);
 

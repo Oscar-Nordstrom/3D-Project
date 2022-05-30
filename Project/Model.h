@@ -19,7 +19,7 @@ using namespace std;
 
 class Model {
 public:
-	Model(/*TextureHandler*& texHandl*/);
+	Model();
 	~Model();
 
 	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);

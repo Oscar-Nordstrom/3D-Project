@@ -59,7 +59,7 @@ Window::Window(int width, int height, const wchar_t* name)
 		wr.right - wr.left, wr.bottom - wr.top,
 		nullptr, nullptr, WindowClass::GetInstance(), this);
 
-	if (hwnd == nullptr) {
+	if (hwnd == NULL) {
 		std::cerr << "Create window.\n";
 	}
 

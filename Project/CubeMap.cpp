@@ -2,12 +2,12 @@
 
 CubeMap::CubeMap(Graphics*& gfx)
 {
-	assert(setUpTextures(gfx->GetDevice()), "Failed to set up textures.");
-	assert(SetUpSrvs(gfx->GetDevice()), "Failed to set up shader resource view.");
+	assert(setUpTextures(gfx->GetDevice())&& "Failed to set up textures.");
+	assert(SetUpSrvs(gfx->GetDevice()) && "Failed to set up shader resource view.");
 	//assert(SetUpRtvs(gfx->GetDevice()), "Failed to set up render target view.");
-	assert(SetUpUavs(gfx->GetDevice()), "Failed to set up unorderd access view.");
-	assert(CreateDepthStencilView(gfx->GetDevice()), "Failed to set up depth stencil view.");
-	assert(LoadShader(gfx->GetDevice()), "Failed to load pixel shader.");
+	assert(SetUpUavs(gfx->GetDevice()) && "Failed to set up unorderd access view.");
+	assert(CreateDepthStencilView(gfx->GetDevice()) && "Failed to set up depth stencil view.");
+	assert(LoadShader(gfx->GetDevice()) && "Failed to load pixel shader.");
 	SetViewport();
 
 	pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);

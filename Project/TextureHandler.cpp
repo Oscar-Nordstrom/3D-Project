@@ -15,6 +15,7 @@ void TextureHandler::Delete()
 	for (int i = 0; i < images.size(); i++) {
 		if (images[i].tex) {
 			images[i].tex->Release();
+			delete images[i].img;
 		}
 	}
 }

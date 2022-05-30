@@ -80,7 +80,7 @@ XMFLOAT3 cross(XMFLOAT3 a, XMFLOAT3 b) {
 }
 
 float length(XMFLOAT3 a) {
-	return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+	return (float)sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
 XMFLOAT3 normalize(XMFLOAT3 a) {

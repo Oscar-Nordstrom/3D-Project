@@ -22,8 +22,8 @@ void Camera::SetProj(float fov, int width, int height, float nearZ, float farZ)
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 	float fovRadius = (fov / 360.0f) * XM_2PI;
 	this->projectionMatrix = XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
-	this->width = width;
-	this->height = height;
+	this->width = (float)width;
+	this->height = (float)height;
 	this->fov = fov;
 	this->nearZ = nearZ;
 	this->farZ = farZ;

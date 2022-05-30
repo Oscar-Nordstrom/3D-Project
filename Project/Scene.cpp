@@ -14,25 +14,24 @@ int roundUpTo(int numToRound, int multiple)
 }
 
 Scene::Scene()
-	:window(WIDTH, HEIGHT, L"Project"), dLight(DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f)), shadow(window.Gfx(), &dLight), cMap(window.Gfx())
+	:window(WIDTH, HEIGHT, L"Project"), cMap(window.Gfx())
 {
 	cam.SetPosition(0.0f, 0.0f, -3.0f),
-	cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 100.0f);
+	cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 200.0f);
 	window.Gfx()->SetProjection(cam.GettProjectionMatrix());
 	window.Gfx()->SetCamera(cam.GettViewMatrix());
 
 
 	SetUpGameObjects();
 
+	SetLights();
 
-	dLight.color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
-	SetUpDirLight();
 	SetUpBufs();
 
+	shadow.Init(window.Gfx(), &dLight);
+	shadow.SetSpotLights(sLights);
 
-
-	qtree = new QuadTree(gameObjects, 0, 100.0f, DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+	qtree = new QuadTree(gameObjects, 0, 300.0f, DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	tesselation = true;
 	tesselationTemp = tesselation;
@@ -41,10 +40,9 @@ Scene::Scene()
 	dt = 0;
 	this->updateCulling = true;
 
-	particle.Init(texHandl, "No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
-
-	this->mouseXtemp = window.mouse.GetPosX();
-	this->mouseYtemp = window.mouse.GetPosY();
+	
+	this->mouseXtemp = (float)window.mouse.GetPosX();
+	this->mouseYtemp = (float)window.mouse.GetPosY();
 
 	HandleCulling();
 
@@ -53,15 +51,22 @@ Scene::Scene()
 Scene::~Scene()
 {
 	if(lightBuf)lightBuf->Release();
+	if(lightBufSpots)lightBufSpots->Release();
 	if(camBuf)camBuf->Release();
 	if(camBuf2)camBuf2->Release();
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		if (shadowMapBufs[i])shadowMapBufs[i]->Release();
 	}
 	if (camBufTime)camBufTime->Release();
-
 	texHandl->Delete();
-
+	delete texHandl;
+	for (auto p : intersectingNodes) {
+		delete p;
+	}
+	for (auto p : objectsToDraw) {
+		delete p;
+	}
+	delete qtree;
 }
 
 int Scene::Start()
@@ -74,9 +79,6 @@ int Scene::Start()
 			std::cerr << "Failed to do frame.\n";
 			return -1;
 		}
-
-		
-
 		Sleep(1);
 	}
 }
@@ -139,7 +141,6 @@ bool Scene::DoFrame()
 	//Shadows End First
 	
 
-
 	//Cube mapping first Start
 	cMap.Clear(window.Gfx()->GetContext());
 	//Go through all uavs
@@ -157,14 +158,14 @@ bool Scene::DoFrame()
 		for (auto p : objectsToDraw) {
 			p->Draw(window.Gfx(), CUBE_MAP);
 		}
-		//for (int i = 0; i < 6; i++) {
-		//	skybox[i].Draw(window.Gfx(), CUBE_MAP);
-		//}
-		ground.Draw(window.Gfx(), CUBE_MAP);
+		for (auto p : grounds) {
+			p->Draw(window.Gfx(), CUBE_MAP);
+		}
 
 		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
+		window.Gfx()->GetContext()->CSSetConstantBuffers(4, 1, &lightBufSpots);
 		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 	}
@@ -199,7 +200,9 @@ bool Scene::DoFrame()
 	//for (int i = 0; i < 6; i++) {
 	//	skybox[i].Draw(window.Gfx());
 	//}
-	ground.Draw(window.Gfx());
+	for (auto p : grounds) {
+		p->Draw(window.Gfx());
+	}
 
 	//Particle Start
 	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
@@ -224,8 +227,6 @@ bool Scene::DoFrame()
 
 bool Scene::SetUpDirLight()
 {
-
-
 	D3D11_BUFFER_DESC desc;
 	desc.ByteWidth = roundUpTo(sizeof(dLight), 16);
 	desc.Usage = D3D11_USAGE_DEFAULT;
@@ -243,6 +244,27 @@ bool Scene::SetUpDirLight()
 
 	return !FAILED(hr);
 }
+
+bool Scene::SetUpSpotLighs()
+{
+	D3D11_BUFFER_DESC desc;
+	desc.ByteWidth = roundUpTo(sizeof(SpotLight)*3, 16);
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+	desc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = &sLights;
+	data.SysMemPitch = 0;
+	data.SysMemSlicePitch = 0;
+
+	HRESULT hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &lightBufSpots);
+
+	return !FAILED(hr);
+}
+
 
 bool Scene::SetUpBufs()
 {
@@ -325,7 +347,7 @@ void Scene::UpdateBufs()
 	CopyMemory(mappedResource.pData, &cam.GetPositionFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
-		assert(false, "Failed to update buffer.");
+		assert(false&& "Failed to update buffer.");
 	}
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
@@ -333,7 +355,7 @@ void Scene::UpdateBufs()
 	CopyMemory(mappedResource.pData, &cam.GetForwardFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf2, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
-		assert(false, "Failed to update buffer.");
+		assert(false && "Failed to update buffer.");
 	}
 
 	for (int i = 0; i < NUM_LIGHTS; i++) {
@@ -342,7 +364,7 @@ void Scene::UpdateBufs()
 		CopyMemory(mappedResource.pData, &shadowBufferData[i], sizeof(ShadowShaderBuffer));//Write the new memory
 		window.Gfx()->GetContext()->Unmap(shadowMapBufs[i], 0);//Reenable GPU access to the data
 		if (FAILED(hr)) {
-			assert(false, "Failed to update buffer.");
+			assert(false && "Failed to update buffer.");
 		}
 	}
 
@@ -351,7 +373,7 @@ void Scene::UpdateBufs()
 	CopyMemory(mappedResource.pData, &theTimedata, sizeof(TimeData));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBufTime, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
-		assert(false, "Failed to update buffer.");
+		assert(false && "Failed to update buffer.");
 	}
 }
 
@@ -364,10 +386,13 @@ bool Scene::UpdateObjcects(float t)
 			return false;
 		}
 	}
-	if (!ground.Update(0.0f, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
+	for (auto p : grounds) {
+		if (!p->Update(0.0f, window.Gfx())) {
+			std::cerr << "Failed to update object.\n";
+			return false;
+		}
 	}
+	
 	if (!cube.Update(-t, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
@@ -420,8 +445,8 @@ void Scene::checkInput()
 		}
 	}
 	else {
-		this->mouseXtemp = window.mouse.GetPosX();
-		this->mouseYtemp = window.mouse.GetPosY();
+		this->mouseXtemp = (float)window.mouse.GetPosX();
+		this->mouseYtemp = (float)window.mouse.GetPosY();
 	}
 	
 }
@@ -455,6 +480,34 @@ void Scene::cubeMapSetCam(int num)
 		cMap.GetCam().SetRotationDeg(0.0f, 180.0f, 0.0f);
 		break;
 	}
+}
+
+void Scene::SetLights()
+{
+	dLight.color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
+	SetUpDirLight();
+
+	sLights[0].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	sLights[1].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	sLights[2].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	sLights[0].position = { -160.0f, -20.0f, 00.0f };
+	sLights[1].position = { -160.0f, -20.0f, 20.0f };
+	sLights[2].position = { -160.0f, -20.0f, 40.0f };
+
+	sLights[0].direction = { 0.0f, -1.0f, 0.0f };
+	sLights[1].direction = { 0.0f, -1.0f, 0.0f };
+	sLights[2].direction = { 0.0f, -1.0f, 0.0f };
+
+	sLights[0].innerAngle = 10.0f;
+	sLights[1].innerAngle = 10.0f;
+	sLights[2].innerAngle = 10.0f;
+
+	sLights[0].outerAngle = 20.0f;
+	sLights[1].outerAngle = 20.0f;
+	sLights[2].outerAngle = 20.0f;
+	SetUpSpotLighs();
 }
 
 void Scene::SetUpSkybox()
@@ -591,18 +644,43 @@ void Scene::SetUpGameObjects()
 	ground.Scale(100.0f, 100.0f, 0.0f);
 	ground.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground.Move(0.0f, -20.0f, 0.0f);
-	//gameObjects.push_back(&ground);
+	grounds.push_back(&ground);
+
+	ground1.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground1.Scale(10.0f, 10.0f, 0.0f);
+	ground1.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
+	ground1.Move(-150.0f, -20.0f, 0.0f);
+	grounds.push_back(&ground1);
+
+	ground2.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground2.Scale(10.0f, 10.0f, 0.0f);
+	ground2.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
+	ground2.Move(-150.0f, -20.0f, 20.0f);
+	grounds.push_back(&ground2);
+
+	ground3.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground3.Scale(10.0f, 10.0f, 0.0f);
+	ground3.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
+	ground3.Move(-150.0f, -20.0f, 40.0f);
+	grounds.push_back(&ground3);
+
+	soldiers[24].SetPos({ -150.0f, 0.0f, 00.0f });
+	soldiers[25].SetPos({ -150.0f, 0.0f, 20.0f });
+	soldiers[26].SetPos({ -150.0f, 0.0f, 40.0f });
 	
 
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
 	gameObjects.push_back(&cube);
 
+	particle.Init(texHandl, "No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
+
+
 	//for (int i = 0; i < 6; i++) {
 	//	skybox[i].Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	//	//gameObjects.push_back(&skybox[i]);
 	//}
-	SetUpSkybox();
+	//SetUpSkybox();
 }
 
 void Scene::UpdateCamera()
@@ -620,11 +698,11 @@ void Scene::UpdateMouseDelta()
 {
 	if (window.mouse.GetPosX() > this->mouseXtemp || window.mouse.GetPosX() < this->mouseXtemp) {
 		this->mouseDX = window.mouse.GetPosX() - this->mouseXtemp;
-		this->mouseXtemp = window.mouse.GetPosX();
+		this->mouseXtemp = (float)window.mouse.GetPosX();
 	}
 	if (window.mouse.GetPosY() > this->mouseYtemp || window.mouse.GetPosY() < this->mouseYtemp) {
 		this->mouseDY = window.mouse.GetPosY() - this->mouseYtemp;
-		this->mouseYtemp = window.mouse.GetPosY();
+		this->mouseYtemp = (float)window.mouse.GetPosY();
 	}
 }
 

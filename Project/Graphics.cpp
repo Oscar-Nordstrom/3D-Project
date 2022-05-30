@@ -7,11 +7,11 @@ Graphics::Graphics(int width, int height, HWND& window)
 	w = width;
 	h = height;
 
-	assert(CreateDeviceAndSwapchain(width, height, window), "Failed to create device and swapchain.");
-	assert(SetUpGbuffer(device, width, height), "Failed to set up G buffer.");
-	assert(CreateDepthStencilView(width, height), "Failed to create depth stencil view.");
-	assert(CreateUAV(device, width, height), "Failed to create uav.");
-	assert(CreateRTV(device, width, height), "Failed to create render target view.");
+	assert(CreateDeviceAndSwapchain(width, height, window)&& "Failed to create device and swapchain.");
+	assert(SetUpGbuffer(device, width, height)&& "Failed to set up G buffer.");
+	assert(CreateDepthStencilView(width, height)&& "Failed to create depth stencil view.");
+	assert(CreateUAV(device, width, height)&& "Failed to create uav.");
+	assert(CreateRTV(device, width, height)&& "Failed to create render target view.");
 
 
 
@@ -22,7 +22,7 @@ Graphics::Graphics(int width, int height, HWND& window)
 
 	deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(3, renderTargets, dsView, 3, 1, &uav, nullptr);
 
-	assert(SetUpSampler(device, samState), "Failed to set up sampler.");
+	assert(SetUpSampler(device, samState)&& "Failed to set up sampler.");
 	SetViewport(width, height);
 	deviceContext->RSSetViewports(1, &viewport);
 	deviceContext->PSSetSamplers(0, 1, &samState);
@@ -167,7 +167,7 @@ void Graphics::UpdateParticles()
 		deviceContext->Dispatch(NUM_PARTICLES/10, 1, 1);
 	}
 	else {
-		assert(false, "Not an even number of particles, or not enough particles.");
+		assert(false&& "Not an even number of particles, or not enough particles.");
 	}
 
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUav, nullptr);
@@ -203,7 +203,7 @@ ID3D11Texture2D* Graphics::GetBackBuffer() const
 	ID3D11Texture2D* backbuffer = nullptr;
 	if (FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backbuffer)))) {
 		std::cerr << "Failed to get backbuffer.\n";
-		assert(false, "Failed to get back buffer.");
+		assert(false&& "Failed to get back buffer.");
 		return nullptr;
 	}
 
@@ -314,7 +314,7 @@ bool Graphics::CreateDeviceAndSwapchain(int width, int height, HWND& window)
 
 bool Graphics::CreateDepthStencilView(int width, int height)
 {
-	D3D11_TEXTURE2D_DESC dsTextureDesc;
+	D3D11_TEXTURE2D_DESC dsTextureDesc = {};
 	dsTextureDesc.Width = width;
 	dsTextureDesc.Height = height;
 	dsTextureDesc.MipLevels = 1;
@@ -349,7 +349,7 @@ void Graphics::SetViewport(int width, int height)
 
 bool Graphics::SetUpSampler(ID3D11Device* device, ID3D11SamplerState*& samState)
 {
-	D3D11_SAMPLER_DESC sampler;
+	D3D11_SAMPLER_DESC sampler = {};
 	sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sampler.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampler.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -418,7 +418,7 @@ bool Graphics::SetUpGbuffer(ID3D11Device* device, int width, int height)
 bool Graphics::CreateUAV(ID3D11Device* device, int width, int height)
 {
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 	uavDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
 	uavDesc.Texture2D.MipSlice = 0;

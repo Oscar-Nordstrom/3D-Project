@@ -57,13 +57,13 @@ Model::~Model()
 
 bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
 {
-	assert(LoadShaders(vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, gfx), "Failed to load shaders.");
-	assert(LoadObj(obj, gfx), "Failed to load OBJ.");
-	assert(CreateInputLayout(gfx->GetDevice()), "Failed to create input layout.");
-	assert(SetUpSampler(gfx->GetDevice()), "Failed to set up sampler.");
-	assert(CreateVertexBuffer(gfx->GetDevice()), "Failed to create vertex buffer.");
-	assert(CreateIndexBuffer(gfx->GetDevice()), "Failed to create index buffer.");
-	assert(CreateConstantBuffer(*gfx, transform), "Failed to create constant buffer.");
+	assert(LoadShaders(vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, gfx)&& "Failed to load shaders.");
+	assert(LoadObj(obj, gfx) && "Failed to load OBJ.");
+	assert(CreateInputLayout(gfx->GetDevice()) && "Failed to create input layout.");
+	assert(SetUpSampler(gfx->GetDevice()) && "Failed to set up sampler.");
+	assert(CreateVertexBuffer(gfx->GetDevice()) && "Failed to create vertex buffer.");
+	assert(CreateIndexBuffer(gfx->GetDevice()) && "Failed to create index buffer.");
+	assert(CreateConstantBuffer(*gfx, transform) && "Failed to create constant buffer.");
 
 
 	return true;
@@ -72,12 +72,12 @@ bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dSha
 bool Model::LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
 {
 	texHandl->AddTexture("snowflake.png", gfx->GetDevice());
-	assert(!FAILED(gfx->GetDevice()->CreateShaderResourceView(texHandl->GetImage("snowflake.png").tex, nullptr, &paprticleTexSrv)), "Failed to create particle texture.");
-	assert(LoadShaders(vShaderPath, NO_SHADER, NO_SHADER, pShaderPath, cShaderPath, gShaderPath, gfx), "Failed to load shaders.");
-	assert(CreateInputLayout(gfx->GetDevice(), true), "Failed to create input layout.");
-	assert(SetUpSampler(gfx->GetDevice()), "Failed to set up sampler.");
-	assert(CreateVertexBuffer(gfx->GetDevice(), true), "Failed to create vertex buffer.");
-	assert(CreateConstantBuffer(*gfx, transform), "Failed to create constant buffer.");
+	assert(!FAILED(gfx->GetDevice()->CreateShaderResourceView(texHandl->GetImage("snowflake.png").tex, nullptr, &paprticleTexSrv)) && "Failed to create particle texture.");
+	assert(LoadShaders(vShaderPath, NO_SHADER, NO_SHADER, pShaderPath, cShaderPath, gShaderPath, gfx) && "Failed to load shaders.");
+	assert(CreateInputLayout(gfx->GetDevice(), true) && "Failed to create input layout.");
+	assert(SetUpSampler(gfx->GetDevice()) && "Failed to set up sampler.");
+	assert(CreateVertexBuffer(gfx->GetDevice(), true) && "Failed to create vertex buffer.");
+	assert(CreateConstantBuffer(*gfx, transform) && "Failed to create constant buffer.");
 	return true;
 }
 
@@ -428,9 +428,9 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 		float randX, randY, randZ;
 		DirectX::XMFLOAT3 points[NUM_PARTICLES];// = { DirectX::XMFLOAT3(20.0f, 0.0f, 0.0f) };
 		for (int i = 0; i < NUM_PARTICLES; i++) {
-			randX = (rand() % 100) - 49;
-			randY = (rand() % 100) - 49;
-			randZ = (rand() % 100) - 49;
+			randX = (float)(rand() % 100) - 49.0f;
+			randY = (float)(rand() % 100) - 49.0f;
+			randZ = (float)(rand() % 100) - 49.0f;
 			points[i] = DirectX::XMFLOAT3(randX, randY, randZ);
 		}
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_UNORDERED_ACCESS;
@@ -452,7 +452,7 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 		uavDesc.Format = DXGI_FORMAT_R32_FLOAT;
 		uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 		uavDesc.Buffer.FirstElement = 0;
-		uavDesc.Buffer.NumElements = std::size(points)*3;
+		uavDesc.Buffer.NumElements = (UINT)std::size(points)*3;
 		uavDesc.Buffer.Flags = 0;
 
 		hr = device->CreateUnorderedAccessView(vertexBuffer, &uavDesc, &uavBuffer);
@@ -608,7 +608,7 @@ bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
 	CopyMemory(mappedResource.pData, &m, sizeof(Matrices));//Write the new memory
 	gfx.GetContext()->Unmap(constantBuffer, 0);
 	if (FAILED(hr)) {
-		assert(false, "Failed to update constant buffer.");
+		assert(false&& "Failed to update constant buffer.");
 	}
 
 	const bool data = tesselation;
@@ -617,7 +617,7 @@ bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
 	CopyMemory(mappedResource.pData, &data, sizeof(bool));//Write the new memory
 	gfx.GetContext()->Unmap(constantBufferTessBool, 0);
 	if (FAILED(hr)) {
-		assert(false, "Failed to update constant buffer.");
+		assert(false&& "Failed to update constant buffer.");
 	}
 
 	return true;

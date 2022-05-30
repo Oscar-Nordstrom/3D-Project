@@ -66,6 +66,7 @@ QuadTree::~QuadTree()
 	for (int i = 0; i < 4; i++) {
 		if (nodes[i] != nullptr) {
 			delete nodes[i];
+			nodes[i] = nullptr;
 		}
 	}
 }

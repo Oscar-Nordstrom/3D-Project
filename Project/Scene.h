@@ -20,7 +20,7 @@
 
 #include "flags.h"
 
-#define NUM_SOLDIERS 24
+#define NUM_SOLDIERS 27
 
 class Scene {
 public:
@@ -30,6 +30,7 @@ public:
 private:
 	bool DoFrame();
 	bool SetUpDirLight();
+	bool SetUpSpotLighs();
 	bool SetUpBufs();
 	void UpdateBufs();
 	bool UpdateObjcects(float t);
@@ -37,6 +38,7 @@ private:
 	void checkInput();
 	void cubeMapSetCam(int num);
 
+	void SetLights();
 	void SetUpSkybox();
 
 	void ImGuiWindows();
@@ -65,14 +67,17 @@ private:
 	SceneObjectTest cube;
 	
 	SceneObjectTest soldiers[NUM_SOLDIERS];
-	SceneObjectTest ground;
+	SceneObjectTest ground, ground1, ground2, ground3;
+	std::vector<SceneObjectTest*> grounds;
 	std::vector<SceneObjectTest*>gameObjects;
 	DirectionalLight dLight;
+	SpotLight sLights[3];
 	ShadowMap shadow;
 	ShadowShaderBuffer shadowBufferData[NUM_LIGHTS];
 	ID3D11Buffer* shadowMapBufs[NUM_LIGHTS];
 
 	ID3D11Buffer* lightBuf;
+	ID3D11Buffer* lightBufSpots;
 	ID3D11Buffer* camBuf;
 	ID3D11Buffer* camBuf2;
 	ID3D11Buffer* camBufTime;

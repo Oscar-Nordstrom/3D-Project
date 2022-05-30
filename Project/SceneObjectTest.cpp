@@ -23,7 +23,7 @@ bool SceneObjectTest::Update(float dt, Graphics*& gfx)
 {
 	UpdateTransform(dt);
 	if (!model.UpdateCbuf(*gfx, transform)) {
-		assert(false, "Failed to update constant buffer.");
+		assert(false && "Failed to update constant buffer.");
 		std::cerr << "Failed to update constant buffer.\n";
 		return false;
 	}
@@ -131,10 +131,10 @@ bool SceneObjectTest::Init(TextureHandler*& texHandl, string objPath, string vSh
 	this->model.SetTexHandl(texHandl);
 
 	if (!particle) {
-		assert(model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, transform, gfx), "Failed to load model.");
+		assert(model.Load(objPath, vShaderPath, hShaderPath, dShaderPath, pShaderPath, cShaderPath, gShaderPath, transform, gfx) && "Failed to load model.");
 	}
 	else {
-		assert(model.LoadAsParticle(vShaderPath, gShaderPath, pShaderPath, cShaderPath, transform, gfx), "Failed to load model.");
+		assert(model.LoadAsParticle(vShaderPath, gShaderPath, pShaderPath, cShaderPath, transform, gfx) && "Failed to load model.");
 	}
 
 	return true;

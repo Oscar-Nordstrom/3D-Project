@@ -1,17 +1,14 @@
 #include "ShadowMap.h"
 
 
-ShadowMap::ShadowMap(Graphics*& gfx, DirectionalLight* light)
-	:gfx(gfx)
+ShadowMap::ShadowMap()
 {
+	this->gfx = nullptr;
 	dLight = nullptr;
 	sLight1 = nullptr;
 	sLight2 = nullptr;
 	sLight3 = nullptr;
 
-	assert(LoadShaders(), "Failed to load shaders.");
-	assert(CreateDepthStencil(), "Failed to create ds.");
-	SetViewPort();
 	lightTurn = 0;
 }
 
@@ -23,6 +20,15 @@ ShadowMap::~ShadowMap()
 	if (dsTexture)dsTexture->Release();
 	if (vertexShadowShader)vertexShadowShader->Release();
 	if (shadowSRV)shadowSRV->Release();
+}
+
+void ShadowMap::Init(Graphics*& gfx, DirectionalLight* light)
+{
+	this->gfx = gfx;
+
+	assert(LoadShaders() && "Failed to load shaders.");
+	assert(CreateDepthStencil() && "Failed to create ds.");
+	SetViewPort();
 }
 
 void ShadowMap::StartFirst(DirectX::XMFLOAT3 pos, int flag)
@@ -57,8 +63,8 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 	ID3D11RenderTargetView* pNullRTV = NULL;
 	gfx->GetContext()->OMSetRenderTargets(1, &pNullRTV, GetDsView(whatLight));
 
+	//DirectX::XMMATRIX cam;
 	DirectX::XMMATRIX projection;
-	DirectX::XMMATRIX cam;
 	if (flag == DIRECTIONAL_LIGHT) {
 		//projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
 		projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
@@ -74,12 +80,12 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 		case 2:
 			break;
 		default:
-			assert(false, "Shadow map, lights out of range. Use value between 0-2");
+			assert(false && "Shadow map, lights out of range. Use value between 0-2");
 			break;
 		}
 	}
 	else {
-		assert(false, "Need a spot light or a direction light.");
+		assert(false && "Need a spot light or a direction light.");
 	}
 
 	gfx->SetProjection(projection);
@@ -90,17 +96,17 @@ void ShadowMap::SetDirLight(DirectionalLight* dLight)
 	this->dLight = dLight;
 }
 
-void ShadowMap::SetSpotLights(SpotLight* spotLights[])
+void ShadowMap::SetSpotLights(SpotLight spotLights[])
 {
-	this->sLight1 = spotLights[0];
-	this->sLight2 = spotLights[1];
-	this->sLight3 = spotLights[2];
+	this->sLight1 = &spotLights[0];
+	this->sLight2 = &spotLights[1];
+	this->sLight3 = &spotLights[2];
 }
 
 ID3D11DepthStencilView* ShadowMap::GetDsView(int what)
 {
 	if (what < 0 || what > 3) {
-		assert(false, "Failed to get dsView, number out of range. Use value between 0-3");
+		assert(false && "Failed to get dsView, number out of range. Use value between 0-3");
 	}
 	return dsViews[what];
 }
@@ -122,7 +128,7 @@ ID3D11ShaderResourceView*& ShadowMap::DepthToSRV()
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		dsViews[i]->GetResource(&shadowRes);
 		hr = gfx->GetDevice()->CreateShaderResourceView(shadowRes, &srvDesc, &shadowSRV);
-		assert(!FAILED(hr), "Failed to convert dsView to SRV");
+		assert(!FAILED(hr)&& "Failed to convert dsView to SRV");
 		shadowRes->Release();
 	}
 	return shadowSRV;

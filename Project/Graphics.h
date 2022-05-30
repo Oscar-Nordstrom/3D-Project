@@ -69,9 +69,9 @@ private:
 	ID3D11RenderTargetView* nullRtv[6] = { nullptr, nullptr, nullptr, nullptr, nullptr };
 	ID3D11ShaderResourceView* nullSrv[6] = { nullptr, nullptr, nullptr, nullptr, nullptr };
 	TextureRT gBuffer[numGbufs];
-	ID3D11RenderTargetView* renderTargets[6];
+	ID3D11RenderTargetView* renderTargets[6]={ nullptr, nullptr, nullptr, nullptr, nullptr };
 	ID3D11RenderTargetView* rtv;
-	ID3D11ShaderResourceView* shaderResources[6];
+	ID3D11ShaderResourceView* shaderResources[6]={ nullptr, nullptr, nullptr, nullptr, nullptr };
 	D3D11_VIEWPORT viewport;
 
 	bool imGuiEnabled;

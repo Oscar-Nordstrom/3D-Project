@@ -12,8 +12,8 @@ Frustum::~Frustum()
 void Frustum::SetFrustum(DirectX::XMFLOAT3 camPos, float nearZ, float farZ, float width, float height, float fov, DirectX::XMFLOAT3 forward, DirectX::XMFLOAT3 up, DirectX::XMFLOAT3 right)
 {
 	float aspect = width / height;
-	width = nearZ * tan(fov / 2) * aspect;
-	height = nearZ * tan(fov / 2);
+	width = nearZ * (float)tan(fov / 2) * aspect;
+	height = nearZ * (float)tan(fov / 2);
 	this->point = camPos;
 	this->nearPlane.point = camPos + (nearZ * forward);
 	this->farPlane.point = camPos + (farZ * forward);

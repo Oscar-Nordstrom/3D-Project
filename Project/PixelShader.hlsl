@@ -43,7 +43,7 @@ PixelShaderOutput main(PixelShaderInput input)
         if (lit) {
             break;
         }
-        if (dot(normalize(lightDir), input.normal) < 0.0f) {
+        if (dot(normalize(lightDir), input.normal.xyz) < 0.0f) {
             continue;
         }
         //Convert to NDC
@@ -69,7 +69,7 @@ PixelShaderOutput main(PixelShaderInput input)
     PixelShaderOutput output;
     
     output.color = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
-    output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
+    output.specular = map_Ks.Sample(samp1, input.uv) *shadowCoeff;
     output.ambient = map_Ka.Sample(samp1, input.uv);
     output.position = input.position;
     output.wPosition = input.wPosition;

@@ -26,16 +26,21 @@ struct ShadowShaderBuffer {
 };
 
 struct DirectionalLight {
-	DirectionalLight(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f))
+	/*DirectionalLight(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f))
 		:direction(dir), color(color)
 	{
 		
-	}
+	}*/
 	DirectX::XMFLOAT4 color;
 	DirectX::XMFLOAT3 direction;
 };
 
 struct SpotLight {
+	/*SpotLight(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), float inner = 10.0f, float outer = 20.0f, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f))
+		:direction(dir), position(pos), color(color), innerAngle(inner), outerAngle(outer)
+	{
+
+	}*/
 	DirectX::XMFLOAT4 color;
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 direction;

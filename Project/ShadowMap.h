@@ -10,8 +10,9 @@
 
 class ShadowMap {
 public:
-	ShadowMap(Graphics*& gfx, DirectionalLight* light);
+	ShadowMap();
 	~ShadowMap();
+	void Init(Graphics*& gfx, DirectionalLight* light);
 	void StartFirst(DirectX::XMFLOAT3 pos, int flag = SPOT_LIGHT);
 	void EndFirst();
 	void StartSeccond();
@@ -19,7 +20,7 @@ public:
 	void UpdateWhatShadow(int whatLight, int flag);
 	void SetDirLight(DirectionalLight* dLight);
 	//Needs 3 lights
-	void SetSpotLights(SpotLight* spotLights[]);
+	void SetSpotLights(SpotLight spotLights[]);
 private:
 	ID3D11DepthStencilView* GetDsView(int what);
 	ID3D11ShaderResourceView*& GetShadowSRV();
@@ -30,7 +31,7 @@ private:
 
 	int lightTurn;
 
-	Graphics*& gfx;
+	Graphics* gfx;
 	DirectionalLight* dLight;
 	SpotLight* sLight1;
 	SpotLight* sLight2;
