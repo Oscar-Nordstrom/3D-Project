@@ -331,7 +331,7 @@ void Camera::UpdateViewMatrix()
 	this->viewMatrix = XMMatrixLookAtLH(this->posVector, camTarget, upDir);
 
 	//Updating directions
-	XMMATRIX vecRotMatrix = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
+	XMMATRIX vecRotMatrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z);
 	this->forward = XMVector3TransformCoord(this->DefaultForwardVector, vecRotMatrix);
 	this->back = XMVector3TransformCoord(this->DefaultBackVector, vecRotMatrix);
 	this->left = XMVector3TransformCoord(this->DefaultLeftVector, vecRotMatrix);

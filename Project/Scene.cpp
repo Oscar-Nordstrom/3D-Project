@@ -483,12 +483,17 @@ void Scene::SetUpSkybox()
 void Scene::ImGuiWindows()
 {
 	if (ImGui::Begin("Settings")) {
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::SliderFloat("Speed Factor", &speedfactor, 0.0f, 4.0f);
 		ImGui::Checkbox("Tesselation", &tesselation);
 		ImGui::Checkbox("QuadTree", &quadTreeOn);
 		ImGui::Checkbox("Frustum Collision Check", &frustumCheckOn);
 
+	}
+	ImGui::End();
+	if (ImGui::Begin("Info")) {
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Intersecting nodes: %.0f", (float)intersectingNodes.size());
+		ImGui::Text("Intersecting objects: %.0f", (float)objectsToDraw.size());
 	}
 	ImGui::End();
 	if (ImGui::Begin("Player")) {
