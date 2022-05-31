@@ -145,7 +145,7 @@ bool Scene::DoFrame()
 	//Shadows End First
 	
 
-	//Cube mapping first Start
+	/*//Cube mapping first Start
 	cMap.Clear(window.Gfx()->GetContext());
 	//Go through all uavs
 	for (int i = 0; i < NUM_TEX; i++) {
@@ -172,7 +172,7 @@ bool Scene::DoFrame()
 		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 	}
-	//Cube map first end
+	//Cube map first end*/
 
 	//Final draw Start
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
@@ -183,11 +183,11 @@ bool Scene::DoFrame()
 	checkInput();
 	UpdateObjcects(t);
 
-	//Cube map seccond Start
+	/*//Cube map seccond Start
 	cMap.SetSeccond(window.Gfx());
 	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 	cMap.SetEnd(window.Gfx());
-	//Cube map seccond End
+	//Cube map seccond End*/
 
 	//Shadows Start Second
 	window.Gfx()->GetContext()->DSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
@@ -268,7 +268,6 @@ bool Scene::SetUpSpotLighs()
 
 	return !FAILED(hr);
 }
-
 
 bool Scene::SetUpBufs()
 {
@@ -709,4 +708,3 @@ void Scene::UpdateMouseDelta()
 		this->mouseYtemp = (float)window.mouse.GetPosY();
 	}
 }
-

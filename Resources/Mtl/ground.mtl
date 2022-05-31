@@ -1,5 +1,6 @@
 newmtl Material
 Ns 3
+Kd 0.5 0.5 0.5
+Ks 0.0 0.0 0.0
+Ka 0.2 0.2 0.2
 map_Kd Texturen\\ground.png
-map_Ks Texturen\\black.png
-map_Ka Texturen\\black.png

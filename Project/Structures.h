@@ -123,28 +123,6 @@ struct MtlImages {
 			data = texHandl->GetImage(what);
 		}
 		
-
-		/*D3D11_TEXTURE2D_DESC text2D;
-		text2D.Width = data.width;
-		text2D.Height = data.height;
-		text2D.MipLevels = 1;
-		text2D.ArraySize = 1;
-		text2D.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		text2D.SampleDesc.Count = 1;
-		text2D.SampleDesc.Quality = 0;
-		text2D.Usage = D3D11_USAGE_IMMUTABLE;
-		text2D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		text2D.CPUAccessFlags = 0;
-		text2D.MiscFlags = 0;
-
-		D3D11_SUBRESOURCE_DATA text2dData;
-		text2dData.pSysMem = data.img;
-		text2dData.SysMemPitch = data.width * 4;
-		text2dData.SysMemSlicePitch = 0;
-
-		//Create the texture
-		ID3D11Texture2D* tex;
-		HRESULT hr = device->CreateTexture2D(&text2D, &text2dData, &tex);*/
 		textures.push_back(data.tex);
 
 		return true;
@@ -258,71 +236,6 @@ struct Material {
 		if (!found2) {
 			three = 0;
 		}
-
-		/*D3D11_TEXTURE2D_DESC text2D;
-		text2D.Width = mtlFileTex->widths[one];
-		text2D.Height = mtlFileTex->heights[one];
-		text2D.MipLevels = 1;
-		text2D.ArraySize = 1;
-		text2D.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		text2D.SampleDesc.Count = 1;
-		text2D.SampleDesc.Quality = 0;
-		text2D.Usage = D3D11_USAGE_IMMUTABLE;
-		text2D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		text2D.CPUAccessFlags = 0;
-		text2D.MiscFlags = 0;
-
-		D3D11_SUBRESOURCE_DATA text2dData;
-		text2dData.pSysMem = mtlFileTex->img[one];
-		text2dData.SysMemPitch = mtlFileTex->widths[one] * 4;
-		text2dData.SysMemSlicePitch = 0;
-
-		//Create the texture
-		if (FAILED(device->CreateTexture2D(&text2D, &text2dData, &textureBuffer[0]))) {
-			return false;
-		}
-
-		text2D.Width = mtlFileTex->widths[two];
-		text2D.Height = mtlFileTex->heights[two];
-		text2D.MipLevels = 1;
-		text2D.ArraySize = 1;
-		text2D.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		text2D.SampleDesc.Count = 1;
-		text2D.SampleDesc.Quality = 0;
-		text2D.Usage = D3D11_USAGE_IMMUTABLE;
-		text2D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		text2D.CPUAccessFlags = 0;
-		text2D.MiscFlags = 0;
-
-		text2dData.pSysMem = mtlFileTex->img[two];
-		text2dData.SysMemPitch = mtlFileTex->widths[two] * 4;
-		text2dData.SysMemSlicePitch = 0;
-
-		//Create the texture
-		if (FAILED(device->CreateTexture2D(&text2D, &text2dData, &textureBuffer[1]))) {
-			return false;
-		}
-
-		text2D.Width = mtlFileTex->widths[three];
-		text2D.Height = mtlFileTex->heights[three];
-		text2D.MipLevels = 1;
-		text2D.ArraySize = 1;
-		text2D.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		text2D.SampleDesc.Count = 1;
-		text2D.SampleDesc.Quality = 0;
-		text2D.Usage = D3D11_USAGE_IMMUTABLE;
-		text2D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		text2D.CPUAccessFlags = 0;
-		text2D.MiscFlags = 0;
-
-		text2dData.pSysMem = mtlFileTex->img[three];
-		text2dData.SysMemPitch = mtlFileTex->widths[three] * 4;
-		text2dData.SysMemSlicePitch = 0;
-
-		//Create the texture
-		if (FAILED(device->CreateTexture2D(&text2D, &text2dData, &textureBuffer[2]))) {
-			return false;
-		}*/
 
 		return true;
 	}
@@ -477,12 +390,6 @@ struct SubMesh {
 					foundMapKa = true;
 				}
 			}
-		}
-		if (foundMapKs) {
-			ks = neg;
-		}
-		if (foundMapKa) {
-			ka = neg;
 		}
 		Material mat(Ns, kd, ka, ks, map_Kd, map_Ks, map_Ka);
 		if (!mat.SetupTexture(device, mtlFileTex)) {

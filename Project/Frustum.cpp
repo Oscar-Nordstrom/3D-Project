@@ -2,7 +2,7 @@
 
 Frustum::Frustum()
 {
-	this->buffer = 0.0f;
+	this->buffer = 1.0f;
 }
 
 Frustum::~Frustum()

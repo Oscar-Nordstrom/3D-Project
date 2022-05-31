@@ -42,74 +42,75 @@ RWTexture2D<unorm float4> backbuffer : register(u0);
 void main(uint3 DTid : SV_DispatchThreadID)
 {
 	float3 neg = float3(-1.0f, -1.0f, -1.0f);
+	float4 zero = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 final = float4(0.0f, 0.0f, 0.0f, 0.0f);;
 	int2 texPos = int2(0, 0);
 	texPos.x = DTid.x;
 	texPos.y = DTid.y;
 	int3 tPos = int3(texPos, 0);
 
+	//Load all values
 	float4 matColor = colors.Load(tPos);
-	// float4 position = positions.Load(tPos);
-   //  float4 wPosition = wPositions.Load(tPos);
+	float4 position = positions.Load(tPos);
+	float4 wPosition = wPositions.Load(tPos);
 	float4 normal = normalize(normals.Load(tPos));
-	float4 ambient;
-	if (ka.x == neg.x || ka.y == neg.y || ka.z == neg.z) {
-		ambient = ambients.Load(tPos);
-	}
-	else {
-		ambient = float4(ka.xyz, 0.0f);
-	}
-	 //float4 specular = speculars.Load(tPos);
+	float4 ambient = ambients.Load(tPos);
+	float4 specular = speculars.Load(tPos);
+
+	//Set all light to zero
+	float4 finalAmbient = zero;
+	float4 finalDiffuse = zero;
+	float4 finalSpecular = zero;
 
 
-	float4 finalAmbient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 finalDiffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	// float4 finalSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	 //Ambient calculations
-	finalAmbient = ambient * matColor;
-
-	//Diffuse
-	float3 norm = normal.xyz;
-	float3 lightDir = normalize(dirSpot[0]);
-	float diff = max(dot(norm, lightDir), 0.0f);
-	finalDiffuse = diff * matColor;
-
-	final = finalAmbient + finalDiffuse;
 
 	//Ambient calculations
-	//finalAmbient = ambient * matColor;
-	//float3 d;
-	//for (int i = 0; i < 4; i++) {
-	//    if (i == 0) {
-	//       d = normalize(dir);
-	//    }
-	//    else {
-	//        d = normalize(dirSpot[i - 1]);
-	//    }
-	//    normal = -normalize(normal);
-	//    //Diffuse calculateions
-	//    float diff = dot(normal.xyz, d);
-	//    if (diff >= 0.0f)
-	//    {
-	//        finalDiffuse += diff * (matColor + color);// *float4(kd.xyz, 0.0f);
-	//    }
-	//    //Specular calculations
-	//    if (diff >= 0.0f)
-	//    {
-	//        float3 r = normalize(reflect(d, normal.xyz));
-	//        float3 v = normalize(cameraDirection.xyz);//normalize(camPos.xyz - wPosition.xyz);
-	//        float spec = dot(r, v);
-	//        if (spec >= 0.0f)
-	//        {
-	//            finalSpecular += specular * pow(spec, s);
-	//        }
+	finalAmbient = ambient * matColor;
 
-	//    }
 
-	//}
-	//final = finalAmbient + finalDiffuse + finalSpecular;
+	for (int i = 0; i < 4; i++) {
+		//Directionl light
+		if (i == 0) {
+			//Diffuse
+			float3 d = -normalize(dir);
+			float diff = max(dot(d, normal.xyz), 0.0f);
+			if (diff == 0.0f) continue;
+			finalDiffuse = diff * (matColor + color);
+
+			//Specular
+			float3 ref = normalize(reflect(d, normal.xyz));
+			float3 vec = normalize(camPos.xyz - wPosition.xyz);
+			float spec = max(dot(ref, vec), 0.0f);
+			finalSpecular += specular * pow(spec, s);
+		}
+		//Spot Light
+		else {
+			int index = i - 1;
+			//float3 lightToPixelVec = posSpot[index] - wPosition.xyz;
+			//float coneCalc = pow(max(dot(-lightToPixelVec, dirSpot[index]), 0.0f), outer);
+			//if (coneCalc <= 0.0f)continue;
+
+
+			float4 tempDiffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+			float4 tempSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+			//Diffuse
+			float3 d = -normalize(dirSpot[index]);
+			float diff = max(dot(d, normal.xyz), 0.0f);
+			if (diff == 0.0f) continue;
+			tempDiffuse = diff * (matColor + color);
+
+			//Specular
+			float3 ref = normalize(reflect(d, normal.xyz));
+			float3 vec = normalize(camPos.xyz - wPosition.xyz);
+			float spec = max(dot(ref, vec), 0.0f);
+			tempSpecular += specular * pow(spec, s);
+
+			//finalDiffuse += tempDiffuse;
+			//finalSpecular += tempSpecular;
+		}
+	}
+	final = finalAmbient + finalDiffuse + finalSpecular;
 
 	backbuffer[DTid.xy] = final;
-
 }
