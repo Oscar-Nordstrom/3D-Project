@@ -60,13 +60,17 @@ Scene::~Scene()
 	if (camBufTime)camBufTime->Release();
 	texHandl->Delete();
 	delete texHandl;
-	for (auto p : intersectingNodes) {
-		delete p;
+	delete qtree;
+	/*for (auto p : intersectingNodes) {
+		if (p != nullptr) {
+			delete p;
+		}
 	}
 	for (auto p : objectsToDraw) {
-		delete p;
-	}
-	delete qtree;
+		if (p != nullptr) {
+			//delete p;
+		}
+	}*/
 }
 
 int Scene::Start()
@@ -165,7 +169,6 @@ bool Scene::DoFrame()
 		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 		window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
-		window.Gfx()->GetContext()->CSSetConstantBuffers(4, 1, &lightBufSpots);
 		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 	}
@@ -210,6 +213,7 @@ bool Scene::DoFrame()
 	particle.Draw(window.Gfx(), PARTICLE);
 	//Particle End
 
+	//dLight;
 	window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);

@@ -53,13 +53,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
    //  float4 wPosition = wPositions.Load(tPos);
 	float4 normal = normalize(normals.Load(tPos));
 	float4 ambient;
-	if (ka.x == neg.x && ka.y == neg.y && ka.z == neg.z) {
+	if (ka.x == neg.x || ka.y == neg.y || ka.z == neg.z) {
 		ambient = ambients.Load(tPos);
 	}
 	else {
 		ambient = float4(ka.xyz, 0.0f);
 	}
-	// float4 specular = speculars.Load(tPos);
+	 //float4 specular = speculars.Load(tPos);
 
 
 	float4 finalAmbient = float4(0.0f, 0.0f, 0.0f, 0.0f);
