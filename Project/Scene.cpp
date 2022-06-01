@@ -52,7 +52,6 @@ Scene::Scene()
 
 }
 
-
 Scene::~Scene()
 {
 	if (lightBuf)lightBuf->Release();
@@ -60,14 +59,15 @@ Scene::~Scene()
 	if (camBuf)camBuf->Release();
 	if (camBuf2)camBuf2->Release();
 	if (camBuf3)camBuf3->Release();
+	if (camBufTime)camBufTime->Release();
 	if (shadowSettings)shadowSettings->Release();
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		if (shadowMapBufs[i])shadowMapBufs[i]->Release();
 	}
-	if (camBufTime)camBufTime->Release();
 	texHandl->Delete();
 	delete texHandl;
 	delete qtree;
+
 	/*for (auto p : intersectingNodes) {
 		if (p != nullptr) {
 			delete p;
@@ -131,12 +131,24 @@ bool Scene::DoFrame()
 	//Shadows Start First
 	DirectX::XMFLOAT3 tempPos = cam.GetPositionFloat3();
 	DirectX::XMFLOAT3 tempDir = cam.GetRotationFloat3();
+	shadow.SetSpotLights(sLights);
+	shadow.SetDirLight(&dLight);
+	shadow.StartFirst();
+
+	//OK no memory leaks
 	for (int i = 0; i < NUM_LIGHTS; i++) {
-		cam.SetPosition(0.0f, 55.0f, 0.0f);
-		cam.SetRotationDeg(90, 0.0f, 0.0f);
-		shadow.SetDirLight(&dLight);
-		shadow.StartFirst(cam.GetPositionFloat3(), DIRECTIONAL_LIGHT);
-		shadow.UpdateWhatShadow(0, DIRECTIONAL_LIGHT);
+		
+		if (i > 0) {
+			int index = i - 1;
+			cam.SetPosition(sLights[index].position);
+			cam.SetRotationDeg(90, 0.0f, 0.0f);
+			shadow.UpdateWhatShadow(i, SPOT_LIGHT);//Sets depth
+		}
+		else {
+			cam.SetPosition(0.0f, 55.0f, 0.0f);
+			cam.SetRotationDeg(90, 0.0f, 0.0f);
+			shadow.UpdateWhatShadow(i, DIRECTIONAL_LIGHT);//Sets depth
+		}
 		UpdateCamera();
 		shadowBufferData[i].view = cam.GettViewMatrix();
 		shadowBufferData[i].proj = cam.GettProjectionMatrix();
@@ -147,7 +159,6 @@ bool Scene::DoFrame()
 			}
 			//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
 		}
-		shadow.EndFirst();
 	}
 
 	cam.SetPosition(tempPos);
@@ -201,12 +212,11 @@ bool Scene::DoFrame()
 	//Cube map seccond End*/
 
 	//Shadows Start Second
-	window.Gfx()->GetContext()->DSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
-	window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
-	window.Gfx()->GetContext()->PSSetConstantBuffers(2, 1, &shadowSettings);
+	window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &shadowSettings);
+	window.Gfx()->GetContext()->DSSetConstantBuffers(1, NUM_LIGHTS, shadowMapBufs);
+	window.Gfx()->GetContext()->PSSetConstantBuffers(1, NUM_LIGHTS, shadowMapBufs);
 	shadow.StartSeccond();
 	shadow.EndSeccond();
-
 	//Shadows End Second
 
 	for (auto p : objectsToDraw) {

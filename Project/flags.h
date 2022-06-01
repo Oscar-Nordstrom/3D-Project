@@ -10,7 +10,7 @@
 #define PIXEL_SHADER 3
 #define COMPUTE_SHADER 4
 
-#define NUM_LIGHTS 1
+#define NUM_LIGHTS 2
 
 #define GEOMETRY_SHADER 5
 

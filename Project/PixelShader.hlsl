@@ -4,7 +4,10 @@ struct PixelShaderInput
 	float4 wPosition : W_POSITION;
 	float4 normal : NORMAL;
 	float2 uv : UV;
-	float4 lightPosition : LIGHTPOS;
+	float4 lightPosition : LIGHTPOS;//Directional Light
+	float4 lightPosition2 : LIGHTPOS1;//Spot Light 1
+	float4 lightPosition3 : LIGHTPOS2;//Spot Light 2
+	float4 lightPosition4 : LIGHTPOS3;//Spot Light 3
 };
 
 struct PixelShaderOutput
@@ -17,16 +20,16 @@ struct PixelShaderOutput
 	float4 specular : SV_Target5;
 };
 
+cbuffer shadowSettings : register(b0)
+{
+	bool ShadowsOn;
+}
 cbuffer lightcb : register(b1)
 {
 	float4 lightColor;
 	float3 lightDir;
 }
-
-cbuffer shadowSettings : register(b2)
-{
-	bool ShadowsOn;
-}
+//Buf 2,3,4 i set
 
 
 Texture2D<float4> map_Kd : register(t0); //Diffuse
@@ -41,7 +44,7 @@ PixelShaderOutput main(PixelShaderInput input)
 {
 
 	bool lit = false;
-	int numLights = 1;
+	int numLights = 4;
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
 		if (lit) {
@@ -51,13 +54,27 @@ PixelShaderOutput main(PixelShaderInput input)
 			continue;
 		}
 
-
+		float4 lightPositionToUse;
 		//Convert to NDC
-		input.lightPosition.xy /= input.lightPosition.w;//OK
+		switch (i) {
+		case 0:
+			lightPositionToUse = input.lightPosition;
+			break;
+		case 1:
+			lightPositionToUse = input.lightPosition2;
+			break;
+		case 2:
+			lightPositionToUse = input.lightPosition3;
+			break;
+		case 3:
+			lightPositionToUse = input.lightPosition4;
+			break;
+		}
+		lightPositionToUse.xy /= lightPositionToUse.w;
 		//Translate to UV (0-1)
-		float2 smTex = float2(input.lightPosition.x * 0.5f + 0.5f, input.lightPosition.y * (-0.5f) + 0.5f);//OK
+		float2 smTex = float2(lightPositionToUse.x * 0.5f + 0.5f, lightPositionToUse.y * (-0.5f) + 0.5f);//OK
 		//Compute pixel depth for shadowing
-		float depth = input.lightPosition.z / input.lightPosition.w;//OK
+		float depth = lightPositionToUse.z / lightPositionToUse.w;//OK
 
 
 	   //Sample

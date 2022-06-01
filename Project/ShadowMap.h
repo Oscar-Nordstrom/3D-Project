@@ -13,7 +13,7 @@ public:
 	ShadowMap();
 	~ShadowMap();
 	void Init(Graphics*& gfx, DirectionalLight* light);
-	void StartFirst(DirectX::XMFLOAT3 pos, int flag = SPOT_LIGHT);
+	void StartFirst();
 	void EndFirst();
 	void StartSeccond();
 	void EndSeccond();
@@ -40,7 +40,6 @@ private:
 	std::vector<ID3D11DepthStencilView*> dsViews;
 	ID3D11Texture2D* dsTexture;
 	ID3D11VertexShader* vertexShadowShader;
-	//ID3D11PixelShader* pixelShadowShader; //Used later
 	ID3D11Resource* shadowRes;
 	ID3D11ShaderResourceView* shadowSRV;
 	D3D11_VIEWPORT shadowViewPort;

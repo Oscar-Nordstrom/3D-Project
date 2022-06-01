@@ -31,14 +31,14 @@ void ShadowMap::Init(Graphics*& gfx, DirectionalLight* light)
 	SetViewPort();
 }
 
-void ShadowMap::StartFirst(DirectX::XMFLOAT3 pos, int flag)
+void ShadowMap::StartFirst()
 {
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		gfx->GetContext()->ClearDepthStencilView(this->dsViews[i], D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
 	gfx->GetContext()->RSSetViewports(1, &shadowViewPort);
 	gfx->GetContext()->VSSetShader(vertexShadowShader, nullptr, 0);
-	ID3D11ShaderResourceView* const pSRV[4] = { NULL,NULL,NULL,NULL };//Might change this
+	ID3D11ShaderResourceView* const pSRV[4] = { NULL,NULL,NULL,NULL };
 	gfx->GetContext()->PSSetShaderResources(1, 4, pSRV);
 	gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
 	if (shadowSRV)shadowSRV->Release();
@@ -70,17 +70,16 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 		projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
 	}
 	else if (flag == SPOT_LIGHT) {
-		projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
 		switch (whatLight)
 		{
-		case 0:
-			break;
 		case 1:
+			projection = DirectX::XMMatrixPerspectiveFovLH(sLight1->outerAngle, 1.0f, 0.1f, 100.f);
 			break;
 		case 2:
+			projection = DirectX::XMMatrixPerspectiveFovLH(sLight2->outerAngle, 1.0f, 0.1f, 100.f);
 			break;
-		default:
-			assert(false && "Shadow map, lights out of range. Use value between 0-2");
+		case 3:
+			projection = DirectX::XMMatrixPerspectiveFovLH(sLight3->outerAngle, 1.0f, 0.1f, 100.f);
 			break;
 		}
 	}
