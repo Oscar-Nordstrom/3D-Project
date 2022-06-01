@@ -16,11 +16,11 @@ int roundUpTo(int numToRound, int multiple)
 Scene::Scene()
 	:window(WIDTH, HEIGHT, L"Project"), cMap(window.Gfx())
 {
+
 	cam.SetPosition(0.0f, 0.0f, -3.0f),
-	cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 200.0f);
+		cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 200.0f);
 	window.Gfx()->SetProjection(cam.GettProjectionMatrix());
 	window.Gfx()->SetCamera(cam.GettViewMatrix());
-
 
 	SetUpGameObjects();
 
@@ -37,23 +37,30 @@ Scene::Scene()
 	tesselationTemp = tesselation;
 	quadTreeOn = true;
 	frustumCheckOn = true;
+	shadowsOn = true;
 	dt = 0;
 	this->updateCulling = true;
 
-	
+
 	this->mouseXtemp = (float)window.mouse.GetPosX();
 	this->mouseYtemp = (float)window.mouse.GetPosY();
 
 	HandleCulling();
 
+
+
+
 }
+
 
 Scene::~Scene()
 {
-	if(lightBuf)lightBuf->Release();
-	if(lightBufSpots)lightBufSpots->Release();
-	if(camBuf)camBuf->Release();
-	if(camBuf2)camBuf2->Release();
+	if (lightBuf)lightBuf->Release();
+	if (lightBufSpots)lightBufSpots->Release();
+	if (camBuf)camBuf->Release();
+	if (camBuf2)camBuf2->Release();
+	if (camBuf3)camBuf3->Release();
+	if (shadowSettings)shadowSettings->Release();
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		if (shadowMapBufs[i])shadowMapBufs[i]->Release();
 	}
@@ -97,7 +104,7 @@ bool Scene::DoFrame()
 	theTimedata.time = timerCount;
 	std::wstring timerString = L"Time elapsed " + std::to_wstring(timerCount);
 
-	
+
 	//std::wstring dirStr = L"X: " + std::to_wstring(cam.GetPositionFloat3().x) + L", Y: " + std::to_wstring(cam.GetPositionFloat3().y) + L", Z: " + std::to_wstring(cam.GetPositionFloat3().z);
 	//std::wstring mouseString = L"Mouse pos: " + std::to_wstring(window.mouse.GetPosX()) + L", " + std::to_wstring(window.mouse.GetPosY());
 	//std::wstring numObjectsString = L"Num objects: " + std::to_wstring(this->objectsToDraw.size());
@@ -120,6 +127,7 @@ bool Scene::DoFrame()
 		this->updateCulling = false;
 	}
 
+
 	//Shadows Start First
 	DirectX::XMFLOAT3 tempPos = cam.GetPositionFloat3();
 	DirectX::XMFLOAT3 tempDir = cam.GetRotationFloat3();
@@ -133,17 +141,20 @@ bool Scene::DoFrame()
 		shadowBufferData[i].view = cam.GettViewMatrix();
 		shadowBufferData[i].proj = cam.GettProjectionMatrix();
 		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
-		for (auto p : objectsToDraw) {
-			p->Draw(window.Gfx(), SHADOW);
+		if (shadowsOn) {
+			for (auto p : objectsToDraw) {
+				p->Draw(window.Gfx(), SHADOW);
+			}
+			//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
 		}
 		shadow.EndFirst();
 	}
-	
+
 	cam.SetPosition(tempPos);
 	cam.SetRotationRad(tempDir);
 	UpdateCamera();
 	//Shadows End First
-	
+
 
 	/*//Cube mapping first Start
 	cMap.Clear(window.Gfx()->GetContext());
@@ -192,6 +203,7 @@ bool Scene::DoFrame()
 	//Shadows Start Second
 	window.Gfx()->GetContext()->DSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
 	window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
+	window.Gfx()->GetContext()->PSSetConstantBuffers(2, 1, &shadowSettings);
 	shadow.StartSeccond();
 	shadow.EndSeccond();
 
@@ -210,6 +222,7 @@ bool Scene::DoFrame()
 	//Particle Start
 	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
 	window.Gfx()->GetContext()->GSSetConstantBuffers(1, 1, &camBuf2);
+	window.Gfx()->GetContext()->GSSetConstantBuffers(2, 1, &camBuf3);
 	particle.Draw(window.Gfx(), PARTICLE);
 	//Particle End
 
@@ -252,7 +265,7 @@ bool Scene::SetUpDirLight()
 bool Scene::SetUpSpotLighs()
 {
 	D3D11_BUFFER_DESC desc;
-	desc.ByteWidth = roundUpTo(sizeof(SpotLight)*3, 16);
+	desc.ByteWidth = roundUpTo(sizeof(SpotLight) * 3, 16);
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.CPUAccessFlags = 0;
@@ -305,6 +318,22 @@ bool Scene::SetUpBufs()
 		return false;
 	}
 
+	desc.ByteWidth = roundUpTo(sizeof(cam.GetUpFloat3()), 16);
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.MiscFlags = 0;
+	desc.StructureByteStride = 0;
+
+	data.pSysMem = &cam.GetUpFloat3();
+	data.SysMemPitch = 0;
+	data.SysMemSlicePitch = 0;
+
+	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBuf3);
+	if (FAILED(hr)) {
+		return false;
+	}
+
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		desc.ByteWidth = roundUpTo(sizeof(shadowBufferData[i]), 16);
 		desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -322,8 +351,24 @@ bool Scene::SetUpBufs()
 			return false;
 		}
 	}
-	
-	
+
+	desc.ByteWidth = roundUpTo(sizeof(bool), 16);
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.MiscFlags = 0;
+	desc.StructureByteStride = 0;
+
+	data.pSysMem = &shadowsOn;
+	data.SysMemPitch = 0;
+	data.SysMemSlicePitch = 0;
+
+	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &shadowSettings);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+
 	theTimedata.dt = dt;
 	theTimedata.time = timerCount;
 	desc.ByteWidth = roundUpTo(sizeof(TimeData), 16);
@@ -350,13 +395,21 @@ void Scene::UpdateBufs()
 	CopyMemory(mappedResource.pData, &cam.GetPositionFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
-		assert(false&& "Failed to update buffer.");
+		assert(false && "Failed to update buffer.");
 	}
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	hr = window.Gfx()->GetContext()->Map(camBuf2, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
 	CopyMemory(mappedResource.pData, &cam.GetForwardFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf2, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false && "Failed to update buffer.");
+	}
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(camBuf3, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, &cam.GetUpFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
+	window.Gfx()->GetContext()->Unmap(camBuf3, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
 		assert(false && "Failed to update buffer.");
 	}
@@ -378,6 +431,14 @@ void Scene::UpdateBufs()
 	if (FAILED(hr)) {
 		assert(false && "Failed to update buffer.");
 	}
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(shadowSettings, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, &shadowsOn, sizeof(bool));//Write the new memory
+	window.Gfx()->GetContext()->Unmap(shadowSettings, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false && "Failed to update buffer.");
+	}
 }
 
 bool Scene::UpdateObjcects(float t)
@@ -395,7 +456,7 @@ bool Scene::UpdateObjcects(float t)
 			return false;
 		}
 	}
-	
+
 	if (!cube.Update(-t, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
@@ -455,7 +516,7 @@ void Scene::checkInput()
 		this->mouseXtemp = (float)window.mouse.GetPosX();
 		this->mouseYtemp = (float)window.mouse.GetPosY();
 	}
-	
+
 }
 
 void Scene::cubeMapSetCam(int num)
@@ -547,6 +608,7 @@ void Scene::ImGuiWindows()
 		ImGui::Checkbox("Tesselation", &tesselation);
 		ImGui::Checkbox("QuadTree", &quadTreeOn);
 		ImGui::Checkbox("Frustum Collision Check", &frustumCheckOn);
+		ImGui::Checkbox("Shadows", &shadowsOn);
 
 	}
 	ImGui::End();
@@ -602,7 +664,7 @@ void Scene::HandleCulling()
 			}
 		}
 	}
-	else{
+	else {
 		objectsToDraw.clear();
 		for (auto p : gameObjects) {
 			objectsToDraw.push_back(p);
@@ -612,8 +674,9 @@ void Scene::HandleCulling()
 
 void Scene::SetUpGameObjects()
 {
+	std::string dir = window.Gfx()->GetShaderDir();
 	for (int i = 0; i < NUM_SOLDIERS; i++) {
-		soldiers[i].Init(texHandl, "../Resources/Obj/elite.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+		soldiers[i].Init(texHandl, "../Resources/Obj/elite.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 		soldiers[i].Scale(2.0f, 2.0f, 2.0f);
 		gameObjects.push_back(&soldiers[i]);
 	}
@@ -622,73 +685,75 @@ void Scene::SetUpGameObjects()
 	soldiers[2].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, 40.0f));
 	soldiers[3].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, -40.0f));
 
-	/*soldiers[4].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, 30.0f));
-	soldiers[5].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, -30.0f));
-	soldiers[6].SetPos(DirectX::XMFLOAT3(-30.0f, 0.0f, 30.0f));
-	soldiers[7].SetPos(DirectX::XMFLOAT3(-30.0f, 0.0f, -30.0f));
+	if (NUM_SOLDIERS > 4) {
+		soldiers[4].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, 30.0f));
+		soldiers[5].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, -30.0f));
+		soldiers[6].SetPos(DirectX::XMFLOAT3(-30.0f, 0.0f, 30.0f));
+		soldiers[7].SetPos(DirectX::XMFLOAT3(-30.0f, 0.0f, -30.0f));
 
-	soldiers[8].SetPos(DirectX::XMFLOAT3(20.0f, 0.0f, 20.0f));
-	soldiers[9].SetPos(DirectX::XMFLOAT3(20.0f, 0.0f, -20.0f));
-	soldiers[10].SetPos(DirectX::XMFLOAT3(-20.0f, 0.0f, 20.0f));
-	soldiers[11].SetPos(DirectX::XMFLOAT3(-20.0f, 0.0f, -20.0f));
+		soldiers[8].SetPos(DirectX::XMFLOAT3(20.0f, 0.0f, 20.0f));
+		soldiers[9].SetPos(DirectX::XMFLOAT3(20.0f, 0.0f, -20.0f));
+		soldiers[10].SetPos(DirectX::XMFLOAT3(-20.0f, 0.0f, 20.0f));
+		soldiers[11].SetPos(DirectX::XMFLOAT3(-20.0f, 0.0f, -20.0f));
 
-	soldiers[12].SetPos(DirectX::XMFLOAT3(10.0f, 0.0f, 10.0f));
-	soldiers[13].SetPos(DirectX::XMFLOAT3(10.0f, 0.0f, -10.0f));
-	soldiers[14].SetPos(DirectX::XMFLOAT3(-10.0f, 0.0f, 10.0f));
-	soldiers[15].SetPos(DirectX::XMFLOAT3(-10.0f, 0.0f, -10.0f));
+		soldiers[12].SetPos(DirectX::XMFLOAT3(10.0f, 0.0f, 10.0f));
+		soldiers[13].SetPos(DirectX::XMFLOAT3(10.0f, 0.0f, -10.0f));
+		soldiers[14].SetPos(DirectX::XMFLOAT3(-10.0f, 0.0f, 10.0f));
+		soldiers[15].SetPos(DirectX::XMFLOAT3(-10.0f, 0.0f, -10.0f));
 
-	soldiers[16].SetPos(DirectX::XMFLOAT3(40.0f, 20.0f, 40.0f));
-	soldiers[17].SetPos(DirectX::XMFLOAT3(40.0f, 20.0f, -40.0f));
-	soldiers[18].SetPos(DirectX::XMFLOAT3(-40.0f, 20.0f, 40.0f));
-	soldiers[19].SetPos(DirectX::XMFLOAT3(-40.0f, 20.0f, -40.0f));
+		soldiers[16].SetPos(DirectX::XMFLOAT3(40.0f, 20.0f, 40.0f));
+		soldiers[17].SetPos(DirectX::XMFLOAT3(40.0f, 20.0f, -40.0f));
+		soldiers[18].SetPos(DirectX::XMFLOAT3(-40.0f, 20.0f, 40.0f));
+		soldiers[19].SetPos(DirectX::XMFLOAT3(-40.0f, 20.0f, -40.0f));
 
-	soldiers[20].SetPos(DirectX::XMFLOAT3(30.0f, 20.0f, 30.0f));
-	soldiers[21].SetPos(DirectX::XMFLOAT3(30.0f, 20.0f, -30.0f));
-	soldiers[22].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, 30.0f));
-	soldiers[23].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, -30.0f));
+		soldiers[20].SetPos(DirectX::XMFLOAT3(30.0f, 20.0f, 30.0f));
+		soldiers[21].SetPos(DirectX::XMFLOAT3(30.0f, 20.0f, -30.0f));
+		soldiers[22].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, 30.0f));
+		soldiers[23].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, -30.0f));
 
-	soldiers[24].SetPos({ -150.0f, 0.0f, 00.0f });
-	soldiers[25].SetPos({ -150.0f, 0.0f, 20.0f });
-	soldiers[26].SetPos({ -150.0f, 0.0f, 40.0f });*/
+		soldiers[24].SetPos({ -150.0f, 0.0f, 00.0f });
+		soldiers[25].SetPos({ -150.0f, 0.0f, 20.0f });
+		soldiers[26].SetPos({ -150.0f, 0.0f, 40.0f });
+	}
+	
 
-	ground.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	ground.Scale(100.0f, 100.0f, 0.0f);
 	ground.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground.Move(0.0f, -20.0f, 0.0f);
 	grounds.push_back(&ground);
 
-	ground1.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground1.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	ground1.Scale(10.0f, 10.0f, 0.0f);
 	ground1.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground1.Move(-150.0f, -20.0f, 0.0f);
 	grounds.push_back(&ground1);
 
-	ground2.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground2.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	ground2.Scale(10.0f, 10.0f, 0.0f);
 	ground2.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground2.Move(-150.0f, -20.0f, 20.0f);
 	grounds.push_back(&ground2);
 
-	ground3.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground3.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	ground3.Scale(10.0f, 10.0f, 0.0f);
 	ground3.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground3.Move(-150.0f, -20.0f, 40.0f);
 	grounds.push_back(&ground3);
 
-	
-	
 
-	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+
+
+	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
 	gameObjects.push_back(&cube);
 
-	cube2.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	cube2.Init(texHandl, "../Resources/Obj/cubeTex.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube2.Scale(2.0f, 2.0f, 2.0f);
 	cube2.Move(-20.0f, 0.0f, 0.0f);
 	gameObjects.push_back(&cube2);
 
-	particle.Init(texHandl, "No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
-
+	particle.Init(texHandl, "No", dir + "/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, dir + "/PixelShaderParticle.cso", dir + "/ComputeShaderParticle.cso", dir + "/GeometryShaderParticle.cso", window.Gfx(), true);
 
 	//for (int i = 0; i < 6; i++) {
 	//	skybox[i].Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());

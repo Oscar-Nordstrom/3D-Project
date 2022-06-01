@@ -24,7 +24,7 @@ private:
 	bool SetUpRtvs(ID3D11Device*& device);
 	bool SetUpUavs(ID3D11Device*& device);
 	bool CreateDepthStencilView(ID3D11Device*& device);
-	bool LoadShader(ID3D11Device*& device);
+	bool LoadShader(Graphics*& gfx);
 	void SetViewport();
 private:
 	ID3D11Texture2D* tex;
@@ -44,7 +44,5 @@ private:
 
 	
 	DirectX::XMFLOAT3 pos;
-
-
 
 };

@@ -4,8 +4,15 @@
 Graphics::Graphics(int width, int height, HWND& window)
 {
 
+#if _DEBUG
+	shaderDir = "../Debug";
+#else 
+	shaderDir = "../Release";
+#endif
+
 	w = width;
 	h = height;
+
 
 	assert(CreateDeviceAndSwapchain(width, height, window)&& "Failed to create device and swapchain.");
 	assert(SetUpGbuffer(device, width, height)&& "Failed to set up G buffer.");
@@ -243,6 +250,21 @@ void Graphics::present()
 void Graphics::SetNormalViewPort()
 {
 	deviceContext->RSSetViewports(1, &viewport);
+}
+
+bool Graphics::IsDebug()
+{
+	if (shaderDir == "../Debug") {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+std::string Graphics::GetShaderDir()
+{
+	return this->shaderDir;
 }
 
 void Graphics::SetUpImGui(HWND& window)

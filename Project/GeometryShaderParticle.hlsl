@@ -17,6 +17,9 @@ cbuffer cBuf : register(b0) {
 cbuffer cBuf2 : register(b1) {
 	float4 cameraDirection;
 }
+cbuffer cBuf3 : register(b2) {
+	float3 cameraUpDirection;
+}
 
 
 [maxvertexcount(6)]
@@ -33,8 +36,9 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
 	const static float SIZE = 0.25f;
 
 	//Billboarding start
-	float3 up = float3(0.0f, 1.0f, 0.0f);
-	float3 right = normalize(cross(up, camDir));
+	float3 particleCamVec = input[0].position.xyz-camPos;
+	float3 up = cameraUpDirection;// float3(0.0f, 1.0f, 0.0f);
+	float3 right = normalize(cross(up, particleCamVec));
 	//Billboarding end
 
 	float3 topLeft = input[0].position.xyz - (right * SIZE) + (up * SIZE);

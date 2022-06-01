@@ -175,6 +175,29 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->IASetInputLayout(inputLayout);
 		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 	}
+	else if (flag == PARTICLE_SHADOW) {
+
+		stride = sizeof(DirectX::XMFLOAT3);
+
+		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->CSSetShader(nullptr, nullptr, 0);
+		gfx->GetContext()->GSSetShader(gShader, nullptr, 0);
+
+		UpdateCbuf(*gfx, transform);
+
+		gfx->GetContext()->IASetPrimitiveTopology(topologyPoints);
+		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		gfx->GetContext()->IASetInputLayout(inputLayout);
+		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
+		gfx->GetContext()->PSSetShaderResources(0, 1, &paprticleTexSrv);
+
+
+
+		//gfx->GetContext()->PSSetSamplers(0, 1, &samState);
+		
+	}
 
 
 	if (flag != PARTICLE) {

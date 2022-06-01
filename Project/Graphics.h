@@ -37,6 +37,9 @@ public:
 
 	void SetNormalViewPort();
 
+	bool IsDebug();
+	std::string GetShaderDir();
+
 
 private:
 
@@ -75,6 +78,8 @@ private:
 	D3D11_VIEWPORT viewport;
 
 	bool imGuiEnabled;
+
+	std::string shaderDir;
 
 
 };

@@ -7,7 +7,7 @@ CubeMap::CubeMap(Graphics*& gfx)
 	//assert(SetUpRtvs(gfx->GetDevice()), "Failed to set up render target view.");
 	assert(SetUpUavs(gfx->GetDevice()) && "Failed to set up unorderd access view.");
 	assert(CreateDepthStencilView(gfx->GetDevice()) && "Failed to set up depth stencil view.");
-	assert(LoadShader(gfx->GetDevice()) && "Failed to load pixel shader.");
+	assert(LoadShader(gfx) && "Failed to load pixel shader.");
 	SetViewport();
 
 	pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -178,11 +178,12 @@ bool CubeMap::CreateDepthStencilView(ID3D11Device*& device)
 	return !FAILED(hr);
 }
 
-bool CubeMap::LoadShader(ID3D11Device*& device)
+bool CubeMap::LoadShader(Graphics*& gfx)
 {
 	std::string shaderData;
 	std::ifstream reader;
-	reader.open("../Debug/PixelShaderCubeMapTest.cso", std::ios::binary | std::ios::ate);
+	std::string dir = gfx->GetShaderDir();
+	reader.open(dir + "/PixelShaderCubeMapTest.cso", std::ios::binary | std::ios::ate);
 	if (!reader.is_open())
 	{
 		std::cerr << "Could not open PS file!" << std::endl;
@@ -196,7 +197,7 @@ bool CubeMap::LoadShader(ID3D11Device*& device)
 	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());//Assign the file to the shader data
 
 
-	if (FAILED(device->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr, &pShader)))
+	if (FAILED(gfx->GetDevice()->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr, &pShader)))
 	{
 		std::cerr << "Failed to create pixel shader!" << std::endl;
 		return false;
@@ -207,7 +208,7 @@ bool CubeMap::LoadShader(ID3D11Device*& device)
 	shaderData.clear();//Clear the string with data
 	reader.close();//Close the file
 
-	reader.open("../Debug/ComputeShaderCubeMapTest.cso", std::ios::binary | std::ios::ate);
+	reader.open(dir +"/ComputeShaderCubeMapTest.cso", std::ios::binary | std::ios::ate);
 	if (!reader.is_open())
 	{
 		std::cerr << "Could not open PS file!" << std::endl;
@@ -221,7 +222,7 @@ bool CubeMap::LoadShader(ID3D11Device*& device)
 	shaderData.assign((std::istreambuf_iterator<char>(reader)), std::istreambuf_iterator<char>());//Assign the file to the shader data
 
 
-	if (FAILED(device->CreateComputeShader(shaderData.c_str(), shaderData.length(), nullptr, &cShader)))
+	if (FAILED(gfx->GetDevice()->CreateComputeShader(shaderData.c_str(), shaderData.length(), nullptr, &cShader)))
 	{
 		std::cerr << "Failed to create pixel shader!" << std::endl;
 		return false;

@@ -20,7 +20,13 @@
 
 #include "flags.h"
 
+#if _DEBUG
 #define NUM_SOLDIERS 4
+#else 
+#define NUM_SOLDIERS 27
+#endif
+
+
 
 class Scene {
 public:
@@ -81,7 +87,9 @@ private:
 	ID3D11Buffer* lightBufSpots;
 	ID3D11Buffer* camBuf;
 	ID3D11Buffer* camBuf2;
+	ID3D11Buffer* camBuf3;
 	ID3D11Buffer* camBufTime;
+	ID3D11Buffer* shadowSettings;
 
 	//SceneObjectTest skybox[6];
 
@@ -96,6 +104,7 @@ private:
 	bool tesselationTemp;
 	bool quadTreeOn;
 	bool frustumCheckOn;
+	bool shadowsOn;
 
 	bool updateCulling;
 
@@ -104,6 +113,4 @@ private:
 	float fov;
 
 	float mouseDX, mouseDY, mouseXtemp, mouseYtemp;
-	
-
 };
