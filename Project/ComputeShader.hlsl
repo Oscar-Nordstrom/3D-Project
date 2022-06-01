@@ -69,6 +69,9 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
 
 	for (int i = 0; i < 4; i++) {
+		if (matColor.x == zero.x && matColor.y == zero.y && matColor.z == zero.z) {
+			continue;
+		}
 		float4 tempDiffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		float4 tempSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		//Directionl light

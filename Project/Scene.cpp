@@ -191,7 +191,7 @@ bool Scene::DoFrame()
 
 	//Shadows Start Second
 	window.Gfx()->GetContext()->DSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
-	window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &lightBuf);
+	window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &shadowMapBufs[0]);
 	shadow.StartSeccond();
 	shadow.EndSeccond();
 
@@ -397,6 +397,10 @@ bool Scene::UpdateObjcects(float t)
 	}
 	
 	if (!cube.Update(-t, window.Gfx())) {
+		std::cerr << "Failed to update object.\n";
+		return false;
+	}
+	if (!cube2.Update(-t, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}
@@ -614,11 +618,11 @@ void Scene::SetUpGameObjects()
 		gameObjects.push_back(&soldiers[i]);
 	}
 	soldiers[0].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, 40.0f));
-	/*soldiers[1].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, -40.0f));
+	soldiers[1].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, -40.0f));
 	soldiers[2].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, 40.0f));
 	soldiers[3].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, -40.0f));
 
-	soldiers[4].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, 30.0f));
+	/*soldiers[4].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, 30.0f));
 	soldiers[5].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, -30.0f));
 	soldiers[6].SetPos(DirectX::XMFLOAT3(-30.0f, 0.0f, 30.0f));
 	soldiers[7].SetPos(DirectX::XMFLOAT3(-30.0f, 0.0f, -30.0f));
@@ -677,6 +681,11 @@ void Scene::SetUpGameObjects()
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
 	gameObjects.push_back(&cube);
+
+	cube2.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
+	cube2.Scale(2.0f, 2.0f, 2.0f);
+	cube2.Move(-20.0f, 0.0f, 0.0f);
+	gameObjects.push_back(&cube2);
 
 	particle.Init(texHandl, "No", "../Debug/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, "../Debug/PixelShaderParticle.cso", "../Debug/ComputeShaderParticle.cso", "../Debug/GeometryShaderParticle.cso", window.Gfx(), true);
 

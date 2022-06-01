@@ -41,9 +41,9 @@ PixelShaderOutput main(PixelShaderInput input)
         if (lit) {
             break;
         }
-        if (dot(normalize(lightDir), input.normal.xyz) < 0.0f) {
+        /*if (dot(normalize(lightDir), input.normal.xyz) < 0.0f) {
             continue;
-        }
+        }*/
         //Convert to NDC
         input.lightPosition.xy /= input.lightPosition.w;//OK
         //Translate to UV (0-1)

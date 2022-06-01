@@ -20,7 +20,7 @@
 
 #include "flags.h"
 
-#define NUM_SOLDIERS 1
+#define NUM_SOLDIERS 4
 
 class Scene {
 public:
@@ -65,6 +65,7 @@ private:
 	CubeMap cMap;
 	SceneObjectTest particle;
 	SceneObjectTest cube;
+	SceneObjectTest cube2;
 	
 	SceneObjectTest soldiers[NUM_SOLDIERS];
 	SceneObjectTest ground, ground1, ground2, ground3;
