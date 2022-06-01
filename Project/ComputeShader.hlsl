@@ -8,15 +8,15 @@ Texture2D<float4> speculars : register(t5);
 
 cbuffer cb : register(b0)
 {
-	float s;//Specular expontent
+	float Ns;//Specular expontent
 	float3 kd;//Diffuse component
 	float3 ks;//Specular component  
 	float3 ka;//Amboient compinent
 }
-cbuffer lightcb : register(b1)
+cbuffer lightCbDirectional : register(b1)
 {
-	float4 color;
-	float3 dir;
+	float4 colorDirLight;
+	float3 directionDirLight;
 }
 cbuffer camcb : register(b2)
 {
@@ -25,7 +25,7 @@ cbuffer camcb : register(b2)
 cbuffer cBuf2 : register(b3) {
 	float4 cameraDirection;
 }
-cbuffer lightcb : register(b4)
+cbuffer lightCbSpot : register(b4)
 {
 	float4 colorSpot[3];
 	float3 posSpot[3];
@@ -50,9 +50,9 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	int3 tPos = int3(texPos, 0);
 
 	//Load all values
-	float4 matColor = colors.Load(tPos);
 	float4 position = positions.Load(tPos);
 	float4 wPosition = wPositions.Load(tPos);
+	float4 matColor = colors.Load(tPos);
 	float4 normal = normalize(normals.Load(tPos));
 	float4 ambient = ambients.Load(tPos);
 	float4 specular = speculars.Load(tPos);
@@ -69,19 +69,23 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
 
 	for (int i = 0; i < 4; i++) {
+		float4 tempDiffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 tempSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		//Directionl light
 		if (i == 0) {
 			//Diffuse
-			float3 d = -normalize(dir);
+			float3 d = -normalize(directionDirLight);
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			finalDiffuse = diff * (matColor + color);
+			tempDiffuse = diff * normalize(matColor + colorDirLight);
 
 			//Specular
-			float3 ref = normalize(reflect(d, normal.xyz));
+			float3 ref = -normalize(reflect(d, normal.xyz));
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
-			float spec = max(dot(ref, vec), 0.0f);
-			finalSpecular += specular * pow(spec, s);
+			float spec = dot(ref, vec);
+			if (spec >= 0.0f) {
+				tempSpecular = specular * pow(spec, Ns);
+			}
 		}
 		//Spot Light
 		else {
@@ -90,25 +94,20 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			//float coneCalc = pow(max(dot(-lightToPixelVec, dirSpot[index]), 0.0f), outer);
 			//if (coneCalc <= 0.0f)continue;
 
-
-			float4 tempDiffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-			float4 tempSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
 			//Diffuse
 			float3 d = -normalize(dirSpot[index]);
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			tempDiffuse = diff * (matColor + color);
+			tempDiffuse = diff * (matColor + colorSpot[i]);
 
 			//Specular
 			float3 ref = normalize(reflect(d, normal.xyz));
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = max(dot(ref, vec), 0.0f);
-			tempSpecular += specular * pow(spec, s);
-
-			//finalDiffuse += tempDiffuse;
-			//finalSpecular += tempSpecular;
+			tempSpecular += specular * pow(spec, Ns);
 		}
+		finalDiffuse += tempDiffuse;
+		finalSpecular += tempSpecular;
 	}
 	final = finalAmbient + finalDiffuse + finalSpecular;
 

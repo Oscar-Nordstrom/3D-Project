@@ -72,8 +72,9 @@ DS_OUTPUT main(HS_CONSTANT_DATA_OUTPUT input, float3 UVW : SV_DomainLocation, co
 
 
 	float3 finalNormal = UVW.x * tri[0].normal.xyz + UVW.y * tri[1].normal.xyz + UVW.z * tri[2].normal.xyz;
-	Output.normal = mul(view, float4(finalNormal, 0.0f));
-	Output.normal = mul(projection, Output.normal);
+	Output.normal = float4(finalNormal.xyz, 0.0f);
+	//Output.normal = mul(view, float4(finalNormal, 0.0f));
+	//Output.normal = mul(projection, Output.normal);
 
 	float2 finalTex = UVW.x * tri[0].uv + UVW.y * tri[1].uv + UVW.z * tri[2].uv;
 	Output.uv = finalTex;

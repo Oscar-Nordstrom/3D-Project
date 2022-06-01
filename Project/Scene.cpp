@@ -614,7 +614,7 @@ void Scene::SetUpGameObjects()
 		gameObjects.push_back(&soldiers[i]);
 	}
 	soldiers[0].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, 40.0f));
-	soldiers[1].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, -40.0f));
+	/*soldiers[1].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, -40.0f));
 	soldiers[2].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, 40.0f));
 	soldiers[3].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, -40.0f));
 
@@ -643,6 +643,10 @@ void Scene::SetUpGameObjects()
 	soldiers[22].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, 30.0f));
 	soldiers[23].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, -30.0f));
 
+	soldiers[24].SetPos({ -150.0f, 0.0f, 00.0f });
+	soldiers[25].SetPos({ -150.0f, 0.0f, 20.0f });
+	soldiers[26].SetPos({ -150.0f, 0.0f, 40.0f });*/
+
 	ground.Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
 	ground.Scale(100.0f, 100.0f, 0.0f);
 	ground.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
@@ -667,9 +671,7 @@ void Scene::SetUpGameObjects()
 	ground3.Move(-150.0f, -20.0f, 40.0f);
 	grounds.push_back(&ground3);
 
-	soldiers[24].SetPos({ -150.0f, 0.0f, 00.0f });
-	soldiers[25].SetPos({ -150.0f, 0.0f, 20.0f });
-	soldiers[26].SetPos({ -150.0f, 0.0f, 40.0f });
+	
 	
 
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());

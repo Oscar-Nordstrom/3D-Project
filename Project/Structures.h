@@ -26,21 +26,11 @@ struct ShadowShaderBuffer {
 };
 
 struct DirectionalLight {
-	/*DirectionalLight(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f))
-		:direction(dir), color(color)
-	{
-		
-	}*/
 	DirectX::XMFLOAT4 color;
 	DirectX::XMFLOAT3 direction;
 };
 
 struct SpotLight {
-	/*SpotLight(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), float inner = 10.0f, float outer = 20.0f, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f))
-		:direction(dir), position(pos), color(color), innerAngle(inner), outerAngle(outer)
-	{
-
-	}*/
 	DirectX::XMFLOAT4 color;
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 direction;
@@ -182,6 +172,9 @@ struct Material {
 	Material(float Ns, DirectX::XMFLOAT3 kd, DirectX::XMFLOAT3 ks, DirectX::XMFLOAT3 ka, std::string map_Kd, std::string map_Ks, std::string map_Ka)
 		:map_Kd(map_Kd), map_Ks(map_Ks), map_Ka(map_Ka)
 	{
+		if (map_Kd == "Texturen\\ground.png") {
+			int dkjsd = 0;
+		}
 		theMtlData.Ns = Ns;
 		theMtlData.kd = kd;
 		theMtlData.ks = ks;
@@ -321,8 +314,8 @@ struct SubMesh {
 	}
 	bool LoadMtl(ID3D11Device* device, ID3D11DeviceContext* context, MtlImages* mtlFileTex, std::string fileName) {
 
-		float Ns = 0.0f;
 		DirectX::XMFLOAT3 neg = { -1.0f, -1.0f, -1.0f };
+		float Ns = 0.0f;
 		DirectX::XMFLOAT3 kd = { 0.1f, 0.1f, 0.1f };
 		DirectX::XMFLOAT3 ks = { 0.0f, 0.0f, 0.0f };
 		DirectX::XMFLOAT3 ka = { 0.1f, 0.1f, 0.1f };
@@ -340,6 +333,9 @@ struct SubMesh {
 		bool foundMapKd = false;
 		bool foundMapKa = false;
 		bool foundMapKs = false;
+		if (fileName == "ground.mtl") {
+			int kldsd = 0;
+		}
 		file.open("../Resources/Mtl/" + fileName);
 		if (!file.is_open()) {
 			std::cerr << "Failed to open mesh file.\n";
@@ -409,8 +405,10 @@ struct SubMesh {
 	}
 
 	void Bind(ID3D11DeviceContext*& context, int flag = NORMAL) {
-		if (flag == NORMAL || flag == CUBE_MAP || flag == CUBE_MAP_TWO)
+		if (flag == NORMAL || flag == CUBE_MAP || flag == CUBE_MAP_TWO) {
 			context->PSSetShaderResources(0, 3, srv);
+			context->CSSetConstantBuffers(0, 1, &cbuf);
+		}
 		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
 		context->DrawIndexed((UINT)subIndices.size(), 0, 0);

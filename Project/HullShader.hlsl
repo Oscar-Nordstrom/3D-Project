@@ -10,7 +10,6 @@ cbuffer cBuf : register(b1)
 
 struct VS_CONTROL_POINT_OUTPUT
 {
-	//float3 vPosition : WORLDPOS;
     float4 position : SV_POSITION;
     float4 wPosition : W_POSITION;
     float4 normal : NORMAL;
@@ -20,7 +19,6 @@ struct VS_CONTROL_POINT_OUTPUT
 
 struct HS_CONTROL_POINT_OUTPUT
 {
-	//float3 vPosition : WORLDPOS; 
     float4 position : SV_POSITION;
     float4 wPosition : W_POSITION;
     float4 normal : NORMAL;

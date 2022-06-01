@@ -20,7 +20,7 @@
 
 #include "flags.h"
 
-#define NUM_SOLDIERS 27
+#define NUM_SOLDIERS 1
 
 class Scene {
 public:
