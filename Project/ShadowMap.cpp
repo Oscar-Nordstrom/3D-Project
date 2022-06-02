@@ -72,13 +72,16 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 		switch (whatLight)
 		{
 		case 1:
-			projection = DirectX::XMMatrixPerspectiveFovLH(sLight1->outerAngle, 1.0f, 0.1f, 100.f);
+			projection = DirectX::XMMatrixPerspectiveFovLH(50.0f, 1.0f, 0.1f, 100.f);
+			//projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
 			break;
 		case 2:
-			projection = DirectX::XMMatrixPerspectiveFovLH(sLight2->outerAngle, 1.0f, 0.1f, 100.f);
+			projection = DirectX::XMMatrixPerspectiveFovLH(50.0f, 1.0f, 0.1f, 100.f);
+			//projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
 			break;
 		case 3:
-			projection = DirectX::XMMatrixPerspectiveFovLH(sLight3->outerAngle, 1.0f, 0.1f, 100.f);
+			projection = DirectX::XMMatrixPerspectiveFovLH(50.0f, 1.0f, 0.1f, 100.f);
+			//projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
 			break;
 		}
 	}

@@ -93,24 +93,21 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			}
 		}
 		//Spot Light
-		/*else {
+		else {
 			int index = i - 1;
-			//float3 lightToPixelVec = posSpot[index] - wPosition.xyz;
-			//float coneCalc = pow(max(dot(-lightToPixelVec, dirSpot[index]), 0.0f), outer);
-			//if (coneCalc <= 0.0f)continue;
 
 			//Diffuse
 			float3 d = -normalize(dirSpot[index]);
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			//tempDiffuse = diff * (matColor + colorSpot[i]);
+			//tempDiffuse = diff * (matColor + colorSpot[i]) * diffuse;
 
 			//Specular
 			float3 ref = normalize(reflect(d, normal.xyz));
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = max(dot(ref, vec), 0.0f);
 			//tempSpecular += specular * pow(spec, Ns);
-		}*/
+		}
 		finalDiffuse += tempDiffuse;
 		finalSpecular += tempSpecular;
 	}
