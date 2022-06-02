@@ -14,7 +14,7 @@
 
 #define GEOMETRY_SHADER 5
 
-#define numGbufs 6
+#define numGbufs 7
 #define NUM_TEX 6
 
 #define DIRECTIONAL_LIGHT 7

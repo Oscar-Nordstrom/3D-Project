@@ -19,6 +19,7 @@ struct PixelShaderOutput
 	float4 normal : SV_Target3;
 	float4 ambient : SV_Target4;
 	float4 specular : SV_Target5;
+	float4 diffuse : SV_Target6;
 };
 
 cbuffer shadowSettings : register(b0)
@@ -59,7 +60,7 @@ PixelShaderOutput main(PixelShaderInput input)
 			break;
 		}
 		if (dot(normalize(lightDir), -input.normal.xyz) <= 0.0f) {
-			continue;
+			//continue;
 		}
 
 		float4 lightPositionToUse;
@@ -103,8 +104,9 @@ PixelShaderOutput main(PixelShaderInput input)
 
 	PixelShaderOutput output;
 
-	output.color = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
+	output.color = map_Kd.Sample(samp1, input.uv);
 	output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
+	output.diffuse = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
 	output.ambient = map_Ka.Sample(samp1, input.uv);
 	output.position = input.position;
 	output.wPosition = input.wPosition;

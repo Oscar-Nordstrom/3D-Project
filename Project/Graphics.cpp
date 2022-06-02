@@ -22,7 +22,7 @@ Graphics::Graphics(int width, int height, HWND& window)
 
 
 
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < numGbufs; i++) {
 		renderTargets[i] = gBuffer[i].rtv;
 		shaderResources[i] = gBuffer[i].srv;
 	}

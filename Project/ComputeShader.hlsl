@@ -5,6 +5,7 @@ Texture2D<float4> colors : register(t2);
 Texture2D<float4> normals : register(t3);
 Texture2D<float4> ambients : register(t4);
 Texture2D<float4> speculars : register(t5);
+Texture2D<float4> diffuses : register(t6);
 
 cbuffer cb : register(b0)
 {
@@ -56,6 +57,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	float4 normal = normalize(normals.Load(tPos));
 	float4 ambient = ambients.Load(tPos);
 	float4 specular = speculars.Load(tPos);
+	float4 diffuse = diffuses.Load(tPos);
 
 	//Set all light to zero
 	float4 finalAmbient = zero;
@@ -80,7 +82,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			float3 d = -normalize(directionDirLight);
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			tempDiffuse = diff * normalize(matColor + colorDirLight);
+			tempDiffuse = diff * normalize(matColor + colorDirLight) * diffuse;
 
 			//Specular
 			float3 ref = -normalize(reflect(d, normal.xyz));
@@ -91,7 +93,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			}
 		}
 		//Spot Light
-		else {
+		/*else {
 			int index = i - 1;
 			//float3 lightToPixelVec = posSpot[index] - wPosition.xyz;
 			//float coneCalc = pow(max(dot(-lightToPixelVec, dirSpot[index]), 0.0f), outer);
@@ -108,7 +110,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = max(dot(ref, vec), 0.0f);
 			//tempSpecular += specular * pow(spec, Ns);
-		}
+		}*/
 		finalDiffuse += tempDiffuse;
 		finalSpecular += tempSpecular;
 	}

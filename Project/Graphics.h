@@ -69,12 +69,12 @@ private:
 	ID3D11UnorderedAccessView* uav;
 	ID3D11SamplerState* samState;
 	ID3D11UnorderedAccessView* nullUav = nullptr;
-	ID3D11RenderTargetView* nullRtv[6] = { nullptr, nullptr, nullptr, nullptr, nullptr };
-	ID3D11ShaderResourceView* nullSrv[6] = { nullptr, nullptr, nullptr, nullptr, nullptr };
+	ID3D11RenderTargetView* nullRtv[numGbufs] = { nullptr};
+	ID3D11ShaderResourceView* nullSrv[numGbufs] = { nullptr };
 	TextureRT gBuffer[numGbufs];
-	ID3D11RenderTargetView* renderTargets[6]={ nullptr, nullptr, nullptr, nullptr, nullptr };
+	ID3D11RenderTargetView* renderTargets[numGbufs]={ nullptr };
 	ID3D11RenderTargetView* rtv;
-	ID3D11ShaderResourceView* shaderResources[6]={ nullptr, nullptr, nullptr, nullptr, nullptr };
+	ID3D11ShaderResourceView* shaderResources[numGbufs]={ nullptr};
 	D3D11_VIEWPORT viewport;
 
 	bool imGuiEnabled;
