@@ -30,7 +30,14 @@ cbuffer lightcb : register(b1)
 	float4 lightColor;
 	float3 lightDir;
 }
-//Buf 2,3,4 i set
+cbuffer lightCbSpot : register(b2)
+{
+	float4 colorSpot[3];
+	float3 posSpot[3];
+	float3 dirSpot[3];
+	float inner;
+	float outer;
+}
 
 
 Texture2D<float4> map_Kd : register(t0); //Diffuse

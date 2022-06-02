@@ -135,7 +135,6 @@ bool Scene::DoFrame()
 	shadow.SetDirLight(&dLight);
 	shadow.StartFirst();
 
-	//OK no memory leaks
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		
 		if (i > 0) {
@@ -151,7 +150,8 @@ bool Scene::DoFrame()
 		}
 		UpdateCamera();
 		shadowBufferData[i].view = cam.GettViewMatrix();
-		shadowBufferData[i].proj = cam.GettProjectionMatrix();
+		shadowBufferData[i].proj = window.Gfx()->GetProjection();
+		//shadowBufferData[i].proj = cam.GettProjectionMatrix();
 		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
 		if (shadowsOn) {
 			for (auto p : objectsToDraw) {
@@ -214,7 +214,8 @@ bool Scene::DoFrame()
 	//Shadows Start Second
 	window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &shadowSettings);
 	window.Gfx()->GetContext()->DSSetConstantBuffers(1, NUM_LIGHTS, shadowMapBufs);
-	window.Gfx()->GetContext()->PSSetConstantBuffers(1, NUM_LIGHTS, shadowMapBufs);
+	window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &lightBuf);
+	window.Gfx()->GetContext()->PSSetConstantBuffers(2, 1, &lightBufSpots);
 	shadow.StartSeccond();
 	shadow.EndSeccond();
 	//Shadows End Second
@@ -241,6 +242,7 @@ bool Scene::DoFrame()
 	window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 	window.Gfx()->GetContext()->CSSetConstantBuffers(3, 1, &camBuf2);
+	window.Gfx()->GetContext()->CSSetConstantBuffers(4, 1, &lightBufSpots);
 	window.Gfx()->EndFrame(window.GetWidth(), window.GetHeight());
 	//Final draw End
 
@@ -570,21 +572,21 @@ void Scene::SetLights()
 	sLights[1].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	sLights[2].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	sLights[0].position = { -160.0f, -20.0f, 00.0f };
-	sLights[1].position = { -160.0f, -20.0f, 20.0f };
-	sLights[2].position = { -160.0f, -20.0f, 40.0f };
+	sLights[0].position = { -150.0f, 50.0f, 00.0f };
+	sLights[1].position = { -150.0f, 50.0f, 20.0f };
+	sLights[2].position = { -150.0f, 50.0f, 40.0f };
 
 	sLights[0].direction = { 0.0f, -1.0f, 0.0f };
 	sLights[1].direction = { 0.0f, -1.0f, 0.0f };
 	sLights[2].direction = { 0.0f, -1.0f, 0.0f };
 
-	sLights[0].innerAngle = 10.0f;
-	sLights[1].innerAngle = 10.0f;
-	sLights[2].innerAngle = 10.0f;
+	sLights[0].innerAngle = 90.0f;
+	sLights[1].innerAngle = 90.0f;
+	sLights[2].innerAngle = 90.0f;
 
-	sLights[0].outerAngle = 20.0f;
-	sLights[1].outerAngle = 20.0f;
-	sLights[2].outerAngle = 20.0f;
+	sLights[0].outerAngle = 90.0f;
+	sLights[1].outerAngle = 90.0f;
+	sLights[2].outerAngle = 90.0f;
 	SetUpSpotLighs();
 }
 

@@ -101,13 +101,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			float3 d = -normalize(dirSpot[index]);
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			tempDiffuse = diff * (matColor + colorSpot[i]);
+			//tempDiffuse = diff * (matColor + colorSpot[i]);
 
 			//Specular
 			float3 ref = normalize(reflect(d, normal.xyz));
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = max(dot(ref, vec), 0.0f);
-			tempSpecular += specular * pow(spec, Ns);
+			//tempSpecular += specular * pow(spec, Ns);
 		}
 		finalDiffuse += tempDiffuse;
 		finalSpecular += tempSpecular;

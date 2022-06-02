@@ -44,4 +44,6 @@ private:
 	ID3D11ShaderResourceView* shadowSRV;
 	D3D11_VIEWPORT shadowViewPort;
 
+	DirectX::XMMATRIX projection;
+
 };

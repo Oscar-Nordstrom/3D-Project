@@ -10,6 +10,7 @@ ShadowMap::ShadowMap()
 	sLight3 = nullptr;
 
 	lightTurn = 0;
+	projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
 }
 
 ShadowMap::~ShadowMap()
@@ -63,8 +64,6 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 	ID3D11RenderTargetView* pNullRTV = NULL;
 	gfx->GetContext()->OMSetRenderTargets(1, &pNullRTV, GetDsView(whatLight));
 
-	//DirectX::XMMATRIX cam;
-	DirectX::XMMATRIX projection;
 	if (flag == DIRECTIONAL_LIGHT) {
 		//projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90), static_cast<float>(gfx->GetWidth()) / static_cast<float>(gfx->GetHeight()), 0.1f, 40000.f);
 		projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
