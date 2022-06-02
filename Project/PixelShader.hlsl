@@ -4,6 +4,7 @@ struct PixelShaderInput
 	float4 wPosition : W_POSITION;
 	float4 normal : NORMAL;
 	float2 uv : UV;
+	//positions from perespective of light
 	float4 lightPosition : LIGHTPOS;//Directional Light
 	float4 lightPosition2 : LIGHTPOS1;//Spot Light 1
 	float4 lightPosition3 : LIGHTPOS2;//Spot Light 2
@@ -58,16 +59,16 @@ PixelShaderOutput main(PixelShaderInput input)
 		//Convert to NDC
 		switch (i) {
 		case 0:
-			lightPositionToUse = input.lightPosition;
+			lightPositionToUse = input.lightPosition;//Directional Light
 			break;
 		case 1:
-			lightPositionToUse = input.lightPosition2;
+			lightPositionToUse = input.lightPosition2;//Spot Light
 			break;
 		case 2:
-			lightPositionToUse = input.lightPosition3;
+			lightPositionToUse = input.lightPosition3;//Spot Light
 			break;
 		case 3:
-			lightPositionToUse = input.lightPosition4;
+			lightPositionToUse = input.lightPosition4;//Spot Light
 			break;
 		}
 		lightPositionToUse.xy /= lightPositionToUse.w;

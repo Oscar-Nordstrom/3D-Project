@@ -41,7 +41,7 @@ void ShadowMap::StartFirst()
 	ID3D11ShaderResourceView* const pSRV[4] = { NULL,NULL,NULL,NULL };
 	gfx->GetContext()->PSSetShaderResources(1, 4, pSRV);
 	gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
-	if (shadowSRV)shadowSRV->Release();
+	//if (shadowSRV)shadowSRV->Release();
 }
 
 void ShadowMap::EndFirst()
@@ -124,13 +124,18 @@ ID3D11ShaderResourceView*& ShadowMap::DepthToSRV()
 	srvDesc.Texture2DArray.MostDetailedMip = 0;
 	srvDesc.Texture2DArray.MipLevels = 1;
 	HRESULT hr;
-	for (int i = 0; i < NUM_LIGHTS; i++) {
+	
+	if (shadowSRV)shadowSRV->Release();
+	hr = gfx->GetDevice()->CreateShaderResourceView(dsTexture, &srvDesc, &shadowSRV);
+	assert(!FAILED(hr) && "Failed to convert dsView to SRV");
+	return shadowSRV;
+	/*for (int i = 0; i < NUM_LIGHTS; i++) {
 		dsViews[i]->GetResource(&shadowRes);
 		hr = gfx->GetDevice()->CreateShaderResourceView(shadowRes, &srvDesc, &shadowSRV);
 		assert(!FAILED(hr)&& "Failed to convert dsView to SRV");
 		shadowRes->Release();
 	}
-	return shadowSRV;
+	return shadowSRV;*/
 }
 
 void ShadowMap::SetViewPort()
