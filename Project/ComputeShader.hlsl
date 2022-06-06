@@ -1,4 +1,20 @@
 
+static const float PI = 3.14159265f;
+static const float TO_RAD = (PI / 180);
+
+struct SpotLight {
+	float4 color;
+	float3 position;
+	float innerAngle;
+	float3 direction;
+	float outerAngle;
+};
+
+struct DirectionalLight {
+	float4 color;
+	float3 direction;
+};
+
 Texture2D<float4> positions : register(t0);
 Texture2D<float4> wPositions : register(t1);
 Texture2D<float4> colors : register(t2);
@@ -16,8 +32,7 @@ cbuffer cb : register(b0)
 }
 cbuffer lightCbDirectional : register(b1)
 {
-	float4 colorDirLight;
-	float3 directionDirLight;
+	DirectionalLight dLight;
 }
 cbuffer camcb : register(b2)
 {
@@ -28,11 +43,7 @@ cbuffer cBuf2 : register(b3) {
 }
 cbuffer lightCbSpot : register(b4)
 {
-	float4 colorSpot[3];
-	float3 posSpot[3];
-	float3 dirSpot[3];
-	float inner;
-	float outer;
+	SpotLight sLights[3];
 }
 
 RWBuffer<float> particles;
@@ -79,10 +90,10 @@ void main(uint3 DTid : SV_DispatchThreadID)
 		//Directionl light
 		if (i == 0) {
 			//Diffuse
-			float3 d = -normalize(directionDirLight);
+			float3 d = -normalize(dLight.direction);
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			tempDiffuse = diff * normalize(matColor + colorDirLight) * diffuse;
+			tempDiffuse = diff * normalize(matColor + dLight.color) * diffuse;
 
 			//Specular
 			float3 ref = -normalize(reflect(d, normal.xyz));
@@ -95,18 +106,33 @@ void main(uint3 DTid : SV_DispatchThreadID)
 		//Spot Light
 		else {
 			int index = i - 1;
-
+			
+			
 			//Diffuse
-			float3 d = -normalize(dirSpot[index]);
+			float3 lightPixelVec = normalize(sLights[index].position - wPosition.xyz);
+			float3 d = -normalize(sLights[index].direction);
+			float angle = acos(dot(d, lightPixelVec));
+			if (angle > sLights[index].outerAngle * TO_RAD) continue;
+			float lightFacotr = 1.0f;
+			if (angle > sLights[index].innerAngle * TO_RAD) {
+				float testAngle = angle - (sLights[index].innerAngle * TO_RAD);
+				float totAngle = (sLights[index].outerAngle - sLights[index].innerAngle)* TO_RAD;
+				lightFacotr = testAngle / totAngle;
+				lightFacotr = 1 - lightFacotr;
+				
+			}
+	
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			//tempDiffuse = diff * (matColor + colorSpot[i]) * diffuse;
-
+			tempDiffuse = diff * (matColor + sLights[index].color) * diffuse * lightFacotr;
+			
 			//Specular
-			float3 ref = normalize(reflect(d, normal.xyz));
+			float3 ref = normalize(reflect(-lightPixelVec, normal.xyz));
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = max(dot(ref, vec), 0.0f);
-			//tempSpecular += specular * pow(spec, Ns);
+			tempSpecular += specular * pow(spec, Ns);
+			tempSpecular *= lightFacotr;
+			
 		}
 		finalDiffuse += tempDiffuse;
 		finalSpecular += tempSpecular;

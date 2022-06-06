@@ -397,3 +397,5 @@ Project/vc143.idb
 .idea/vcs.xml
 
 .idea/workspace.xml
+
+*.enc

@@ -17,6 +17,14 @@ Scene::Scene()
 	:window(WIDTH, HEIGHT, L"Project"), cMap(window.Gfx())
 {
 
+	tesselation = true;
+	tesselationTemp = tesselation;
+	quadTreeOn = true;
+	frustumCheckOn = true;
+	shadowsOn = true;
+	dt = 0;
+	this->updateCulling = true;
+
 	cam.SetPosition(0.0f, 0.0f, -3.0f),
 		cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 200.0f);
 	window.Gfx()->SetProjection(cam.GettProjectionMatrix());
@@ -33,13 +41,6 @@ Scene::Scene()
 
 	qtree = new QuadTree(gameObjects, 0, 300.0f, DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	tesselation = true;
-	tesselationTemp = tesselation;
-	quadTreeOn = true;
-	frustumCheckOn = true;
-	shadowsOn = true;
-	dt = 0;
-	this->updateCulling = true;
 
 
 	this->mouseXtemp = (float)window.mouse.GetPosX();
@@ -277,7 +278,7 @@ bool Scene::SetUpDirLight()
 bool Scene::SetUpSpotLighs()
 {
 	D3D11_BUFFER_DESC desc;
-	desc.ByteWidth = roundUpTo(sizeof(SpotLight) * 3, 16);
+	desc.ByteWidth = roundUpTo(sizeof(SpotLight)*3, 16);
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.CPUAccessFlags = 0;
@@ -379,7 +380,6 @@ bool Scene::SetUpBufs()
 	if (FAILED(hr)) {
 		return false;
 	}
-
 
 	theTimedata.dt = dt;
 	theTimedata.time = timerCount;
@@ -572,21 +572,21 @@ void Scene::SetLights()
 	sLights[1].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	sLights[2].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	sLights[0].position = { -150.0f, 50.0f, 00.0f };
-	sLights[1].position = { -150.0f, 50.0f, 20.0f };
-	sLights[2].position = { -150.0f, 50.0f, 40.0f };
+	sLights[0].position = { -150.0f, 15.0f, 50.0f };
+	sLights[1].position = { -150.0f, 15.0f, 0.0f };
+	sLights[2].position = { -150.0f, 15.0f, -50.0f };
 
 	sLights[0].direction = { 0.0f, -1.0f, 0.0f };
 	sLights[1].direction = { 0.0f, -1.0f, 0.0f };
 	sLights[2].direction = { 0.0f, -1.0f, 0.0f };
 
-	sLights[0].innerAngle = 90.0f;
-	sLights[1].innerAngle = 90.0f;
-	sLights[2].innerAngle = 90.0f;
+	sLights[0].innerAngle = 20.0f;
+	sLights[1].innerAngle = 20.0f;
+	sLights[2].innerAngle = 20.0f;
 
-	sLights[0].outerAngle = 90.0f;
-	sLights[1].outerAngle = 90.0f;
-	sLights[2].outerAngle = 90.0f;
+	sLights[0].outerAngle = 25.0f;
+	sLights[1].outerAngle = 25.0f;
+	sLights[2].outerAngle = 25.0f;
 	SetUpSpotLighs();
 }
 
@@ -693,9 +693,9 @@ void Scene::SetUpGameObjects()
 		gameObjects.push_back(&soldiers[i]);
 	}
 	soldiers[0].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, 40.0f));
-	soldiers[1].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, -40.0f));
-	soldiers[2].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, 40.0f));
-	soldiers[3].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, -40.0f));
+	soldiers[1].SetPos({ -150.0f, -10.0f, 50.0f });
+	soldiers[2].SetPos({ -150.0f, -5.0f, 0.0f });
+	soldiers[3].SetPos({ -150.0f, 0.0f, -50.0f });
 
 	if (NUM_SOLDIERS > 4) {
 		soldiers[4].SetPos(DirectX::XMFLOAT3(30.0f, 0.0f, 30.0f));
@@ -723,9 +723,9 @@ void Scene::SetUpGameObjects()
 		soldiers[22].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, 30.0f));
 		soldiers[23].SetPos(DirectX::XMFLOAT3(-30.0f, 20.0f, -30.0f));
 
-		soldiers[24].SetPos({ -150.0f, 0.0f, 00.0f });
-		soldiers[25].SetPos({ -150.0f, 0.0f, 20.0f });
-		soldiers[26].SetPos({ -150.0f, 0.0f, 40.0f });
+		soldiers[24].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, -40.0f));
+		soldiers[25].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, 40.0f));
+		soldiers[26].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, -40.0f));
 	}
 	
 
@@ -736,21 +736,21 @@ void Scene::SetUpGameObjects()
 	grounds.push_back(&ground);
 
 	ground1.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
-	ground1.Scale(10.0f, 10.0f, 0.0f);
+	ground1.Scale(40.0f, 40.0f, 0.0f);
 	ground1.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
-	ground1.Move(-150.0f, -20.0f, 0.0f);
+	ground1.Move(-150.0f, -20.0f, -50.0f);
 	grounds.push_back(&ground1);
 
 	ground2.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
-	ground2.Scale(10.0f, 10.0f, 0.0f);
+	ground2.Scale(40.0f, 40.0f, 0.0f);
 	ground2.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
-	ground2.Move(-150.0f, -20.0f, 20.0f);
+	ground2.Move(-150.0f, -20.0f, 0.0f);
 	grounds.push_back(&ground2);
 
 	ground3.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
-	ground3.Scale(10.0f, 10.0f, 0.0f);
+	ground3.Scale(40.0f, 40.0f, 0.0f);
 	ground3.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
-	ground3.Move(-150.0f, -20.0f, 40.0f);
+	ground3.Move(-150.0f, -20.0f, 50.0f);
 	grounds.push_back(&ground3);
 
 

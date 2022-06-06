@@ -31,11 +31,11 @@ struct DirectionalLight {
 };
 
 struct SpotLight {
-	DirectX::XMFLOAT4 color;
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT3 direction;
-	float innerAngle;
-	float outerAngle;
+	DirectX::XMFLOAT4 color;//16 bytes
+	DirectX::XMFLOAT3 position;//12 bytes
+	float innerAngle;//4 bytes
+	DirectX::XMFLOAT3 direction;//12 bytes
+	float outerAngle;//4 bytes
 };
 
 struct TextureRT {
