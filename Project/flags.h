@@ -2,7 +2,7 @@
 
 #define NO_SHADER "NO_SHADER"
 
-#define NUM_PARTICLES 1000
+#define NUM_PARTICLES 10000
 
 #define VERTEX_SHADER 0
 #define HULL_SHADER 1

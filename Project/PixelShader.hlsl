@@ -61,7 +61,7 @@ PixelShaderOutput main(PixelShaderInput input)
 {
 
 	bool lit = false;
-	int numLights = 4;
+	int numLights = 1;//Change to 4 when using all lights
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
 		
