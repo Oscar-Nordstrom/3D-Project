@@ -45,7 +45,7 @@ struct HS_CONTROL_POINT_OUTPUT
 	float4 wPosition : W_POSITION;
 	float4 normal : NORMAL;
 	float2 uv : UV;
-	float4 lightPosition : LIGHTPOS;
+	//float4 lightPosition : LIGHTPOS;
 };
 
 struct HS_CONSTANT_DATA_OUTPUT
@@ -96,7 +96,7 @@ DS_OUTPUT main(HS_CONSTANT_DATA_OUTPUT input, float3 UVW : SV_DomainLocation, co
 	float2 finalTex = UVW.x * tri[0].uv + UVW.y * tri[1].uv + UVW.z * tri[2].uv;
 	Output.uv = finalTex;
 
-	float3 finalLightPos = UVW.x * tri[0].lightPosition.xyz + UVW.y * tri[1].lightPosition.xyz + UVW.z * tri[2].lightPosition.xyz;
+	float3 finalLightPos = UVW.x * tri[0].wPosition.xyz + UVW.y * tri[1].wPosition.xyz + UVW.z * tri[2].wPosition.xyz;
 	Output.lightPosition = mul(lightView, float4(finalLightPos, 1.0f));
 	Output.lightPosition = mul(lightProjection, Output.lightPosition);
 

@@ -1,3 +1,11 @@
+struct SpotLight {
+	float4 color;
+	float3 position;
+	float innerAngle;
+	float3 direction;
+	float outerAngle;
+};
+
 struct PixelShaderInput
 {
 	float4 position : SV_POSITION;
@@ -22,22 +30,22 @@ struct PixelShaderOutput
 	float4 diffuse : SV_Target6;
 };
 
+struct DirectionalLight {
+	float4 color;
+	float3 direction;
+};
+
 cbuffer shadowSettings : register(b0)
 {
 	bool ShadowsOn;
 }
 cbuffer lightcb : register(b1)
 {
-	float4 lightColor;
-	float3 lightDir;
+	DirectionalLight dLight;
 }
 cbuffer lightCbSpot : register(b2)
 {
-	float4 colorSpot[3];
-	float3 posSpot[3];
-	float3 dirSpot[3];
-	float inner;
-	float outer;
+	SpotLight sLights[3];
 }
 
 
@@ -56,15 +64,8 @@ PixelShaderOutput main(PixelShaderInput input)
 	int numLights = 4;
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
-		if (lit) {
-			break;
-		}
-		if (dot(normalize(lightDir), -input.normal.xyz) <= 0.0f) {
-			//continue;
-		}
-
+		
 		float4 lightPositionToUse;
-		//Convert to NDC
 		switch (i) {
 		case 0:
 			lightPositionToUse = input.lightPosition;//Directional Light
@@ -79,15 +80,15 @@ PixelShaderOutput main(PixelShaderInput input)
 			lightPositionToUse = input.lightPosition4;//Spot Light
 			break;
 		}
+		if(lit)
+		//Convert to NDC
 		lightPositionToUse.xy /= lightPositionToUse.w;
 		//Translate to UV (0-1)
 		float2 smTex = float2(lightPositionToUse.x * 0.5f + 0.5f, lightPositionToUse.y * (-0.5f) + 0.5f);//OK
 		//Compute pixel depth for shadowing
 		float depth = lightPositionToUse.z / lightPositionToUse.w;//OK
-
-
-	   //Sample
-		float4 sampled = shadowMaps.SampleLevel(samp1, float3(smTex, i), 0);
+		//Sample
+		float4 sampled = shadowMaps.Sample(samp1, float3(smTex, i), 0);
 		//Check if shadowd
 		if (sampled.r < depth)
 		{

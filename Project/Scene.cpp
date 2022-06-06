@@ -145,7 +145,7 @@ bool Scene::DoFrame()
 			shadow.UpdateWhatShadow(i, SPOT_LIGHT);//Sets depth
 		}
 		else {
-			cam.SetPosition(0.0f, 55.0f, 0.0f);
+			cam.SetPosition(0.0f, 40.0f, 0.0f);
 			cam.SetRotationDeg(90, 0.0f, 0.0f);
 			shadow.UpdateWhatShadow(i, DIRECTIONAL_LIGHT);//Sets depth
 		}
@@ -572,21 +572,21 @@ void Scene::SetLights()
 	sLights[1].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	sLights[2].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	sLights[0].position = { -150.0f, 15.0f, 50.0f };
-	sLights[1].position = { -150.0f, 15.0f, 0.0f };
-	sLights[2].position = { -150.0f, 15.0f, -50.0f };
+	sLights[0].position = { -150.0f, 20.0f, 50.0f };
+	sLights[1].position = { -150.0f, 20.0f, 0.0f };
+	sLights[2].position = { -150.0f, 20.0f, -50.0f };
 
 	sLights[0].direction = { 0.0f, -1.0f, 0.0f };
 	sLights[1].direction = { 0.0f, -1.0f, 0.0f };
 	sLights[2].direction = { 0.0f, -1.0f, 0.0f };
 
-	sLights[0].innerAngle = 20.0f;
-	sLights[1].innerAngle = 20.0f;
-	sLights[2].innerAngle = 20.0f;
+	sLights[0].innerAngle = 15.0f;
+	sLights[1].innerAngle = 15.0f;
+	sLights[2].innerAngle = 15.0f;
 
-	sLights[0].outerAngle = 25.0f;
-	sLights[1].outerAngle = 25.0f;
-	sLights[2].outerAngle = 25.0f;
+	sLights[0].outerAngle = 20.0f;
+	sLights[1].outerAngle = 20.0f;
+	sLights[2].outerAngle = 20.0f;
 	SetUpSpotLighs();
 }
 
@@ -730,7 +730,7 @@ void Scene::SetUpGameObjects()
 	
 
 	ground.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
-	ground.Scale(100.0f, 100.0f, 0.0f);
+	ground.Scale(150.0f, 150.0f, 0.0f);
 	ground.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground.Move(0.0f, -20.0f, 0.0f);
 	grounds.push_back(&ground);
