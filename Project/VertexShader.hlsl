@@ -18,7 +18,6 @@ struct VSOut
     float4 wPosition : W_POSITION;
     float4 normal : NORMAL;
     float2 uv : UV;
-   // float4 lightPosition : LIGHTPOS;
 };
 
 VSOut main(VertexShaderInput input)
@@ -32,8 +31,6 @@ VSOut main(VertexShaderInput input)
     wPosition = mul(world, wPosition); //World space
     position = mul(world, position);//World space
     normal = mul(world, normal); //World space 
-    //Light
-   // output.lightPosition = wPosition;
     
     output.position = position;
     output.wPosition = wPosition;

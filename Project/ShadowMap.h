@@ -23,8 +23,7 @@ public:
 	void SetSpotLights(SpotLight spotLights[]);
 private:
 	ID3D11DepthStencilView* GetDsView(int what);
-	ID3D11ShaderResourceView*& GetShadowSRV();
-	ID3D11ShaderResourceView*& DepthToSRV();
+	void DepthToSRV();
 	void SetViewPort();
 	bool CreateDepthStencil();
 	bool LoadShaders();
@@ -38,11 +37,11 @@ private:
 	SpotLight* sLight2;
 	SpotLight* sLight3;
 
-	std::vector<ID3D11DepthStencilView*> dsViews;
-	ID3D11Texture2D* dsTexture;
+	ID3D11ShaderResourceView* shadowSRV[4];
+	ID3D11DepthStencilView* dsViews[4];
+	ID3D11Texture2D* dsTexture[4];
 	ID3D11VertexShader* vertexShadowShader;
 	ID3D11Resource* shadowRes;
-	ID3D11ShaderResourceView* shadowSRV;
 	ID3D11SamplerState* samState;
 	D3D11_VIEWPORT shadowViewPort;
 

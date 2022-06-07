@@ -13,10 +13,10 @@ struct PixelShaderInput
 	float4 normal : NORMAL;
 	float2 uv : UV;
 	//positions from perespective of light
-	float4 lightPosition : LIGHTPOS;//Directional Light
-	float4 lightPosition2 : LIGHTPOS1;//Spot Light 1
-	float4 lightPosition3 : LIGHTPOS2;//Spot Light 2
-	float4 lightPosition4 : LIGHTPOS3;//Spot Light 3
+	float4 lightPosition1 : LIGHTPOS1;//Directional Light
+	float4 lightPosition2 : LIGHTPOS2;//Spot Light 1
+	float4 lightPosition3 : LIGHTPOS3;//Spot Light 2
+	float4 lightPosition4 : LIGHTPOS4;//Spot Light 3
 };
 
 struct PixelShaderOutput
@@ -55,21 +55,24 @@ Texture2D<float4> map_Ka : register(t2); //Ambient
 SamplerState samp1 : register(s0);
 SamplerState shadowSamp : register(s1);
 
-Texture2DArray<float4> shadowMaps : register(t3);
+Texture2D<float4> shadowMap1 : register(t3);//Directional Light
+Texture2D<float4> shadowMap2 : register(t4);//SpotLight 1
+Texture2D<float4> shadowMap3 : register(t5);//SpotLight 2
+Texture2D<float4> shadowMap4 : register(t6);//SpotLight 3
 
 
 PixelShaderOutput main(PixelShaderInput input)
 {
-
+	float4 zero = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	bool lit = false;
 	int numLights = 4;//Change to 4 when using all lights
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
 		
-		float4 lightPositionToUse;
+		float4 lightPositionToUse = zero;
 		switch (i) {
 		case 0:
-			lightPositionToUse = input.lightPosition;//Directional Light
+			lightPositionToUse = input.lightPosition1;//Directional Light
 			break;
 		case 1:
 			lightPositionToUse = input.lightPosition2;//Spot Light
@@ -89,7 +92,23 @@ PixelShaderOutput main(PixelShaderInput input)
 		//Compute pixel depth for shadowing
 		float depth = lightPositionToUse.z / lightPositionToUse.w;//OK
 		//Sample
-		float4 sampled = shadowMaps.Sample(shadowSamp, float3(smTex, i));
+		float4 sampled = zero;
+		switch (i) {
+		case 0:
+			sampled = shadowMap1.Sample(shadowSamp, smTex);
+			break;
+		case 1:
+			sampled = shadowMap2.Sample(shadowSamp, smTex);
+			break;
+		case 2:
+			sampled = shadowMap3.Sample(shadowSamp, smTex);
+			break;
+		case 3:
+			sampled = shadowMap4.Sample(shadowSamp, smTex);
+			break;
+		}
+		
+
 		//Check if shadowd
 		if (sampled.r < depth)
 		{

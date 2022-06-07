@@ -730,12 +730,12 @@ void Scene::SetUpGameObjects()
 	
 
 	ground.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
-	ground.Scale(3500.0f, 3500.0f, 0.0f);
+	ground.Scale(150.0f, 150.0f, 0.0f);
 	ground.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground.Move(0.0f, -18.0f, 0.0f);
 	grounds.push_back(&ground);
 
-/*	ground1.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
+	ground1.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	ground1.Scale(40.0f, 40.0f, 0.0f);
 	ground1.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground1.Move(-150.0f, -20.0f, -50.0f);
@@ -751,7 +751,7 @@ void Scene::SetUpGameObjects()
 	ground3.Scale(40.0f, 40.0f, 0.0f);
 	ground3.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground3.Move(-150.0f, -20.0f, 50.0f);
-	grounds.push_back(&ground3);*/
+	grounds.push_back(&ground3);
 
 
 

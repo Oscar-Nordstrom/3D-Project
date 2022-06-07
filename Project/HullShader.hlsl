@@ -14,7 +14,6 @@ struct VS_CONTROL_POINT_OUTPUT
     float4 wPosition : W_POSITION;
     float4 normal : NORMAL;
     float2 uv : UV;
-   // float4 lightPosition : LIGHTPOS;
 };
 
 struct HS_CONTROL_POINT_OUTPUT
@@ -23,7 +22,6 @@ struct HS_CONTROL_POINT_OUTPUT
     float4 wPosition : W_POSITION;
     float4 normal : NORMAL;
     float2 uv : UV;
-   // float4 lightPosition : LIGHTPOS;
 };
 
 struct HS_CONSTANT_DATA_OUTPUT
@@ -73,7 +71,6 @@ HS_CONTROL_POINT_OUTPUT main( InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_PO
 {
 	HS_CONTROL_POINT_OUTPUT Output;
 
-	//Output.lightPosition = ip[i].lightPosition;
     Output.wPosition = ip[i].wPosition;
 	Output.position = ip[i].position;
 	Output.normal = ip[i].normal;

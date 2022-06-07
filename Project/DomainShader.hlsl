@@ -6,8 +6,8 @@ cbuffer cBuf : register(b0)
 };
 cbuffer cBuf : register(b1)//Directional Light
 {
-	float4x4 lightView;
-	float4x4 lightProjection;
+	float4x4 lightView1;
+	float4x4 lightProjection1;
 };
 cbuffer cBuf2 : register(b2)//Spot light 1
 {
@@ -32,10 +32,10 @@ struct DS_OUTPUT
 	float4 wPosition : W_POSITION;
 	float4 normal : NORMAL;
 	float2 uv : UV;
-	float4 lightPosition : LIGHTPOS;//Directional Light
-	float4 lightPosition2 : LIGHTPOS1;//Spot Light 1
-	float4 lightPosition3 : LIGHTPOS2;//Spot Light 2
-	float4 lightPosition4 : LIGHTPOS3;//Spot Light 3
+	float4 lightPosition1 : LIGHTPOS1;//Directional Light
+	float4 lightPosition2 : LIGHTPOS2;//Spot Light 1
+	float4 lightPosition3 : LIGHTPOS3;//Spot Light 2
+	float4 lightPosition4 : LIGHTPOS4;//Spot Light 3
 };
 
 struct HS_CONTROL_POINT_OUTPUT
@@ -90,15 +90,15 @@ DS_OUTPUT main(HS_CONSTANT_DATA_OUTPUT input, float3 UVW : SV_DomainLocation, co
 
 	float3 finalNormal = UVW.x * tri[0].normal.xyz + UVW.y * tri[1].normal.xyz + UVW.z * tri[2].normal.xyz;
 	Output.normal = float4(finalNormal.xyz, 0.0f);
-	//Output.normal = mul(view, float4(finalNormal, 0.0f));
-	//Output.normal = mul(projection, Output.normal);
+
 
 	float2 finalTex = UVW.x * tri[0].uv + UVW.y * tri[1].uv + UVW.z * tri[2].uv;
 	Output.uv = finalTex;
 
 	float3 finalLightPos = UVW.x * tri[0].wPosition.xyz + UVW.y * tri[1].wPosition.xyz + UVW.z * tri[2].wPosition.xyz;
-	Output.lightPosition = mul(lightView, float4(finalLightPos, 1.0f));
-	Output.lightPosition = mul(lightProjection, Output.lightPosition);
+
+	Output.lightPosition1 = mul(lightView1, float4(finalLightPos, 1.0f));
+	Output.lightPosition1 = mul(lightProjection1, Output.lightPosition1);
 
 	Output.lightPosition2 = mul(lightView2, float4(finalLightPos, 1.0f));
 	Output.lightPosition2 = mul(lightProjection2, Output.lightPosition2);

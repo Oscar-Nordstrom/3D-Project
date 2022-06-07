@@ -8,11 +8,15 @@ ShadowMap::ShadowMap()
 	sLight1 = nullptr;
 	sLight2 = nullptr;
 	sLight3 = nullptr;
-	dsTexture = nullptr;
 	shadowRes = nullptr;
-	shadowSRV = nullptr;
 	vertexShadowShader = nullptr;
 	samState = nullptr;
+
+	for (int i = 0; i < 4; i++) {
+		dsViews[i] = nullptr;
+		dsTexture[i] = nullptr;
+		shadowSRV[i] = nullptr;
+	}
 
 	lightTurn = 0;
 	projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
@@ -20,13 +24,14 @@ ShadowMap::ShadowMap()
 
 ShadowMap::~ShadowMap()
 {
-	for (auto p : dsViews) {
-		if (p)p->Release();
-	}
-	if (dsTexture)dsTexture->Release();
-	if (vertexShadowShader)vertexShadowShader->Release();
-	if (shadowSRV)shadowSRV->Release();
 	if (samState)samState->Release();
+	if (vertexShadowShader)vertexShadowShader->Release();
+
+	for (int i = 0; i < 4; i++) {
+		if (dsViews[i])dsViews[i]->Release();
+		if (shadowSRV[i])shadowSRV[i]->Release();
+		if (dsTexture[i])dsTexture[i]->Release();
+	}
 }
 
 void ShadowMap::Init(Graphics*& gfx, DirectionalLight* light)
@@ -46,10 +51,9 @@ void ShadowMap::StartFirst()
 	}
 	gfx->GetContext()->RSSetViewports(1, &shadowViewPort);
 	gfx->GetContext()->VSSetShader(vertexShadowShader, nullptr, 0);
-	ID3D11ShaderResourceView* const pSRV[4] = { NULL,NULL,NULL,NULL };
-	gfx->GetContext()->PSSetShaderResources(1, 4, pSRV);
+	ID3D11ShaderResourceView* const pSRV[6] = { NULL };
+	gfx->GetContext()->PSSetShaderResources(1, 6, pSRV);
 	gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
-	//if (shadowSRV)shadowSRV->Release();
 }
 
 void ShadowMap::EndFirst()
@@ -59,7 +63,10 @@ void ShadowMap::EndFirst()
 void ShadowMap::StartSeccond()
 {
 	DepthToSRV();
-	gfx->GetContext()->PSSetShaderResources(3, 1, &shadowSRV);
+	gfx->GetContext()->PSSetShaderResources(3, 1, &shadowSRV[0]);
+	gfx->GetContext()->PSSetShaderResources(4, 1, &shadowSRV[1]);
+	gfx->GetContext()->PSSetShaderResources(5, 1, &shadowSRV[2]);
+	gfx->GetContext()->PSSetShaderResources(6, 1, &shadowSRV[3]);
 	gfx->GetContext()->PSSetSamplers(1, 1, &samState);
 }
 
@@ -79,16 +86,13 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 		switch (whatLight)
 		{
 		case 1:
-			//projection = DirectX::XMMatrixPerspectiveFovLH(sLight1->outerAngle, 1.0f, 0.1f, 100.f);
-			projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
+			projection = DirectX::XMMatrixPerspectiveFovLH(sLight1->outerAngle, 1.0f, 0.1f, 100.f);
 			break;
 		case 2:
-			//projection = DirectX::XMMatrixPerspectiveFovLH(sLight2->outerAngle, 1.0f, 0.1f, 100.f);
-			projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
+			projection = DirectX::XMMatrixPerspectiveFovLH(sLight2->outerAngle, 1.0f, 0.1f, 100.f);
 			break;
 		case 3:
-			//projection = DirectX::XMMatrixPerspectiveFovLH(sLight3->outerAngle, 1.0f, 0.1f, 100.f);
-			projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
+			projection = DirectX::XMMatrixPerspectiveFovLH(sLight3->outerAngle, 1.0f, 0.1f, 100.f);
 			break;
 		}
 	}
@@ -119,32 +123,23 @@ ID3D11DepthStencilView* ShadowMap::GetDsView(int what)
 	return dsViews[what];
 }
 
-ID3D11ShaderResourceView*& ShadowMap::GetShadowSRV()
-{
-	return shadowSRV;
-}
-
-ID3D11ShaderResourceView*& ShadowMap::DepthToSRV()
+void ShadowMap::DepthToSRV()
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2DArray.ArraySize = NUM_LIGHTS;
+	srvDesc.Texture2DArray.ArraySize = 1;
 	srvDesc.Texture2DArray.MostDetailedMip = 0;
 	srvDesc.Texture2DArray.MipLevels = 1;
 	HRESULT hr;
-	
-	if (shadowSRV)shadowSRV->Release();
-	hr = gfx->GetDevice()->CreateShaderResourceView(dsTexture, &srvDesc, &shadowSRV);
-	assert(!FAILED(hr) && "Failed to convert dsView to SRV");
-	return shadowSRV;
-	/*for (int i = 0; i < NUM_LIGHTS; i++) {
+
+	for (int i = 0; i < 4; i++) {
+		if (shadowSRV[i])shadowSRV[i]->Release();
 		dsViews[i]->GetResource(&shadowRes);
-		hr = gfx->GetDevice()->CreateShaderResourceView(shadowRes, &srvDesc, &shadowSRV);
-		assert(!FAILED(hr)&& "Failed to convert dsView to SRV");
+		hr = gfx->GetDevice()->CreateShaderResourceView(shadowRes, &srvDesc, &shadowSRV[i]);
+		assert(!FAILED(hr) && "Failed to convert dsView to SRV");
 		shadowRes->Release();
 	}
-	return shadowSRV;*/
 }
 
 void ShadowMap::SetViewPort()
@@ -163,7 +158,7 @@ bool ShadowMap::CreateDepthStencil()
 	texDesc.Width = gfx->GetWidth();
 	texDesc.Height = gfx->GetHeight();
 	texDesc.MipLevels = 1;
-	texDesc.ArraySize = NUM_LIGHTS;
+	texDesc.ArraySize = 1;
 	texDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
@@ -172,10 +167,11 @@ bool ShadowMap::CreateDepthStencil()
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 
-
-	if (FAILED(gfx->GetDevice()->CreateTexture2D(&texDesc, nullptr, &dsTexture)))
-	{
-		return false;
+	for (int i = 0; i < 4; i++) {
+		if (FAILED(gfx->GetDevice()->CreateTexture2D(&texDesc, nullptr, &dsTexture[i])))
+		{
+			return false;
+		}
 	}
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsViewDesc = {};
@@ -185,26 +181,25 @@ bool ShadowMap::CreateDepthStencil()
 	dsViewDesc.Texture2DArray.ArraySize = 1;
 	dsViewDesc.Texture2DArray.MipSlice = 0;
 
-	for (int i = 0; i < NUM_LIGHTS; i++) {
-		dsViewDesc.Texture2DArray.FirstArraySlice = D3D11CalcSubresource(0, i, 1);
-		ID3D11DepthStencilView* dsView;
-		if (FAILED(gfx->GetDevice()->CreateDepthStencilView(dsTexture, &dsViewDesc, &dsView))) {
+	for (int i = 0; i < 4; i++) {
+		if (FAILED(gfx->GetDevice()->CreateDepthStencilView(dsTexture[i], &dsViewDesc, &dsViews[i]))) {
 			return false;
 		}
-		dsViews.push_back(dsView);
 	}
 
 	//DEPTH STENCIL TO SRV
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-	srvDesc.Texture2DArray.ArraySize = NUM_LIGHTS;
-	srvDesc.Texture2DArray.MostDetailedMip = 0;
-	srvDesc.Texture2DArray.MipLevels = 1;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
 
-	HRESULT hr = gfx->GetDevice()->CreateShaderResourceView(dsTexture, &srvDesc, &shadowSRV);
+	HRESULT hr;
+	for (int i = 0; i < 4; i++) {
+		hr = gfx->GetDevice()->CreateShaderResourceView(dsTexture[i], &srvDesc, &shadowSRV[i]);
+		assert(!FAILED(hr) && "Failed to create srv");
+	}
 
-	return !FAILED(hr);
+	return true;
 }
 
 bool ShadowMap::LoadShaders()
