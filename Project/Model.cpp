@@ -13,7 +13,6 @@ Model::Model()
 	samState = nullptr;
 	texHandl = nullptr;
 	uavBuffer = nullptr;
-	shadowSamp = nullptr;
 	indexBuffer = nullptr;
 	inputLayout = nullptr;
 	vertexBuffer = nullptr;
@@ -38,7 +37,6 @@ Model::~Model()
 	if (gShader)gShader->Release();
 	if (inputLayout)inputLayout->Release();
 	if (samState)samState->Release();
-	if (shadowSamp)shadowSamp->Release();
 	if (vertexBuffer)vertexBuffer->Release();
 	if (uavBuffer)uavBuffer->Release();
 	if (indexBuffer)indexBuffer->Release();
@@ -132,7 +130,6 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		UpdateCbuf(*gfx, transform);
 
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
-		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 
@@ -149,7 +146,6 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		UpdateCbuf(*gfx, transform);
 
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
-		gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
 		gfx->GetContext()->IASetPrimitiveTopology(topology);
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 
@@ -408,6 +404,7 @@ bool Model::CreateInputLayout(ID3D11Device*& device, bool particle)
 
 bool Model::SetUpSampler(ID3D11Device*& device)
 {
+
 	D3D11_SAMPLER_DESC sampler;
 	sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sampler.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -417,13 +414,6 @@ bool Model::SetUpSampler(ID3D11Device*& device)
 	sampler.MaxAnisotropy = 1;
 
 	HRESULT hr = device->CreateSamplerState(&sampler, &samState);
-	if (FAILED(hr)) {
-		return false;
-	}
-
-	sampler.Filter = D3D11_FILTER_MINIMUM_ANISOTROPIC;
-
-	hr = device->CreateSamplerState(&sampler, &shadowSamp);
 
 	return !FAILED(hr);
 }

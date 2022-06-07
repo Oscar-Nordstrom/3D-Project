@@ -74,7 +74,7 @@ private:
 	SceneObjectTest cube2;
 	
 	SceneObjectTest soldiers[NUM_SOLDIERS];
-	SceneObjectTest ground, ground1, ground2, ground3;
+	SceneObjectTest ground;// , ground1, ground2, ground3;
 	std::vector<SceneObjectTest*> grounds;
 	std::vector<SceneObjectTest*>gameObjects;
 	DirectionalLight dLight;

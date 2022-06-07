@@ -28,6 +28,7 @@ private:
 	void SetViewPort();
 	bool CreateDepthStencil();
 	bool LoadShaders();
+	bool SetUpSampler();
 
 	int lightTurn;
 
@@ -42,6 +43,7 @@ private:
 	ID3D11VertexShader* vertexShadowShader;
 	ID3D11Resource* shadowRes;
 	ID3D11ShaderResourceView* shadowSRV;
+	ID3D11SamplerState* samState;
 	D3D11_VIEWPORT shadowViewPort;
 
 	DirectX::XMMATRIX projection;

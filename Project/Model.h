@@ -64,7 +64,6 @@ private:
 	ID3D11GeometryShader* gShader;
 	ID3D11InputLayout* inputLayout;
 	ID3D11SamplerState* samState;
-	ID3D11SamplerState* shadowSamp;
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* nullBuf;
 	ID3D11UnorderedAccessView* uavBuffer;

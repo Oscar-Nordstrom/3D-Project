@@ -53,6 +53,7 @@ Texture2D<float4> map_Kd : register(t0); //Diffuse
 Texture2D<float4> map_Ks : register(t1); //Specular
 Texture2D<float4> map_Ka : register(t2); //Ambient
 SamplerState samp1 : register(s0);
+SamplerState shadowSamp : register(s1);
 
 Texture2DArray<float4> shadowMaps : register(t3);
 
@@ -61,7 +62,7 @@ PixelShaderOutput main(PixelShaderInput input)
 {
 
 	bool lit = false;
-	int numLights = 1;//Change to 4 when using all lights
+	int numLights = 4;//Change to 4 when using all lights
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
 		
@@ -88,7 +89,7 @@ PixelShaderOutput main(PixelShaderInput input)
 		//Compute pixel depth for shadowing
 		float depth = lightPositionToUse.z / lightPositionToUse.w;//OK
 		//Sample
-		float4 sampled = shadowMaps.Sample(samp1, float3(smTex, i), 0);
+		float4 sampled = shadowMaps.Sample(shadowSamp, float3(smTex, i));
 		//Check if shadowd
 		if (sampled.r < depth)
 		{

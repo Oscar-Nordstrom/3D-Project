@@ -12,6 +12,7 @@ ShadowMap::ShadowMap()
 	shadowRes = nullptr;
 	shadowSRV = nullptr;
 	vertexShadowShader = nullptr;
+	samState = nullptr;
 
 	lightTurn = 0;
 	projection = DirectX::XMMatrixOrthographicLH(200.0f, 200.0f, 0.1f, 100.0f);
@@ -25,6 +26,7 @@ ShadowMap::~ShadowMap()
 	if (dsTexture)dsTexture->Release();
 	if (vertexShadowShader)vertexShadowShader->Release();
 	if (shadowSRV)shadowSRV->Release();
+	if (samState)samState->Release();
 }
 
 void ShadowMap::Init(Graphics*& gfx, DirectionalLight* light)
@@ -33,6 +35,7 @@ void ShadowMap::Init(Graphics*& gfx, DirectionalLight* light)
 
 	assert(LoadShaders() && "Failed to load shaders.");
 	assert(CreateDepthStencil() && "Failed to create ds.");
+	assert(SetUpSampler() && "Failed to set up sampler.");
 	SetViewPort();
 }
 
@@ -57,6 +60,7 @@ void ShadowMap::StartSeccond()
 {
 	DepthToSRV();
 	gfx->GetContext()->PSSetShaderResources(3, 1, &shadowSRV);
+	gfx->GetContext()->PSSetSamplers(1, 1, &samState);
 }
 
 void ShadowMap::EndSeccond()
@@ -234,6 +238,25 @@ bool ShadowMap::LoadShaders()
 
 
 	return true;
+}
+
+bool ShadowMap::SetUpSampler()
+{
+	D3D11_SAMPLER_DESC sampler;
+	sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler.BorderColor[0] = 1;
+	sampler.BorderColor[1] = 1;
+	sampler.BorderColor[2] = 1;
+	sampler.BorderColor[3] = 1;
+	sampler.MipLODBias = 0;
+	sampler.MaxAnisotropy = 1;
+
+	HRESULT hr = gfx->GetDevice()->CreateSamplerState(&sampler, &samState);
+
+	return !FAILED(hr);
 }
 
 

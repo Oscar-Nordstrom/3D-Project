@@ -27,7 +27,6 @@ Texture2D<float4> tex2 : register(t1); //Specular
 Texture2D<float4> tex3 : register(t2); //Ambient
 TextureCube cMap : register(t3);//Cube map
 SamplerState samp1 : register(s0);
-SamplerState shadowSamp : register(s1);
 
 Texture2D<float4> shadowMap : register(t3);
 
@@ -45,7 +44,7 @@ PixelShaderOutput main(PixelShaderInput input)
     //Compute pixel depth for shadowing
     float depth = input.lightPosition.z / input.lightPosition.w; //OK
     //Sample
-    float4 sampled = shadowMap.Sample(shadowSamp, smTex); //Maybe need another sampler?
+    float4 sampled = shadowMap.Sample(samp1, smTex); //Maybe need another sampler?
     //Check if shadowd
     if (sampled.r < depth)//Is this right?
     {
