@@ -137,7 +137,7 @@ bool Scene::DoFrame()
 	shadow.StartFirst();
 
 	for (int i = 0; i < NUM_LIGHTS; i++) {
-		
+
 		if (i > 0) {
 			int index = i - 1;
 			cam.SetPosition(sLights[index].position);
@@ -232,10 +232,12 @@ bool Scene::DoFrame()
 	}
 
 	//Particle Start
-	window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
-	window.Gfx()->GetContext()->GSSetConstantBuffers(1, 1, &camBuf2);
-	window.Gfx()->GetContext()->GSSetConstantBuffers(2, 1, &camBuf3);
-	particle.Draw(window.Gfx(), PARTICLE);
+	if (particlesOn) {
+		window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
+		window.Gfx()->GetContext()->GSSetConstantBuffers(1, 1, &camBuf2);
+		window.Gfx()->GetContext()->GSSetConstantBuffers(2, 1, &camBuf3);
+		particle.Draw(window.Gfx(), PARTICLE);
+	}
 	//Particle End
 
 	//dLight;
@@ -248,9 +250,11 @@ bool Scene::DoFrame()
 	//Final draw End
 
 	//Update particles
-	particle.UpdateParticle(window.Gfx());
-	window.Gfx()->GetContext()->CSSetConstantBuffers(3, 1, &camBufTime);
-	window.Gfx()->UpdateParticles();
+	if (particlesOn) {
+		particle.UpdateParticle(window.Gfx());
+		window.Gfx()->GetContext()->CSSetConstantBuffers(3, 1, &camBufTime);
+		window.Gfx()->UpdateParticles();
+	}
 
 	return true;
 }
@@ -278,7 +282,7 @@ bool Scene::SetUpDirLight()
 bool Scene::SetUpSpotLighs()
 {
 	D3D11_BUFFER_DESC desc;
-	desc.ByteWidth = roundUpTo(sizeof(SpotLight)*3, 16);
+	desc.ByteWidth = roundUpTo(sizeof(SpotLight) * 3, 16);
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.CPUAccessFlags = 0;
@@ -621,6 +625,7 @@ void Scene::ImGuiWindows()
 		ImGui::Checkbox("QuadTree", &quadTreeOn);
 		ImGui::Checkbox("Frustum Collision Check", &frustumCheckOn);
 		ImGui::Checkbox("Shadows", &shadowsOn);
+		ImGui::Checkbox("Particles", &particlesOn);
 
 	}
 	ImGui::End();
@@ -727,10 +732,10 @@ void Scene::SetUpGameObjects()
 		soldiers[25].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, 40.0f));
 		soldiers[26].SetPos(DirectX::XMFLOAT3(-40.0f, 0.0f, -40.0f));
 	}
-	
+
 
 	ground.Init(texHandl, "../Resources/Obj/ground.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
-	ground.Scale(150.0f, 150.0f, 0.0f);
+	ground.Scale(100.0f, 100.0f, 0.0f);
 	ground.Rotate(DirectX::XMConvertToRadians(90), 0.0f, 0.0f);
 	ground.Move(0.0f, -18.0f, 0.0f);
 	grounds.push_back(&ground);

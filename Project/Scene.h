@@ -105,6 +105,7 @@ private:
 	bool quadTreeOn;
 	bool frustumCheckOn;
 	bool shadowsOn;
+	bool particlesOn;
 
 	bool updateCulling;
 
