@@ -63,9 +63,10 @@ Texture2D<float4> shadowMap4 : register(t6);//SpotLight 3
 
 PixelShaderOutput main(PixelShaderInput input)
 {
+	const float bias = 0.0001f;
 	float4 zero = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	bool lit = false;
-	int numLights = 4;//Change to 4 when using all lights
+	int numLights = 4;
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
 		
@@ -110,7 +111,7 @@ PixelShaderOutput main(PixelShaderInput input)
 		
 
 		//Check if shadowd
-		if (sampled.r < depth)
+		if (sampled.r+bias < depth)
 		{
 			//If the light sees is less than what we see, there is a shadow
 			shadowCoeff = 0.0f;
