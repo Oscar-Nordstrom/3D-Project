@@ -51,8 +51,8 @@ void ShadowMap::StartFirst()
 	}
 	gfx->GetContext()->RSSetViewports(1, &shadowViewPort);
 	gfx->GetContext()->VSSetShader(vertexShadowShader, nullptr, 0);
-	ID3D11ShaderResourceView* const pSRV[6] = { NULL };
-	gfx->GetContext()->PSSetShaderResources(1, 6, pSRV);
+	ID3D11ShaderResourceView* const pSRV[7] = { NULL };
+	gfx->GetContext()->PSSetShaderResources(1, 7, pSRV);
 	gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
 }
 
@@ -106,6 +106,11 @@ void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
 void ShadowMap::SetDirLight(DirectionalLight* dLight)
 {
 	this->dLight = dLight;
+}
+
+void ShadowMap::SetSampler(int slot)
+{
+	gfx->GetContext()->PSSetSamplers(slot, 1, &samState);
 }
 
 void ShadowMap::SetSpotLights(SpotLight spotLights[])

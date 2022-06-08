@@ -19,6 +19,7 @@ public:
 	void EndSeccond();
 	void UpdateWhatShadow(int whatLight, int flag);
 	void SetDirLight(DirectionalLight* dLight);
+	void SetSampler(int slot = 1);
 	//Needs 3 lights
 	void SetSpotLights(SpotLight spotLights[]);
 private:

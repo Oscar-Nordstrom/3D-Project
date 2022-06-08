@@ -22,6 +22,8 @@ Scene::Scene()
 	quadTreeOn = true;
 	frustumCheckOn = true;
 	shadowsOn = true;
+	particlesOn = true;
+	cubeMappingOn = true;
 	dt = 0;
 	this->updateCulling = true;
 
@@ -134,85 +136,99 @@ bool Scene::DoFrame()
 
 
 	//Cube mapping first Start
-	cMap.Clear(window.Gfx()->GetContext());
-	//std::vector<SceneObjectTest*>tempObjects = objectsToDraw;
-	//std::vector<QuadTree*> tempNodes = intersectingNodes;
-	//tempPos = cam.GetPositionFloat3();
-	//tempDir = cam.GetRotationFloat3();
-	//Go through all uavs
-	for (int i = 0; i < NUM_TEX; i++) {
-		//Rotate camera
-		cubeMapSetCam(i);
-		HandleCulling(cMap.GetCam());
+	if (cubeMappingOn) {
 
-		//Shadows Start First Cube Map
-		DirectX::XMFLOAT3 tempPos = cam.GetPositionFloat3();
-		DirectX::XMFLOAT3 tempDir = cam.GetRotationFloat3();
-		shadow.SetSpotLights(sLights);
-		shadow.SetDirLight(&dLight);
-		shadow.StartFirst();
 
-		for (int i = 0; i < NUM_LIGHTS; i++) {
+ 		cMap.Clear(window.Gfx()->GetContext());
+		//std::vector<SceneObjectTest*>tempObjects = objectsToDraw;
+		//std::vector<QuadTree*> tempNodes = intersectingNodes;
+		//tempPos = cam.GetPositionFloat3();
+		//tempDir = cam.GetRotationFloat3();
+		//Go through all uavs
+		for (int i = 0; i < NUM_TEX; i++) {
+			//Rotate camera
+			cubeMapSetCam(i);
+			HandleCulling(cMap.GetCam());
 
-			if (i > 0) {
-				int index = i - 1;
-				cam.SetPosition(sLights[index].position);
-				cam.SetRotationDeg(90, 0.0f, 0.0f);
-				shadow.UpdateWhatShadow(i, SPOT_LIGHT);//Sets depth
-			}
-			else {
-				cam.SetPosition(0.0f, 40.0f, 0.0f);
-				cam.SetRotationDeg(90, 0.0f, 0.0f);
-				shadow.UpdateWhatShadow(i, DIRECTIONAL_LIGHT);//Sets depth
-			}
-			UpdateCamera();
-			shadowBufferData[i].view = cam.GettViewMatrix();
-			shadowBufferData[i].proj = window.Gfx()->GetProjection();
-			//shadowBufferData[i].proj = cam.GettProjectionMatrix();
-			window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
-			if (shadowsOn) {
-				for (auto p : objectsToDraw) {
-					p->Draw(window.Gfx(), SHADOW);
+			//Shadows Start First Cube Map
+			DirectX::XMFLOAT3 tempPos = cam.GetPositionFloat3();
+			DirectX::XMFLOAT3 tempDir = cam.GetRotationFloat3();
+			shadow.SetSpotLights(sLights);
+			shadow.SetDirLight(&dLight);
+			shadow.StartFirst();
+
+			for (int i = 0; i < NUM_LIGHTS; i++) {
+
+				if (i > 0) {
+					int index = i - 1;
+					cam.SetPosition(sLights[index].position);
+					cam.SetRotationDeg(90, 0.0f, 0.0f);
+					shadow.UpdateWhatShadow(i, SPOT_LIGHT);//Sets depth
 				}
-				//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
+				else {
+					cam.SetPosition(0.0f, 40.0f, 0.0f);
+					cam.SetRotationDeg(90, 0.0f, 0.0f);
+					shadow.UpdateWhatShadow(i, DIRECTIONAL_LIGHT);//Sets depth
+				}
+				UpdateCamera();
+				shadowBufferData[i].view = cam.GettViewMatrix();
+				shadowBufferData[i].proj = window.Gfx()->GetProjection();
+				//shadowBufferData[i].proj = cam.GettProjectionMatrix();
+				window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
+				if (shadowsOn) {
+					for (auto p : objectsToDraw) {
+						p->Draw(window.Gfx(), SHADOW);
+					}
+					//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
+				}
 			}
+
+			cam.SetPosition(tempPos);
+			cam.SetRotationRad(tempDir);
+			UpdateCamera();
+			//Shadows End First Cube Map
+
+
+			//Render to current uavs
+			window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
+			shadow.StartSeccond();
+			window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &shadowSettings);
+			window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &lightBuf);
+			window.Gfx()->GetContext()->PSSetConstantBuffers(2, 1, &lightBufSpots);
+			window.Gfx()->GetContext()->PSSetConstantBuffers(3, 1, &camBuf);
+
+			window.Gfx()->SetProjection(cMap.GetCam().GettProjectionMatrix());
+			window.Gfx()->SetCamera(cMap.GetCam().GettViewMatrix());
+
+			cMap.Set(window.Gfx()->GetContext(), i);
+
+			for (auto p : objectsToDraw) {
+				p->Draw(window.Gfx(), CUBE_MAP);
+			}
+			for (auto p : grounds) {
+				p->Draw(window.Gfx(), CUBE_MAP);
+			}
+
+			if (particlesOn) {
+				window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBufCubeMap);
+				window.Gfx()->GetContext()->GSSetConstantBuffers(1, 1, &camBuf2CubeMap);
+				window.Gfx()->GetContext()->GSSetConstantBuffers(2, 1, &camBuf3CubeMap);
+				particle.Draw(window.Gfx(), PARTICLE);
+			}
+
+			
+			//shadow.StartSeccond(4);
+			window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
+			window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
+			window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
+			window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 		}
-
-		cam.SetPosition(tempPos);
-		cam.SetRotationRad(tempDir);
-		UpdateCamera();
-		//Shadows End First Cube Map
-
-		//Render to current uavs
-		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
-		window.Gfx()->SetProjection(cMap.GetCam().GettProjectionMatrix());
-		window.Gfx()->SetCamera(cMap.GetCam().GettViewMatrix());
-
-		cMap.Set(window.Gfx()->GetContext(), i);
-
-		for (auto p : objectsToDraw) {
-			p->Draw(window.Gfx(), CUBE_MAP);
-		}
-		for (auto p : grounds) {
-			p->Draw(window.Gfx(), CUBE_MAP);
-		}
-
-		window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBufCubeMap);
-		window.Gfx()->GetContext()->GSSetConstantBuffers(1, 1, &camBuf2CubeMap);
-		window.Gfx()->GetContext()->GSSetConstantBuffers(2, 1, &camBuf3CubeMap);
-		particle.Draw(window.Gfx(), PARTICLE);
-
-		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
-		window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
-		window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
-		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
-		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
+		//cam.SetPosition(tempPos);
+		//cam.SetRotationRad(tempDir);
+		//objectsToDraw = tempObjects;
+		//intersectingNodes = tempNodes;
+		HandleCulling(cam);
 	}
-	//cam.SetPosition(tempPos);
-	//cam.SetRotationRad(tempDir);
-	//objectsToDraw = tempObjects;
-	//intersectingNodes = tempNodes;
-	HandleCulling(cam);
 	//Cube map first end
 
 
@@ -264,9 +280,11 @@ bool Scene::DoFrame()
 	UpdateObjcects(t);
 
 	//Cube map seccond Start
-	cMap.SetSeccond(window.Gfx());
-	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
-	cMap.SetEnd(window.Gfx());
+	if (cubeMappingOn) {
+		cMap.SetSeccond(window.Gfx());
+		cube.Draw(window.Gfx(), CUBE_MAP_TWO);
+		cMap.SetEnd(window.Gfx());
+	}
 	//Cube map seccond End
 
 	//Shadows Start Second
@@ -281,7 +299,7 @@ bool Scene::DoFrame()
 	for (auto p : objectsToDraw) {
 		p->Draw(window.Gfx());
 	}
-	
+
 	//for (int i = 0; i < 6; i++) {
 	//	skybox[i].Draw(window.Gfx());
 	//}
@@ -701,6 +719,7 @@ void Scene::ImGuiWindows()
 		ImGui::Checkbox("Frustum Collision Check", &frustumCheckOn);
 		ImGui::Checkbox("Shadows", &shadowsOn);
 		ImGui::Checkbox("Particles", &particlesOn);
+		ImGui::Checkbox("CubeMap", &cubeMappingOn);
 
 	}
 	ImGui::End();

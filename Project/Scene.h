@@ -108,6 +108,7 @@ private:
 	bool frustumCheckOn;
 	bool shadowsOn;
 	bool particlesOn;
+	bool cubeMappingOn;
 
 	bool updateCulling;
 

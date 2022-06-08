@@ -6,6 +6,11 @@ struct SpotLight {
 	float outerAngle;
 };
 
+struct DirectionalLight {
+	float4 color;
+	float3 direction;
+};
+
 struct PixelShaderInput
 {
 	float4 position : SV_POSITION;
@@ -28,11 +33,6 @@ struct PixelShaderOutput
 	float4 ambient : SV_Target4;
 	float4 specular : SV_Target5;
 	float4 diffuse : SV_Target6;
-};
-
-struct DirectionalLight {
-	float4 color;
-	float3 direction;
 };
 
 cbuffer shadowSettings : register(b0)

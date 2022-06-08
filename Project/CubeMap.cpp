@@ -56,7 +56,7 @@ void CubeMap::SetSeccond(Graphics*& gfx)
 	gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 	gfx->GetContext()->CSSetUnorderedAccessViews(6, 1, &nullUav, nullptr);
 	gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
-	gfx->GetContext()->PSSetShaderResources(3, 1, &srv);
+	gfx->GetContext()->PSSetShaderResources(7, 1, &srv);
 }
 
 void CubeMap::SetEnd(Graphics*& gfx)
