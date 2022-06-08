@@ -8,11 +8,13 @@ struct SpotLight {
     float innerAngle;
     float3 direction;
     float outerAngle;
+	float4 on;
 };
 
 struct DirectionalLight {
     float4 color;
     float3 direction;
+	bool on;
 };
 
 Texture2D<float4> positions : register(t0);
@@ -145,6 +147,9 @@ void main(uint3 DTid : SV_DispatchThreadID)
 		float4 tempSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		//Directionl light
 		if (i == 0) {
+			if (!dLight.on) {
+				continue;
+			}
 			//Diffuse
 			float3 d = -normalize(dLight.direction);
 			float diff = max(dot(d, normal.xyz), 0.0f);
@@ -156,13 +161,15 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = dot(ref, vec);
 			if (spec >= 0.0f) {
-				tempSpecular = specular * pow(spec, Ns);
+				tempSpecular = specular * pow(abs(spec), Ns);
 			}
 		}
 		//Spot Light
 		else {
 			int index = i - 1;
-
+			if (sLights[index].on.x == 0.0f) {
+				continue;
+			}
 
 			//Diffuse
 			float3 lightPixelVec = normalize(sLights[index].position - wPosition.xyz);

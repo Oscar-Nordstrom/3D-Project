@@ -46,6 +46,7 @@ private:
 
 	void SetLights();
 	void SetUpSkybox();
+	void HandleLightSettings();
 
 	void ImGuiWindows();
 
@@ -109,6 +110,9 @@ private:
 	bool shadowsOn;
 	bool particlesOn;
 	bool cubeMappingOn;
+	bool sLight1On;
+	bool sLight2On;
+	bool sLight3On;
 
 	bool updateCulling;
 

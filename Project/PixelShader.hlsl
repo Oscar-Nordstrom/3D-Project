@@ -4,11 +4,13 @@ struct SpotLight {
 	float innerAngle;
 	float3 direction;
 	float outerAngle;
+	float4 on;
 };
 
 struct DirectionalLight {
 	float4 color;
 	float3 direction;
+	bool on;
 };
 
 struct PixelShaderInput
@@ -69,23 +71,37 @@ PixelShaderOutput main(PixelShaderInput input)
 	int numLights = 4;
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
-		
+		bool lightIsOn = true;
 		float4 lightPositionToUse = zero;
 		switch (i) {
 		case 0:
 			lightPositionToUse = input.lightPosition1;//Directional Light
+			if (!dLight.on) {
+				lightIsOn = false;
+			}
 			break;
 		case 1:
 			lightPositionToUse = input.lightPosition2;//Spot Light
+			if (sLights[0].on.x == 0.0f) {
+				lightIsOn = false;
+			}
 			break;
 		case 2:
 			lightPositionToUse = input.lightPosition3;//Spot Light
+			if (sLights[1].on.x == 0.0f) {
+				lightIsOn = false;
+			}
 			break;
 		case 3:
 			lightPositionToUse = input.lightPosition4;//Spot Light
+			if (sLights[2].on.x == 0.0f) {
+				lightIsOn = false;
+			}
 			break;
 		}
-		if(lit)
+		if (!lightIsOn) {
+			continue;
+		}
 		//Convert to NDC
 		lightPositionToUse.xy /= lightPositionToUse.w;
 		//Translate to UV (0-1)

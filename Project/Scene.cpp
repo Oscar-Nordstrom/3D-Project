@@ -24,6 +24,10 @@ Scene::Scene()
 	shadowsOn = true;
 	particlesOn = true;
 	cubeMappingOn = true;
+	sLight1On = true;
+	sLight2On = true;
+	sLight3On = true;
+
 	dt = 0;
 	this->updateCulling = true;
 
@@ -133,7 +137,7 @@ bool Scene::DoFrame()
 		this->updateCulling = false;
 	}
 
-
+	HandleLightSettings();
 
 	//Cube mapping first Start
 	if (cubeMappingOn) {
@@ -339,9 +343,9 @@ bool Scene::SetUpDirLight()
 {
 	D3D11_BUFFER_DESC desc;
 	desc.ByteWidth = roundUpTo(sizeof(dLight), 16);
-	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.CPUAccessFlags = 0;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	desc.MiscFlags = 0;
 	desc.StructureByteStride = 0;
 
@@ -359,9 +363,9 @@ bool Scene::SetUpSpotLighs()
 {
 	D3D11_BUFFER_DESC desc;
 	desc.ByteWidth = roundUpTo(sizeof(SpotLight) * 3, 16);
-	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.CPUAccessFlags = 0;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	desc.MiscFlags = 0;
 	desc.StructureByteStride = 0;
 
@@ -517,6 +521,22 @@ void Scene::UpdateBufs()
 	}
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(lightBufSpots, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, &sLights, sizeof(SpotLight)*3);//Write the new memory
+	window.Gfx()->GetContext()->Unmap(lightBufSpots, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false && "Failed to update buffer.");
+	}
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(lightBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, &dLight, sizeof(dLight));//Write the new memory
+	window.Gfx()->GetContext()->Unmap(lightBuf, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false && "Failed to update buffer.");
+	}
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	hr = window.Gfx()->GetContext()->Map(camBufTime, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
 	CopyMemory(mappedResource.pData, &theTimedata, sizeof(TimeData));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBufTime, 0);//Reenable GPU access to the data
@@ -549,7 +569,7 @@ bool Scene::UpdateObjcects(float t)
 		}
 	}
 
-	if (!cube.Update(-t, window.Gfx())) {
+	if (!cube.Update(0.0f, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}
@@ -663,6 +683,7 @@ void Scene::SetLights()
 {
 	dLight.color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	dLight.direction = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
+	dLight.on = true;
 	SetUpDirLight();
 
 	sLights[0].color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -684,6 +705,10 @@ void Scene::SetLights()
 	sLights[0].outerAngle = 20.0f;
 	sLights[1].outerAngle = 20.0f;
 	sLights[2].outerAngle = 20.0f;
+
+	sLights[0].on = { 1.0f, 1.0f, 1.0f, 1.0f };
+	sLights[1].on = { 1.0f, 1.0f, 1.0f, 1.0f };
+	sLights[2].on = { 1.0f, 1.0f, 1.0f, 1.0f };
 	SetUpSpotLighs();
 }
 
@@ -710,9 +735,31 @@ void Scene::SetUpSkybox()
 	skybox[5].Rotate(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f);*/
 }
 
+void Scene::HandleLightSettings()
+{
+	if (sLight1On) {
+		sLights[0].on = { 1.0f, 1.0f, 1.0f, 1.0f };
+	}
+	else {
+		sLights[0].on = { 0.0f, 0.0f, 0.0f, 0.0f };
+	}
+	if (sLight2On) {
+		sLights[1].on = { 1.0f, 1.0f, 1.0f, 1.0f };
+	}
+	else {
+		sLights[1].on = { 0.0f, 0.0f, 0.0f, 0.0f };
+	}
+	if (sLight3On) {
+		sLights[2].on = { 1.0f, 1.0f, 1.0f, 1.0f };
+	}
+	else {
+		sLights[2].on = { 0.0f, 0.0f, 0.0f, 0.0f };
+	}
+}
+
 void Scene::ImGuiWindows()
 {
-	if (ImGui::Begin("Settings")) {
+	if (ImGui::Begin("General Settings")) {
 		ImGui::SliderFloat("Speed Factor", &speedfactor, 0.0f, 4.0f);
 		ImGui::Checkbox("Tesselation", &tesselation);
 		ImGui::Checkbox("QuadTree", &quadTreeOn);
@@ -720,7 +767,13 @@ void Scene::ImGuiWindows()
 		ImGui::Checkbox("Shadows", &shadowsOn);
 		ImGui::Checkbox("Particles", &particlesOn);
 		ImGui::Checkbox("CubeMap", &cubeMappingOn);
-
+	}
+	ImGui::End();
+	if (ImGui::Begin("Light Settings")) {
+		ImGui::Checkbox("Directional Light", &dLight.on);
+		ImGui::Checkbox("Spotlight 1 Light", &sLight1On);
+		ImGui::Checkbox("Spotlight 2 Light", &sLight2On);
+		ImGui::Checkbox("Spotlight 3 Light", &sLight3On);
 	}
 	ImGui::End();
 	if (ImGui::Begin("Info")) {

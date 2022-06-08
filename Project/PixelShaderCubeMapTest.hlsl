@@ -1,56 +1,58 @@
 struct SpotLight {
-    float4 color;
-    float3 position;
-    float innerAngle;
-    float3 direction;
-    float outerAngle;
+	float4 color;
+	float3 position;
+	float innerAngle;
+	float3 direction;
+	float outerAngle;
+	float4 on;
 };
 
 struct DirectionalLight {
-    float4 color;
-    float3 direction;
+	float4 color;
+	float3 direction;
+	bool on;
 };
 
 struct PixelShaderInput
 {
-    float4 position : SV_POSITION;
-    float4 wPosition : W_POSITION;
-    float4 normal : NORMAL;
-    float2 uv : UV;
-    //positions from perespective of light
-    float4 lightPosition1 : LIGHTPOS1;//Directional Light
-    float4 lightPosition2 : LIGHTPOS2;//Spot Light 1
-    float4 lightPosition3 : LIGHTPOS3;//Spot Light 2
-    float4 lightPosition4 : LIGHTPOS4;//Spot Light 3
+	float4 position : SV_POSITION;
+	float4 wPosition : W_POSITION;
+	float4 normal : NORMAL;
+	float2 uv : UV;
+	//positions from perespective of light
+	float4 lightPosition1 : LIGHTPOS1;//Directional Light
+	float4 lightPosition2 : LIGHTPOS2;//Spot Light 1
+	float4 lightPosition3 : LIGHTPOS3;//Spot Light 2
+	float4 lightPosition4 : LIGHTPOS4;//Spot Light 3
 };
 
 struct PixelShaderOutput
 {
-    float4 position : SV_Target0;
-    float4 wPosition : SV_Target1;
-    float4 color : SV_Target2;
-    float4 normal : SV_Target3;
-    float4 ambient : SV_Target4;
-    float4 specular : SV_Target5;
-    float4 diffuse : SV_Target6;
+	float4 position : SV_Target0;
+	float4 wPosition : SV_Target1;
+	float4 color : SV_Target2;
+	float4 normal : SV_Target3;
+	float4 ambient : SV_Target4;
+	float4 specular : SV_Target5;
+	float4 diffuse : SV_Target6;
 };
 
 cbuffer shadowSettings : register(b0)
 {
-    bool ShadowsOn;
+	bool ShadowsOn;
 }
 cbuffer lightcb : register(b1)
 {
-    DirectionalLight dLight;
+	DirectionalLight dLight;
 }
 cbuffer lightCbSpot : register(b2)
 {
-    SpotLight sLights[3];
+	SpotLight sLights[3];
 }
 
 cbuffer camcb : register(b3)
 {
-    float4 camPos;
+	float4 camPos;
 }
 
 Texture2D<float4> map_Kd : register(t0); //Diffuse
@@ -80,25 +82,39 @@ PixelShaderOutput main(PixelShaderInput input)
 	int numLights = 4;
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
-
+		bool lightIsOn = true;
 		float4 lightPositionToUse = zero;
 		switch (i) {
 		case 0:
 			lightPositionToUse = input.lightPosition1;//Directional Light
+			if (!dLight.on) {
+				lightIsOn = false;
+			}
 			break;
 		case 1:
 			lightPositionToUse = input.lightPosition2;//Spot Light
+			if (sLights[0].on.x == 0.0f) {
+				lightIsOn = false;
+			}
 			break;
 		case 2:
 			lightPositionToUse = input.lightPosition3;//Spot Light
+			if (sLights[1].on.x == 0.0f) {
+				lightIsOn = false;
+			}
 			break;
 		case 3:
 			lightPositionToUse = input.lightPosition4;//Spot Light
+			if (sLights[2].on.x == 0.0f) {
+				lightIsOn = false;
+			}
 			break;
 		}
-		if (lit)
-			//Convert to NDC
-			lightPositionToUse.xy /= lightPositionToUse.w;
+		if (!lightIsOn) {
+			continue;
+		}
+		//Convert to NDC
+		lightPositionToUse.xy /= lightPositionToUse.w;
 		//Translate to UV (0-1)
 		float2 smTex = float2(lightPositionToUse.x * 0.5f + 0.5f, lightPositionToUse.y * (-0.5f) + 0.5f);//OK
 		//Compute pixel depth for shadowing
@@ -135,20 +151,20 @@ PixelShaderOutput main(PixelShaderInput input)
 		shadowCoeff = 1.0f;
 	}
 
-  
 
-    PixelShaderOutput output;
-    output.color = cMap.Sample(samp1, input.wPosition.xyz);
-    output.diffuse = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
-    output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
-    output.ambient = map_Ka.Sample(samp1, input.uv);
-    output.position = input.position;
-    output.wPosition = input.wPosition;
-    output.normal = input.normal;
-    
- 
-    
-    return output;
+
+	PixelShaderOutput output;
+	output.color = cMap.Sample(samp1, input.wPosition.xyz);
+	output.diffuse = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
+	output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
+	output.ambient = map_Ka.Sample(samp1, input.uv);
+	output.position = input.position;
+	output.wPosition = input.wPosition;
+	output.normal = input.normal;
+
+
+
+	return output;
 
 
 }

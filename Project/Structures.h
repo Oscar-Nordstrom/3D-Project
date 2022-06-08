@@ -28,6 +28,7 @@ struct ShadowShaderBuffer {
 struct DirectionalLight {
 	DirectX::XMFLOAT4 color;
 	DirectX::XMFLOAT3 direction;
+	bool on;
 };
 
 struct SpotLight {
@@ -36,6 +37,7 @@ struct SpotLight {
 	float innerAngle;//4 bytes
 	DirectX::XMFLOAT3 direction;//12 bytes
 	float outerAngle;//4 bytes
+	DirectX::XMFLOAT4 on;
 };
 
 struct TextureRT {
