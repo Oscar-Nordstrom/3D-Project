@@ -4,7 +4,10 @@ struct PixelShaderInput
     float4 wPosition : W_POSITION;
     float4 normal : NORMAL;
     float2 uv : UV;
-    float4 lightPosition : LIGHTPOS;
+    float4 lightPosition1 : LIGHTPOS1;//Directional Light
+    float4 lightPosition2 : LIGHTPOS2;//Spot Light 1
+    float4 lightPosition3 : LIGHTPOS3;//Spot Light 2
+    float4 lightPosition4 : LIGHTPOS4;//Spot Light 3
 };
 
 struct PixelShaderOutput
@@ -36,7 +39,7 @@ PixelShaderOutput main(PixelShaderInput input)
 {
     
  
-    float shadowCoeff = 1.0f;
+   /* float shadowCoeff = 1.0f;
     //Convert to NDC
     input.lightPosition.xy /= input.lightPosition.w; //OK
     //Translate to UV (0-1)
@@ -50,7 +53,7 @@ PixelShaderOutput main(PixelShaderInput input)
     {
         //If the light sees is less than what we see, there is a shadow
         shadowCoeff = 0.0f;
-    }
+    }*/
     
 
     
@@ -64,7 +67,6 @@ PixelShaderOutput main(PixelShaderInput input)
     
     //output.color = cMap.Sample(samp1, float3(input.uv, 1.0f)); // * shadowCoeff;
     output.color = cubeTex;
-    //output.color = red;
     output.specular = tex2.Sample(samp1, input.uv); // * shadowCoeff;
     output.ambient = tex3.Sample(samp1, input.uv);
     output.position = input.position;
