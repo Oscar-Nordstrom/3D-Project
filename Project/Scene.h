@@ -51,7 +51,7 @@ private:
 
 	void EnableTesselation();
 	void DisableTesselation();
-	void HandleCulling();
+	void HandleCulling(Camera& cam);
 
 	void SetUpGameObjects();
 
@@ -71,7 +71,6 @@ private:
 	CubeMap cMap;
 	SceneObjectTest particle;
 	SceneObjectTest cube;
-	SceneObjectTest cube2;
 	
 	SceneObjectTest soldiers[NUM_SOLDIERS];
 	SceneObjectTest ground , ground1, ground2, ground3;
@@ -88,6 +87,9 @@ private:
 	ID3D11Buffer* camBuf;
 	ID3D11Buffer* camBuf2;
 	ID3D11Buffer* camBuf3;
+	ID3D11Buffer* camBufCubeMap;
+	ID3D11Buffer* camBuf2CubeMap;
+	ID3D11Buffer* camBuf3CubeMap;
 	ID3D11Buffer* camBufTime;
 	ID3D11Buffer* shadowSettings;
 

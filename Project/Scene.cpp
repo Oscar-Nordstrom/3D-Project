@@ -25,8 +25,8 @@ Scene::Scene()
 	dt = 0;
 	this->updateCulling = true;
 
-	cam.SetPosition(0.0f, 0.0f, -3.0f),
-		cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 1000.0f);
+	cam.SetPosition(0.0f, 0.0f, -3.0f);
+	cam.SetProj(90.0f, window.GetWidth(), window.GetHeight(), 0.1f, 1000.0f);
 	window.Gfx()->SetProjection(cam.GettProjectionMatrix());
 	window.Gfx()->SetCamera(cam.GettViewMatrix());
 
@@ -46,7 +46,7 @@ Scene::Scene()
 	this->mouseXtemp = (float)window.mouse.GetPosX();
 	this->mouseYtemp = (float)window.mouse.GetPosY();
 
-	HandleCulling();
+	HandleCulling(cam);
 
 
 
@@ -60,6 +60,9 @@ Scene::~Scene()
 	if (camBuf)camBuf->Release();
 	if (camBuf2)camBuf2->Release();
 	if (camBuf3)camBuf3->Release();
+	if (camBufCubeMap)camBufCubeMap->Release();
+	if (camBuf2CubeMap)camBuf2CubeMap->Release();
+	if (camBuf3CubeMap)camBuf3CubeMap->Release();
 	if (camBufTime)camBufTime->Release();
 	if (shadowSettings)shadowSettings->Release();
 	for (int i = 0; i < NUM_LIGHTS; i++) {
@@ -124,9 +127,93 @@ bool Scene::DoFrame()
 	}
 
 	if (updateCulling) {
-		HandleCulling();
+		HandleCulling(cam);
 		this->updateCulling = false;
 	}
+
+
+
+	//Cube mapping first Start
+	cMap.Clear(window.Gfx()->GetContext());
+	//std::vector<SceneObjectTest*>tempObjects = objectsToDraw;
+	//std::vector<QuadTree*> tempNodes = intersectingNodes;
+	//tempPos = cam.GetPositionFloat3();
+	//tempDir = cam.GetRotationFloat3();
+	//Go through all uavs
+	for (int i = 0; i < NUM_TEX; i++) {
+		//Rotate camera
+		cubeMapSetCam(i);
+		HandleCulling(cMap.GetCam());
+
+		//Shadows Start First Cube Map
+		DirectX::XMFLOAT3 tempPos = cam.GetPositionFloat3();
+		DirectX::XMFLOAT3 tempDir = cam.GetRotationFloat3();
+		shadow.SetSpotLights(sLights);
+		shadow.SetDirLight(&dLight);
+		shadow.StartFirst();
+
+		for (int i = 0; i < NUM_LIGHTS; i++) {
+
+			if (i > 0) {
+				int index = i - 1;
+				cam.SetPosition(sLights[index].position);
+				cam.SetRotationDeg(90, 0.0f, 0.0f);
+				shadow.UpdateWhatShadow(i, SPOT_LIGHT);//Sets depth
+			}
+			else {
+				cam.SetPosition(0.0f, 40.0f, 0.0f);
+				cam.SetRotationDeg(90, 0.0f, 0.0f);
+				shadow.UpdateWhatShadow(i, DIRECTIONAL_LIGHT);//Sets depth
+			}
+			UpdateCamera();
+			shadowBufferData[i].view = cam.GettViewMatrix();
+			shadowBufferData[i].proj = window.Gfx()->GetProjection();
+			//shadowBufferData[i].proj = cam.GettProjectionMatrix();
+			window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
+			if (shadowsOn) {
+				for (auto p : objectsToDraw) {
+					p->Draw(window.Gfx(), SHADOW);
+				}
+				//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
+			}
+		}
+
+		cam.SetPosition(tempPos);
+		cam.SetRotationRad(tempDir);
+		UpdateCamera();
+		//Shadows End First Cube Map
+
+		//Render to current uavs
+		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
+		window.Gfx()->SetProjection(cMap.GetCam().GettProjectionMatrix());
+		window.Gfx()->SetCamera(cMap.GetCam().GettViewMatrix());
+
+		cMap.Set(window.Gfx()->GetContext(), i);
+
+		for (auto p : objectsToDraw) {
+			p->Draw(window.Gfx(), CUBE_MAP);
+		}
+		for (auto p : grounds) {
+			p->Draw(window.Gfx(), CUBE_MAP);
+		}
+
+		window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBufCubeMap);
+		window.Gfx()->GetContext()->GSSetConstantBuffers(1, 1, &camBuf2CubeMap);
+		window.Gfx()->GetContext()->GSSetConstantBuffers(2, 1, &camBuf3CubeMap);
+		particle.Draw(window.Gfx(), PARTICLE);
+
+		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
+		window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
+		window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
+		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
+		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
+	}
+	//cam.SetPosition(tempPos);
+	//cam.SetRotationRad(tempDir);
+	//objectsToDraw = tempObjects;
+	//intersectingNodes = tempNodes;
+	HandleCulling(cam);
+	//Cube map first end
 
 
 	//Shadows Start First
@@ -167,36 +254,6 @@ bool Scene::DoFrame()
 	UpdateCamera();
 	//Shadows End First
 
-
-	/*//Cube mapping first Start
-	cMap.Clear(window.Gfx()->GetContext());
-	//Go through all uavs
-	for (int i = 0; i < NUM_TEX; i++) {
-		//Rotate camera
-		cubeMapSetCam(i);
-
-		//Render to current uavs
-		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
-		window.Gfx()->SetProjection(cMap.GetProj());/////////////////Cmaps cam has a projection, set that!
-		window.Gfx()->SetCamera(cMap.GetCam().GettViewMatrix());
-
-		cMap.Set(window.Gfx()->GetContext(), i);
-
-		for (auto p : objectsToDraw) {
-			p->Draw(window.Gfx(), CUBE_MAP);
-		}
-		for (auto p : grounds) {
-			p->Draw(window.Gfx(), CUBE_MAP);
-		}
-
-		window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &camBuf);
-		window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
-		window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
-		window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
-		window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
-	}
-	//Cube map first end*/
-
 	//Final draw Start
 	window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f);
 	ImGuiWindows();
@@ -206,11 +263,11 @@ bool Scene::DoFrame()
 	checkInput();
 	UpdateObjcects(t);
 
-	/*//Cube map seccond Start
+	//Cube map seccond Start
 	cMap.SetSeccond(window.Gfx());
 	cube.Draw(window.Gfx(), CUBE_MAP_TWO);
 	cMap.SetEnd(window.Gfx());
-	//Cube map seccond End*/
+	//Cube map seccond End
 
 	//Shadows Start Second
 	window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &shadowSettings);
@@ -224,13 +281,14 @@ bool Scene::DoFrame()
 	for (auto p : objectsToDraw) {
 		p->Draw(window.Gfx());
 	}
+	
 	//for (int i = 0; i < 6; i++) {
 	//	skybox[i].Draw(window.Gfx());
 	//}
 	for (auto p : grounds) {
 		p->Draw(window.Gfx());
 	}
-
+	//soldiers[3].Draw(window.Gfx());
 	//Particle Start
 	if (particlesOn) {
 		window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
@@ -319,50 +377,44 @@ bool Scene::SetUpBufs()
 		return false;
 	}
 
+	desc.ByteWidth = roundUpTo(sizeof(cMap.GetCam().GetForwardFloat3()), 16);
+	data.pSysMem = &cMap.GetCam().GetForwardFloat3();
+	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBufCubeMap);
+	if (FAILED(hr)) {
+		return false;
+	}
+
 	desc.ByteWidth = roundUpTo(sizeof(cam.GetForwardFloat3()), 16);
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-
 	data.pSysMem = &cam.GetForwardFloat3();
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-
 	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBuf2);
 	if (FAILED(hr)) {
 		return false;
 	}
 
+	desc.ByteWidth = roundUpTo(sizeof(cMap.GetCam().GetForwardFloat3()), 16);
+	data.pSysMem = &cMap.GetCam().GetForwardFloat3();
+	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBuf2CubeMap);
+	if (FAILED(hr)) {
+		return false;
+	}
+
 	desc.ByteWidth = roundUpTo(sizeof(cam.GetUpFloat3()), 16);
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-
 	data.pSysMem = &cam.GetUpFloat3();
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-
 	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBuf3);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	desc.ByteWidth = roundUpTo(sizeof(cMap.GetCam().GetUpFloat3()), 16);
+	data.pSysMem = &cMap.GetCam().GetUpFloat3();
+	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBuf3CubeMap);
 	if (FAILED(hr)) {
 		return false;
 	}
 
 	for (int i = 0; i < NUM_LIGHTS; i++) {
 		desc.ByteWidth = roundUpTo(sizeof(shadowBufferData[i]), 16);
-		desc.Usage = D3D11_USAGE_DYNAMIC;
-		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		desc.MiscFlags = 0;
-		desc.StructureByteStride = 0;
-
 		data.pSysMem = &shadowBufferData[i];
-		data.SysMemPitch = 0;
-		data.SysMemSlicePitch = 0;
-
 		hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &shadowMapBufs[i]);
 		if (FAILED(hr)) {
 			return false;
@@ -370,16 +422,7 @@ bool Scene::SetUpBufs()
 	}
 
 	desc.ByteWidth = roundUpTo(sizeof(bool), 16);
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-
 	data.pSysMem = &shadowsOn;
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-
 	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &shadowSettings);
 	if (FAILED(hr)) {
 		return false;
@@ -388,16 +431,7 @@ bool Scene::SetUpBufs()
 	theTimedata.dt = dt;
 	theTimedata.time = timerCount;
 	desc.ByteWidth = roundUpTo(sizeof(TimeData), 16);
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	desc.MiscFlags = 0;
-	desc.StructureByteStride = 0;
-
 	data.pSysMem = &dt;
-	data.SysMemPitch = 0;
-	data.SysMemSlicePitch = 0;
-
 	hr = window.Gfx()->GetDevice()->CreateBuffer(&desc, &data, &camBufTime);
 
 	return !FAILED(hr);
@@ -415,6 +449,14 @@ void Scene::UpdateBufs()
 	}
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(camBufCubeMap, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, &cMap.GetCam().GetPositionFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
+	window.Gfx()->GetContext()->Unmap(camBufCubeMap, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false && "Failed to update buffer.");
+	}
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	hr = window.Gfx()->GetContext()->Map(camBuf2, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
 	CopyMemory(mappedResource.pData, &cam.GetForwardFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf2, 0);//Reenable GPU access to the data
@@ -423,9 +465,25 @@ void Scene::UpdateBufs()
 	}
 
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(camBuf2CubeMap, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, &cMap.GetCam().GetForwardFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
+	window.Gfx()->GetContext()->Unmap(camBuf2CubeMap, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false && "Failed to update buffer.");
+	}
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
 	hr = window.Gfx()->GetContext()->Map(camBuf3, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
 	CopyMemory(mappedResource.pData, &cam.GetUpFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
 	window.Gfx()->GetContext()->Unmap(camBuf3, 0);//Reenable GPU access to the data
+	if (FAILED(hr)) {
+		assert(false && "Failed to update buffer.");
+	}
+
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = window.Gfx()->GetContext()->Map(camBuf3CubeMap, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);//Disable GPU access to the data
+	CopyMemory(mappedResource.pData, &cMap.GetCam().GetUpFloat3(), sizeof(DirectX::XMFLOAT3));//Write the new memory
+	window.Gfx()->GetContext()->Unmap(camBuf3CubeMap, 0);//Reenable GPU access to the data
 	if (FAILED(hr)) {
 		assert(false && "Failed to update buffer.");
 	}
@@ -474,10 +532,6 @@ bool Scene::UpdateObjcects(float t)
 	}
 
 	if (!cube.Update(-t, window.Gfx())) {
-		std::cerr << "Failed to update object.\n";
-		return false;
-	}
-	if (!cube2.Update(-t, window.Gfx())) {
 		std::cerr << "Failed to update object.\n";
 		return false;
 	}
@@ -543,13 +597,34 @@ void Scene::cubeMapSetCam(int num)
 	//3: down
 	//4: front
 	//5: back
-	switch (num)
+	/*switch (num)
 	{
 	case 0:
 		cMap.GetCam().SetRotationDeg(0.0f, -90.0f, 0.0f);
 		break;
 	case 1:
 		cMap.GetCam().SetRotationDeg(0.0f, 90.0f, 0.0f);
+		break;
+	case 2:
+		cMap.GetCam().SetRotationDeg(-90.0f, 0.0f, 0.0f);
+		break;
+	case 3:
+		cMap.GetCam().SetRotationDeg(90.0f, 0.0f, 0.0f);
+		break;
+	case 4:
+		cMap.GetCam().SetRotationDeg(0.0f, 0.0f, 0.0f);
+		break;
+	case 5:
+		cMap.GetCam().SetRotationDeg(0.0f, 180.0f, 0.0f);
+		break;
+	}*/
+	switch (num)
+	{
+	case 0:
+		cMap.GetCam().SetRotationDeg(0.0f, 90.0f, 0.0f);
+		break;
+	case 1:
+		cMap.GetCam().SetRotationDeg(0.0f, -90.0f, 0.0f);
 		break;
 	case 2:
 		cMap.GetCam().SetRotationDeg(-90.0f, 0.0f, 0.0f);
@@ -657,7 +732,7 @@ void Scene::DisableTesselation()
 	}
 }
 
-void Scene::HandleCulling()
+void Scene::HandleCulling(Camera& cam)
 {
 	if (quadTreeOn) {
 		intersectingNodes.clear();
@@ -697,7 +772,7 @@ void Scene::SetUpGameObjects()
 		soldiers[i].Scale(2.0f, 2.0f, 2.0f);
 		gameObjects.push_back(&soldiers[i]);
 	}
-	soldiers[0].SetPos(DirectX::XMFLOAT3(40.0f, 0.0f, 40.0f));
+	soldiers[0].SetPos({ 40.0f, 0.0f, 40.0f });
 	soldiers[1].SetPos({ -150.0f, -10.0f, 50.0f });
 	soldiers[2].SetPos({ -150.0f, -5.0f, 0.0f });
 	soldiers[3].SetPos({ -150.0f, 0.0f, -50.0f });
@@ -764,11 +839,6 @@ void Scene::SetUpGameObjects()
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
 	gameObjects.push_back(&cube);
-
-	cube2.Init(texHandl, "../Resources/Obj/cubeTex.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
-	cube2.Scale(2.0f, 2.0f, 2.0f);
-	cube2.Move(-20.0f, 0.0f, 0.0f);
-	gameObjects.push_back(&cube2);
 
 	particle.Init(texHandl, "No", dir + "/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, dir + "/PixelShaderParticle.cso", dir + "/ComputeShaderParticle.cso", dir + "/GeometryShaderParticle.cso", window.Gfx(), true);
 
