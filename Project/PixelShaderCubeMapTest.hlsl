@@ -151,10 +151,12 @@ PixelShaderOutput main(PixelShaderInput input)
 		shadowCoeff = 1.0f;
 	}
 
-
+	float3 viewVector = input.wPosition.xyz - camPos.xyz;
+	float3 refelcVector = reflect(normalize(viewVector), normalize(input.normal.xyz));
+	refelcVector = normalize(refelcVector);
 
 	PixelShaderOutput output;
-	output.color = cMap.Sample(samp1, input.wPosition.xyz);
+	output.color = cMap.Sample(samp1, refelcVector);
 	output.diffuse = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
 	output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
 	output.ambient = map_Ka.Sample(samp1, input.uv);
