@@ -38,4 +38,4 @@
 #define WIDTH 800
 #define HEIGHT 600
 
-#define W_H_CUBE 600
+#define W_H_CUBE 1000

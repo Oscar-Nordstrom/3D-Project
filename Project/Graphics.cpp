@@ -15,7 +15,8 @@ Graphics::Graphics(int width, int height, HWND& window)
 
 
 	assert(CreateDeviceAndSwapchain(width, height, window)&& "Failed to create device and swapchain.");
-	assert(SetUpGbuffer(device, width, height)&& "Failed to set up G buffer.");
+	assert(SetUpGbuffer(device, width, height) && "Failed to set up G buffer.");
+	assert(SetUpGbufferCubeMap(device, width, height)&& "Failed to set up G buffer cubemap.");
 	assert(CreateDepthStencilView(width, height)&& "Failed to create depth stencil view.");
 	assert(CreateUAV(device, width, height)&& "Failed to create uav.");
 	assert(CreateRTV(device, width, height)&& "Failed to create render target view.");
@@ -25,6 +26,9 @@ Graphics::Graphics(int width, int height, HWND& window)
 	for (int i = 0; i < numGbufs; i++) {
 		renderTargets[i] = gBuffer[i].rtv;
 		shaderResources[i] = gBuffer[i].srv;
+
+		renderTargetsCubeMap[i] = gBufferCubeMap[i].rtv;
+		shaderResourcesCubeMap[i] = gBufferCubeMap[i].srv;
 	}
 
 	deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(3, renderTargets, dsView, 3, 1, &uav, nullptr);
@@ -43,7 +47,9 @@ Graphics::~Graphics()
 	if (deviceContext)deviceContext->Release();
 	if (swapChain)swapChain->Release();
 	if (dsTexture)dsTexture->Release();
+	if (dsTextureCubeMap)dsTextureCubeMap->Release();
 	if (dsView)dsView->Release();
+	if (dsViewCubeMap)dsViewCubeMap->Release();
 	if (samState)samState->Release();
 	if (uav)uav->Release();
 	if (rtv)rtv->Release();
@@ -52,6 +58,11 @@ Graphics::~Graphics()
 		if (gBuffer[i].texture)gBuffer[i].texture->Release();
 		if (gBuffer[i].rtv)gBuffer[i].rtv->Release();
 		if (gBuffer[i].srv)gBuffer[i].srv->Release();
+
+		if (gBufferCubeMap[i].texture)gBufferCubeMap[i].texture->Release();
+		if (gBufferCubeMap[i].rtv)gBufferCubeMap[i].rtv->Release();
+		if (gBufferCubeMap[i].srv)gBufferCubeMap[i].srv->Release();
+
 	}
 
 	ImGui_ImplWin32_Shutdown();
@@ -90,24 +101,24 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 	}
 	else if (flag == CUBE_MAP) {
 		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
-		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargetsCubeMap, dsViewCubeMap, numGbufs, 1, &uav, nullptr);
 		const float color[] = { r, g, b, 1.0f };
 		deviceContext->ClearUnorderedAccessViewFloat(uav, color);
 		for (int i = 0; i < numGbufs; i++) {
-			deviceContext->ClearRenderTargetView(renderTargets[i], color);
+			deviceContext->ClearRenderTargetView(renderTargetsCubeMap[i], color);
 		}
-		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+		deviceContext->ClearDepthStencilView(dsViewCubeMap, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
 	else if (flag == CUBE_MAP_TWO) {
 		//deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
 		//deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
-		deviceContext->OMSetRenderTargets(1, &rtv, dsView);
+		deviceContext->OMSetRenderTargets(1, &rtv, dsViewCubeMap);
 		const float color[] = { r, g, b, 1.0f };
 		/*deviceContext->ClearUnorderedAccessViewFloat(uav, color);
 		for (int i = 0; i < numGbufs; i++) {
 			deviceContext->ClearRenderTargetView(renderTargets[i], color);
 		}*/
-		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+		deviceContext->ClearDepthStencilView(dsViewCubeMap, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 		deviceContext->CSSetUnorderedAccessViews(6, 1, &nullUav, 0);
 	}
 	else if (flag == SHADOW) {
@@ -140,11 +151,11 @@ void Graphics::EndFrame(int width, int height, int flag)
 	}
 	else if (flag == CUBE_MAP) {
 		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
-		deviceContext->CSSetShaderResources(0, numGbufs, shaderResources);
+		deviceContext->CSSetShaderResources(0, numGbufs, shaderResourcesCubeMap);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
 		deviceContext->Dispatch(width / 20, height / 20, 1);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
-		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargetsCubeMap, dsView, 0, 1, &uav, nullptr);
 		//swapChain->Present(1, 0);
 	}
 	else if (flag == CUBE_MAP_TWO) {
@@ -153,7 +164,7 @@ void Graphics::EndFrame(int width, int height, int flag)
 		//deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
 		//deviceContext->Dispatch(width / 20, height / 20, 1);
 		//deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
-		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargetsCubeMap, dsView, 0, 1, &uav, nullptr);
 		//deviceContext->OMSetRenderTargets(1, &rtv, dsView);
 	}
 	else if (flag == PARTICLE) {
@@ -355,6 +366,19 @@ bool Graphics::CreateDepthStencilView(int width, int height)
 	}
 
 	HRESULT hr = device->CreateDepthStencilView(dsTexture, 0, &dsView);
+	assert(!FAILED(hr) && "Failed to create dsview.");
+
+
+
+	dsTextureDesc.Width = W_H_CUBE;
+	dsTextureDesc.Height = W_H_CUBE;
+
+	if (FAILED(device->CreateTexture2D(&dsTextureDesc, nullptr, &dsTextureCubeMap))) {
+		std::cerr << "Failed to create ds texture.\n";
+		return false;
+	}
+
+	hr = device->CreateDepthStencilView(dsTextureCubeMap, 0, &dsViewCubeMap);
 
 	return !FAILED(hr);
 }
@@ -427,6 +451,55 @@ bool Graphics::SetUpGbuffer(ID3D11Device* device, int width, int height)
 
 	for (int i = 0; i < numGbufs; i++) {
 		if (FAILED(device->CreateShaderResourceView(gBuffer[i].texture, &srvDesc, &gBuffer[i].srv))) {
+			std::cerr << "Failed to create the g shader resource view.\n";
+			return false;
+		}
+	}
+
+
+
+	return true;
+}
+
+bool Graphics::SetUpGbufferCubeMap(ID3D11Device* device, int width, int height)
+{
+	D3D11_TEXTURE2D_DESC texDesc = {};
+	texDesc.Width = W_H_CUBE;
+	texDesc.Height = W_H_CUBE;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+	for (int i = 0; i < numGbufs; i++) {
+		if (FAILED(device->CreateTexture2D(&texDesc, nullptr, &gBufferCubeMap[i].texture))) {
+			std::cerr << "Failed to create the g texture.\n";
+			return false;
+		}
+	}
+
+
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = texDesc.Format;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+	for (int i = 0; i < numGbufs; i++) {
+		if (FAILED(device->CreateRenderTargetView(gBufferCubeMap[i].texture, &rtvDesc, &gBufferCubeMap[i].rtv))) {
+			std::cerr << "Failed to create the g render target view.\n";
+			return false;
+		}
+	}
+
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = texDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	for (int i = 0; i < numGbufs; i++) {
+		if (FAILED(device->CreateShaderResourceView(gBufferCubeMap[i].texture, &srvDesc, &gBufferCubeMap[i].srv))) {
 			std::cerr << "Failed to create the g shader resource view.\n";
 			return false;
 		}

@@ -10,19 +10,9 @@ CubeMap::CubeMap(Graphics*& gfx)
 	assert(LoadShader(gfx) && "Failed to load pixel shader.");
 	SetViewport();
 
-	pos = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-	//cam.SetPosition(pos);
-	//cam.SetRotationRad(DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 	cam.SetPosition(0.0f, 0.0f, -3.0f);
 	cam.SetProj(90.0f, 100, 100, 0.1f, 1000.0f);
 
-	//float fov = 90.0f; //90 degrees field of view
-	//float fovRadius = (fov / 360.0f) * DirectX::XM_2PI;//vertical field of view angle in radians
-	//float aspectRatio = 1.0f;//static_cast<float>(W_H_CUBE) / static_cast<float>(W_H_CUBE);//The aspect ratio
-	//float nearZ = 0.1f; //Minimum viewing 
-	//float farZ = 1000.0f;//Maximum viewing distance
-	//proj = DirectX::XMMatrixPerspectiveFovLH(fovRadius, aspectRatio, nearZ, farZ);
 
 	nullSrv = nullptr;
 	nullUav = nullptr;

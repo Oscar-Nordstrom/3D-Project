@@ -55,6 +55,7 @@ private:
 	void SetViewport(int width, int height);
 	bool SetUpSampler(ID3D11Device* device, ID3D11SamplerState*& samState);
 	bool SetUpGbuffer(ID3D11Device* device, int width, int height);
+	bool SetUpGbufferCubeMap(ID3D11Device* device, int width, int height);
 	bool CreateUAV(ID3D11Device* device, int width, int height);
 	bool CreateRTV(ID3D11Device* device, int width, int height);
 
@@ -65,16 +66,21 @@ private:
 	ID3D11DeviceContext* deviceContext;
 	IDXGISwapChain* swapChain;
 	ID3D11Texture2D* dsTexture;
+	ID3D11Texture2D* dsTextureCubeMap;
 	ID3D11DepthStencilView* dsView;
+	ID3D11DepthStencilView* dsViewCubeMap;
 	ID3D11UnorderedAccessView* uav;
 	ID3D11SamplerState* samState;
 	ID3D11UnorderedAccessView* nullUav = nullptr;
 	ID3D11RenderTargetView* nullRtv[numGbufs] = { nullptr};
 	ID3D11ShaderResourceView* nullSrv[numGbufs] = { nullptr };
 	TextureRT gBuffer[numGbufs];
-	ID3D11RenderTargetView* renderTargets[numGbufs]={ nullptr };
+	TextureRT gBufferCubeMap[numGbufs];
+	ID3D11RenderTargetView* renderTargets[numGbufs] = { nullptr };
+	ID3D11RenderTargetView* renderTargetsCubeMap[numGbufs]={ nullptr };
 	ID3D11RenderTargetView* rtv;
-	ID3D11ShaderResourceView* shaderResources[numGbufs]={ nullptr};
+	ID3D11ShaderResourceView* shaderResources[numGbufs] = { nullptr };
+	ID3D11ShaderResourceView* shaderResourcesCubeMap[numGbufs]={ nullptr};
 	D3D11_VIEWPORT viewport;
 
 	bool imGuiEnabled;
