@@ -50,7 +50,6 @@ private:
 	vector<unsigned short> indices;
 	vector<SubMesh*> subs;
 
-
 	MtlImages* images;
 	TextureHandler* texHandl;
 

@@ -94,8 +94,6 @@ private:
 	ID3D11Buffer* camBufTime;
 	ID3D11Buffer* shadowSettings;
 
-	//SceneObjectTest skybox[6];
-
 	QuadTree* qtree;
 	std::vector<QuadTree*> intersectingNodes;
 	std::vector<SceneObjectTest*>objectsToDraw;

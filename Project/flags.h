@@ -2,7 +2,7 @@
 
 #define NO_SHADER "NO_SHADER"
 
-#define NUM_PARTICLES 10000
+
 
 #define VERTEX_SHADER 0
 #define HULL_SHADER 1
@@ -39,3 +39,6 @@
 #define HEIGHT 600
 
 #define W_H_CUBE 1000
+
+#define PARTICLE_RANGE 1000
+#define NUM_PARTICLES 100000

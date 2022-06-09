@@ -439,21 +439,24 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 	}
 	else {
 		float randX, randY, randZ;
-		DirectX::XMFLOAT3 points[NUM_PARTICLES];// = { DirectX::XMFLOAT3(20.0f, 0.0f, 0.0f) };
+		std::vector<DirectX::XMFLOAT3> points;
+		//DirectX::XMFLOAT3 points[NUM_PARTICLES];
 		for (int i = 0; i < NUM_PARTICLES; i++) {
-			randX = (float)(rand() % 100) - 49.0f;
-			randY = (float)(rand() % 100) - 49.0f;
-			randZ = (float)(rand() % 100) - 49.0f;
-			points[i] = DirectX::XMFLOAT3(randX, randY, randZ);
+			//srand(time(0));
+			randX = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
+			randY = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
+			randZ = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
+			//points[i] = DirectX::XMFLOAT3(randX, randY, randZ);
+			points.push_back(DirectX::XMFLOAT3(randX, randY, randZ));
 		}
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_UNORDERED_ACCESS;
 		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 		bufferDesc.CPUAccessFlags = 0;
 		bufferDesc.MiscFlags = 0;
-		bufferDesc.ByteWidth = UINT(sizeof(points));
+		bufferDesc.ByteWidth = UINT(points.size() * sizeof(DirectX::XMFLOAT3));
 		bufferDesc.StructureByteStride = 0;
 
-		data.pSysMem = points;
+		data.pSysMem = points.data();
 		data.SysMemPitch = 0;
 		data.SysMemSlicePitch = 0;
 

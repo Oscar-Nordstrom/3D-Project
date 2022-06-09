@@ -144,10 +144,6 @@ bool Scene::DoFrame()
 
 
  		cMap.Clear(window.Gfx()->GetContext());
-		//std::vector<SceneObjectTest*>tempObjects = objectsToDraw;
-		//std::vector<QuadTree*> tempNodes = intersectingNodes;
-		//tempPos = cam.GetPositionFloat3();
-		//tempDir = cam.GetRotationFloat3();
 		//Go through all uavs
 		for (int i = 0; i < NUM_TEX; i++) {
 			//Rotate camera
@@ -227,10 +223,6 @@ bool Scene::DoFrame()
 			window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
 			window.Gfx()->EndFrame(W_H_CUBE, W_H_CUBE, CUBE_MAP);
 		}
-		//cam.SetPosition(tempPos);
-		//cam.SetRotationRad(tempDir);
-		//objectsToDraw = tempObjects;
-		//intersectingNodes = tempNodes;
 		HandleCulling(cam);
 	}
 	//Cube map first end
@@ -304,13 +296,9 @@ bool Scene::DoFrame()
 		p->Draw(window.Gfx());
 	}
 
-	//for (int i = 0; i < 6; i++) {
-	//	skybox[i].Draw(window.Gfx());
-	//}
 	for (auto p : grounds) {
 		p->Draw(window.Gfx());
 	}
-	//soldiers[3].Draw(window.Gfx());
 	//Particle Start
 	if (particlesOn) {
 		window.Gfx()->GetContext()->GSSetConstantBuffers(0, 1, &camBuf);
@@ -574,12 +562,6 @@ bool Scene::UpdateObjcects(float t)
 		return false;
 	}
 
-	//for (int i = 0; i < 6; i++) {
-	//	if (!skybox[i].Update(0.0f, window.Gfx())) {
-	//		std::cerr << "Failed to update object.\n";
-	//		return false;
-	//	}
-	//}
 	return true;
 }
 
@@ -710,29 +692,6 @@ void Scene::SetLights()
 	sLights[1].on = { 1.0f, 1.0f, 1.0f, 1.0f };
 	sLights[2].on = { 1.0f, 1.0f, 1.0f, 1.0f };
 	SetUpSpotLighs();
-}
-
-void Scene::SetUpSkybox()
-{
-	/*skybox[0].Scale(100.0f, 100.0f, 0.0f);
-	skybox[1].Scale(100.0f, 100.0f, 0.0f);
-	skybox[2].Scale(100.0f, 100.0f, 0.0f);
-	skybox[3].Scale(100.0f, 100.0f, 0.0f);
-	skybox[4].Scale(100.0f, 100.0f, 0.0f);
-	skybox[5].Scale(100.0f, 100.0f, 0.0f);
-
-	skybox[0].Move(0.0f, 0.0f, 50.0f); //Front
-	skybox[1].Move(0.0f, 0.0f, -50.0f); //Back
-	skybox[2].Move(50.0f, 0.0f, 0.0f); //Right
-	skybox[3].Move(-50.0f, 0.0f, 0.0f); //Left
-	skybox[4].Move(0.0f, 50.0f, 0.0f); //Up
-	skybox[5].Move(0.0f, -50.0f, 0.0f); //Down
-
-	skybox[1].Rotate(0.0f, DirectX::XMConvertToRadians(180.0f), 0.0f);
-	skybox[2].Rotate(0.0f, DirectX::XMConvertToRadians(90.0f), 0.0f);
-	skybox[3].Rotate(0.0f, DirectX::XMConvertToRadians(-90.0f), 0.0f);
-	skybox[4].Rotate(DirectX::XMConvertToRadians(-90.0f), 0.0f, 0.0f);
-	skybox[5].Rotate(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f);*/
 }
 
 void Scene::HandleLightSettings()
@@ -909,16 +868,10 @@ void Scene::SetUpGameObjects()
 
 
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
-	cube.Scale(3.0f, 3.0f, 3.0f);
+	cube.Scale(2.0f, 2.0f, 2.0f);
 	gameObjects.push_back(&cube);
 
 	particle.Init(texHandl, "No", dir + "/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, dir + "/PixelShaderParticle.cso", dir + "/ComputeShaderParticle.cso", dir + "/GeometryShaderParticle.cso", window.Gfx(), true);
-
-	//for (int i = 0; i < 6; i++) {
-	//	skybox[i].Init(texHandl, "../Resources/Obj/ground.obj", "../Debug/VertexShader.cso", "../Debug/HullShader.cso", "../Debug/DomainShader.cso", "../Debug/PixelShader.cso", "../Debug/ComputeShader.cso", NO_SHADER, window.Gfx());
-	//	//gameObjects.push_back(&skybox[i]);
-	//}
-	//SetUpSkybox();
 }
 
 void Scene::UpdateCamera()
