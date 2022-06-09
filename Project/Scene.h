@@ -10,7 +10,6 @@
 #include "SceneObjectTest.h"
 #include "QuadTree.h"
 
-#include "SceneObject.h"
 #include "Structures.h"
 #include "ShadowMap.h"
 #include "CubeMap.h"
@@ -25,8 +24,6 @@
 #else 
 #define NUM_SOLDIERS 27
 #endif
-
-
 
 class Scene {
 public:
@@ -45,7 +42,6 @@ private:
 	void cubeMapSetCam(int num);
 
 	void SetLights();
-	void SetUpSkybox();
 	void HandleLightSettings();
 
 	void ImGuiWindows();

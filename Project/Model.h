@@ -14,6 +14,8 @@
 
 #include "flags.h"
 
+#include "FileLoader.h"
+
 
 using namespace std;
 
@@ -42,15 +44,15 @@ private:
 	bool ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader*& v, ID3D11HullShader*& h, ID3D11DomainShader*& d, ID3D11PixelShader*& p, ID3D11ComputeShader*& c, ID3D11GeometryShader*& g);
 	
 private:
-	vector<DirectX::XMFLOAT3> v;
-	vector<DirectX::XMFLOAT3> vn;
-	vector<DirectX::XMFLOAT2> vt;
+	//vector<DirectX::XMFLOAT3> v;
+	//vector<DirectX::XMFLOAT3> vn;
+	//vector<DirectX::XMFLOAT2> vt;
 
 	vector<SimpleVertex> verts; 
 	vector<unsigned short> indices;
 	vector<SubMesh*> subs;
 
-	MtlImages* images;
+	//MtlImages* images;
 	TextureHandler* texHandl;
 
 	string vShaderByteCode;
@@ -71,7 +73,9 @@ private:
 	ID3D11Buffer* constantBufferTessBool;
 	D3D11_PRIMITIVE_TOPOLOGY topology;
 	D3D11_PRIMITIVE_TOPOLOGY topologyTriList;
-	D3D11_PRIMITIVE_TOPOLOGY topologyPoints;;
+	D3D11_PRIMITIVE_TOPOLOGY topologyPoints;
+
+	FileLoader fileLoader;
 
 	bool tesselation;
 

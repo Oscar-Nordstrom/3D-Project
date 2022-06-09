@@ -69,7 +69,15 @@ bool TextureHandler::TextureExists(std::string name)
 	return false;
 }
 
-ImageData TextureHandler::GetImage(std::string name) const
+bool TextureHandler::TextureExists(int index)
+{
+	if (index >= 0 && index < images.size()) {
+		return true;
+	}
+	return false;
+}
+
+ImageData TextureHandler::GetImage(std::string name)
 {
 	for (int i = 0; i < images.size(); i++) {
 		if (images[i].name == name) {
@@ -77,6 +85,19 @@ ImageData TextureHandler::GetImage(std::string name) const
 		}
 	}
 	return images[0];
+}
+
+ImageData TextureHandler::GetImage(int index)
+{
+	if (index >= 0 && index < images.size()) {
+		return images[index];
+	}
+	return images[0];
+}
+
+int TextureHandler::NumImages() const
+{
+	return images.size();
 }
 
 

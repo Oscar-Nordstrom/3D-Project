@@ -2,7 +2,7 @@
 
 Model::Model()
 {
-	images = nullptr;
+	//images = nullptr;
 	pShader = nullptr;
 	hShader = nullptr;
 	dShader = nullptr;
@@ -46,11 +46,11 @@ Model::~Model()
 
 
 	for (auto o : subs) {
-		o->Terminate();
+		//o->Terminate();
 		delete o;
 	}
 
-	delete images;
+	//delete images;
 }
 
 bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
@@ -199,7 +199,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 	if (flag != PARTICLE) {
 		if (subs.size() > 0) {
 			for (auto& o : subs) {
-				o->Bind(gfx->GetContext(), flag);
+				o->Bind(flag);
 			}
 		}
 		else {
@@ -242,7 +242,7 @@ bool Model::LoadShaders(string vShaderPath, string hShaderPath, string dShaderPa
 
 bool Model::LoadObj(string obj, Graphics*& gfx)
 {
-	bool foundMtllib = false;
+	/*bool foundMtllib = false;
 
 	bool submesh = false;
 	bool useSubs = false;
@@ -367,12 +367,19 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 		submeshEnd = (int)indices.size() - 1;
 		SubMesh* subM = new SubMesh(gfx->GetDevice(), gfx->GetContext(), indices, images, subName, mtlFile, mtl, submeshStart, submeshEnd);
 		subs.push_back(subM);
-	}
+	}*/
+
+	fileLoader.LoadObj(obj, gfx);
+	verts = fileLoader.GetVerts();
+	indices = fileLoader.GetIndices();
+	subs = fileLoader.GetSubs();
 
 	/*For debugging
 	if (FindVert() != -1) {
 		assert(false && "THIS WAS SAD");
 	}*/
+
+	
 	return true;
 }
 
@@ -658,6 +665,7 @@ void Model::SetParticleUpdate(Graphics*& gfx)
 void Model::SetTexHandl(TextureHandler*& texHandl)
 {
 	this->texHandl = texHandl;
+	fileLoader.SetTexHandl(texHandl);
 }
 
 /*int Model::FindVert()
