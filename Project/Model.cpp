@@ -96,8 +96,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		UpdateCbuf(*gfx, transform);
 
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
-		//gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
-		gfx->GetContext()->IASetPrimitiveTopology(topology);
+		gfx->GetContext()->IASetPrimitiveTopology(topology);//(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST)
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 		gfx->GetContext()->HSSetConstantBuffers(1, 1, &constantBufferTessBool);
 
