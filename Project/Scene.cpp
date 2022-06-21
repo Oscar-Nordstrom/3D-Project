@@ -865,6 +865,9 @@ void Scene::SetUpGameObjects()
 	grounds.push_back(&ground3);
 
 
+	sponza.Init(texHandl, "../Resources/Obj/sponzaTest.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
+	sponza.Scale(0.001, 0.001, 0.001);
+	gameObjects.push_back(&sponza);
 
 
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());

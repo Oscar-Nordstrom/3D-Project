@@ -1,5 +1,7 @@
 #include "FileLoader.h"
 
+#include <set>
+
 FileLoader::FileLoader()
 {
 	this->texHandl = nullptr;
@@ -36,9 +38,10 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 	DirectX::XMFLOAT3 tempV, tempVn;
 	DirectX::XMFLOAT2 tempVt;
 	int tempI = 0;
-	int step = 0;
+	//int step = 0;
 
 	std::map<std::string, int> verts_map;
+	std::set<std::string> my_set;
 
 	std::ifstream file(filePath);
 	if (!file.is_open()) {
@@ -57,7 +60,6 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 		if (!foundMtllib && prefix == "mtllib") {
 
 			ss >> mtlFile;
-			//images = new MtlImages(mtlFile, gfx->GetDevice(), texHandl);
 			LoadImages(mtlFile, gfx);
 			foundMtllib = true;
 		}
@@ -87,9 +89,6 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 		}
 		else if (prefix == "f") {
 
-			if (step++ > 4) {
-				step = step;
-			}
 			int count = 0;
 			int i = 0;
 			while (ss >> tempI) {
@@ -114,6 +113,8 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 					count = 0;
 					SimpleVertex vertTemp(tempV, tempVn, tempVt);
 
+					//Debug test
+					my_set.insert(vertTemp.make_this_string());
 					//Checking for duplicates
 					auto found_it = verts_map.find(vertTemp.make_this_string());
 					if (verts_map.end() == found_it) {
@@ -145,6 +146,11 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 		submeshEnd = (int)indices.size() - 1;
 		SubMesh* subM = new SubMesh(gfx, indices, texHandl, subName, mtlFile, mtl, submeshStart, submeshEnd);
 		subs.push_back(subM);
+	}
+
+	if (verts_map.size() != my_set.size()) {
+		int geyg = 0;
+		geyg++;
 	}
 
 	/*For debugging
