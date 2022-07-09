@@ -13,6 +13,8 @@ public:
 	SubMesh(Graphics*& gfx, std::vector<unsigned short>& indices, TextureHandler*& texHandl, std::string name, std::string mtlFile, std::string mtl, int start, int end);
 	~SubMesh();
 	void Bind(int flag = NORMAL);
+	int start;
+	int end;
 private:
 	bool SetUpIndexBuffer(std::vector<unsigned short>& indices);
 	bool LoadMtl();
@@ -20,8 +22,6 @@ private:
 	std::string name;
 	std::string mtlFile;
 	std::string mtl;
-	int start;
-	int end;
 
 	Graphics* gfx;
 	TextureHandler* texHandl;

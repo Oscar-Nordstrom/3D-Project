@@ -187,10 +187,6 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->IASetInputLayout(inputLayout);
 		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 		gfx->GetContext()->PSSetShaderResources(0, 1, &paprticleTexSrv);
-
-
-
-		//gfx->GetContext()->PSSetSamplers(0, 1, &samState);
 		
 	}
 

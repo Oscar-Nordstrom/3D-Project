@@ -9,9 +9,6 @@ FileLoader::FileLoader()
 
 FileLoader::~FileLoader()
 {
-	for (auto p : subs) {
-		//if (p != nullptr)delete p;
-	}
 
 }
 
@@ -38,10 +35,8 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 	DirectX::XMFLOAT3 tempV, tempVn;
 	DirectX::XMFLOAT2 tempVt;
 	int tempI = 0;
-	//int step = 0;
 
 	std::map<std::string, int> verts_map;
-	std::set<std::string> my_set;
 
 	std::ifstream file(filePath);
 	if (!file.is_open()) {
@@ -112,24 +107,19 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 				if (count > 2) {
 					count = 0;
 					SimpleVertex vertTemp(tempV, tempVn, tempVt);
-
-					//Debug test
-					my_set.insert(vertTemp.make_this_string());
+					
 					//Checking for duplicates
 					auto found_it = verts_map.find(vertTemp.make_this_string());
 					if (verts_map.end() == found_it) {
 						verts.push_back(vertTemp);
 						int indi = (int)verts.size() - 1;
-						verts_map.insert(std::make_pair(vertTemp.make_this_string(), indi));
+						std::string tempKey = vertTemp.make_this_string();
+						verts_map.insert(std::make_pair(tempKey, indi));
 						indices.push_back(indi);
 					}
 					else {
 						indices.push_back(found_it->second);
 					}
-					//Not checking for duplicates
-					//verts.push_back(vertTemp);
-					//int indi = (int)verts.size() - 1;
-					//indices.push_back(indi);
 
 					if (submesh) {
 						submesh = false;
@@ -139,6 +129,9 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 				}
 			}
 		}
+		
+		prefix = "";
+		ss.clear();
 
 	}
 	if (useSubs) {
@@ -148,15 +141,6 @@ bool FileLoader::LoadObj(std::string filePath, Graphics* gfx)
 		subs.push_back(subM);
 	}
 
-	if (verts_map.size() != my_set.size()) {
-		int geyg = 0;
-		geyg++;
-	}
-
-	/*For debugging
-	if (FindVert() != -1) {
-		assert(false && "THIS WAS SAD");
-	}*/
 	return true;
 }
 
