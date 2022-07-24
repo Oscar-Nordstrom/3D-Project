@@ -22,7 +22,7 @@ SceneObjectTest::~SceneObjectTest()
 bool SceneObjectTest::Update(float dt, Graphics*& gfx)
 {
 	UpdateTransform(dt);
-	if (!model.UpdateCbuf(*gfx, transform)) {
+	if (!model.UpdateCbuf(*gfx, transform, this->x, this->y, this->z)) {
 		assert(false && "Failed to update constant buffer.");
 		std::cerr << "Failed to update constant buffer.\n";
 		return false;

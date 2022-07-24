@@ -27,7 +27,7 @@ public:
 	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
 	bool LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
 	void Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag = NORMAL);
-	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform);
+	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform, float x = 0.0f, float y = 0.0f, float z = 0.0f);
 	void DisableTesselation();
 	void EnableTesselation();
 	void SetParticleUpdate(Graphics*& gfx);
@@ -52,7 +52,6 @@ private:
 	vector<unsigned short> indices;
 	vector<SubMesh*> subs;
 
-	//MtlImages* images;
 	TextureHandler* texHandl;
 
 	string vShaderByteCode;
@@ -70,6 +69,7 @@ private:
 	ID3D11UnorderedAccessView* uavBuffer;
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* constantBuffer;
+	ID3D11Buffer* posBuffer;
 	ID3D11Buffer* constantBufferTessBool;
 	D3D11_PRIMITIVE_TOPOLOGY topology;
 	D3D11_PRIMITIVE_TOPOLOGY topologyTriList;

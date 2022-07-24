@@ -40,12 +40,10 @@ struct DS_OUTPUT
 
 struct HS_CONTROL_POINT_OUTPUT
 {
-	//float3 vPosition : WORLDPOS; 
 	float4 position : SV_POSITION;
 	float4 wPosition : W_POSITION;
 	float4 normal : NORMAL;
 	float2 uv : UV;
-	//float4 lightPosition : LIGHTPOS;
 };
 
 struct HS_CONSTANT_DATA_OUTPUT

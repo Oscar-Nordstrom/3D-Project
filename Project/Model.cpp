@@ -41,6 +41,7 @@ Model::~Model()
 	if (uavBuffer)uavBuffer->Release();
 	if (indexBuffer)indexBuffer->Release();
 	if (constantBuffer)constantBuffer->Release();
+	if (posBuffer)posBuffer->Release();
 	if (constantBufferTessBool)constantBufferTessBool->Release();
 	if (paprticleTexSrv)paprticleTexSrv->Release();
 
@@ -99,6 +100,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->IASetPrimitiveTopology(topology);//(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST)
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 		gfx->GetContext()->HSSetConstantBuffers(1, 1, &constantBufferTessBool);
+		gfx->GetContext()->HSSetConstantBuffers(2, 1, &posBuffer);
 
 		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		gfx->GetContext()->IASetInputLayout(inputLayout);
@@ -442,13 +444,10 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 	else {
 		float randX, randY, randZ;
 		std::vector<DirectX::XMFLOAT3> points;
-		//DirectX::XMFLOAT3 points[NUM_PARTICLES];
 		for (int i = 0; i < NUM_PARTICLES; i++) {
-			//srand(time(0));
 			randX = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
 			randY = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
 			randZ = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
-			//points[i] = DirectX::XMFLOAT3(randX, randY, randZ);
 			points.push_back(DirectX::XMFLOAT3(randX, randY, randZ));
 		}
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_UNORDERED_ACCESS;
@@ -525,6 +524,14 @@ bool Model::CreateConstantBuffer(Graphics& gfx, DirectX::XMMATRIX transform)
 	data.SysMemSlicePitch = 0;
 
 	HRESULT hr = gfx.GetDevice()->CreateBuffer(&cbDesc, &data, &constantBuffer);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	DirectX::XMFLOAT3 posData = {0.0f, 0.0f, 0.0f};
+	data.pSysMem = &posData;
+	cbDesc.ByteWidth = 16;
+	hr = gfx.GetDevice()->CreateBuffer(&cbDesc, &data, &posBuffer);
 	if (FAILED(hr)) {
 		return false;
 	}
@@ -610,7 +617,7 @@ bool Model::ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader
 	return true;
 }
 
-bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
+bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform, float x, float y, float z)
 {
 	DirectX::XMFLOAT4X4 world;
 	DirectX::XMFLOAT4X4 view;
@@ -627,6 +634,15 @@ bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
 	gfx.GetContext()->Unmap(constantBuffer, 0);
 	if (FAILED(hr)) {
 		assert(false&& "Failed to update constant buffer.");
+	}
+
+	DirectX::XMFLOAT3 newPosData = { x,y,z };
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = gfx.GetContext()->Map(posBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	CopyMemory(mappedResource.pData, &newPosData, sizeof(DirectX::XMFLOAT3));//Write the new memory
+	gfx.GetContext()->Unmap(posBuffer, 0);
+	if (FAILED(hr)) {
+		assert(false && "Failed to update constant buffer.");
 	}
 
 	const bool data = tesselation;
