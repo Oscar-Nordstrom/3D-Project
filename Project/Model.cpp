@@ -158,7 +158,6 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
 		gfx->GetContext()->GSSetShader(gShader, nullptr, 0);
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
-		//gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
 

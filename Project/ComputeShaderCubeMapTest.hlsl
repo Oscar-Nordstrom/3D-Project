@@ -56,60 +56,7 @@ RWTexture2DArray<unorm float4> backbuffer : register(u6);
 [numthreads(20, 20, 1)]
 
 void main(uint3 DTid : SV_DispatchThreadID)
-{
-    
-    /*float4 final = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    int2 texPos = int2(0, 0);
-    texPos.x = DTid.x;
-    texPos.y = DTid.y;
-    int3 tPos = int3(texPos, 0);
-    float4 matColor = colors.Load(tPos);
-    final = matColor;
-   int2 texPos = int2(0, 0);
-    texPos.x = DTid.x;
-    texPos.y = DTid.y;
-    int3 tPos = int3(texPos, 0);
-    
-    float4 matColor = colors.Load(tPos);
-    float4 position = positions.Load(tPos);
-    float4 wPosition = wPositions.Load(tPos);
-    float4 normal = normalize(normals.Load(tPos));
-    float4 ambient = ambients.Load(tPos);
-    float4 specular = speculars.Load(tPos);
-    
-    float4 finalAmbient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    float4 finalDiffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    float4 finalSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    
-    //Do light calculations
-    
-    //Ambient calculations
-    finalAmbient = ambient * matColor;
-    
-    float3 d = normalize(dir);
-    normal = normalize(normal);
-    //Diffuse calculateions
-    float diff = dot(-d, normal.xyz);
-    if (diff >= 0.0f)
-    {
-        finalDiffuse = diff * (matColor + color);
-    }
-
-    //Specular calculations
-    if (diff >= 0.0f)
-    {
-        float3 r = -normalize(reflect(-d, normal.xyz));
-        float3 v = normalize(camPos.xyz - wPosition.xyz);
-        float spec = dot(r, v);
-        if (spec >= 0.0f)
-        {
-            finalSpecular = specular * pow(spec, s);
-        }
-
-    }
-    
-    final = finalAmbient + finalDiffuse + finalSpecular;*/
-    
+{ 
 
 	float3 neg = float3(-1.0f, -1.0f, -1.0f);
 	float4 zero = float4(0.0f, 0.0f, 0.0f, 0.0f);

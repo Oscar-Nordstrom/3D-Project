@@ -48,7 +48,6 @@ cbuffer lightCbSpot : register(b4)
 	SpotLight sLights[3];
 }
 
-RWBuffer<float> particles;//Why is this here???????????????????
 
 RWTexture2D<unorm float4> backbuffer : register(u0);
 

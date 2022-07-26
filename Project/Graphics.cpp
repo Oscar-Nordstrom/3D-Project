@@ -90,7 +90,6 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 		ImGuiStart();
 		deviceContext->RSSetViewports(1, &viewport);
 		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
-		//deviceContext->OMSetRenderTargets(numGbufs, renderTargets, dsView);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
 		const float color[] = { r, g, b, 1.0f };
 		deviceContext->ClearUnorderedAccessViewFloat(uav, color);
@@ -98,6 +97,7 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 			deviceContext->ClearRenderTargetView(renderTargets[i], color);
 		}
 		deviceContext->ClearDepthStencilView(dsView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+		
 	}
 	else if (flag == CUBE_MAP) {
 		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
@@ -347,6 +347,7 @@ bool Graphics::CreateDeviceAndSwapchain(int width, int height, HWND& window)
 
 bool Graphics::CreateDepthStencilView(int width, int height)
 {
+
 	D3D11_TEXTURE2D_DESC dsTextureDesc = {};
 	dsTextureDesc.Width = width;
 	dsTextureDesc.Height = height;
@@ -365,6 +366,7 @@ bool Graphics::CreateDepthStencilView(int width, int height)
 		return false;
 	}
 
+
 	HRESULT hr = device->CreateDepthStencilView(dsTexture, 0, &dsView);
 	assert(!FAILED(hr) && "Failed to create dsview.");
 
@@ -372,6 +374,8 @@ bool Graphics::CreateDepthStencilView(int width, int height)
 
 	dsTextureDesc.Width = W_H_CUBE;
 	dsTextureDesc.Height = W_H_CUBE;
+
+
 
 	if (FAILED(device->CreateTexture2D(&dsTextureDesc, nullptr, &dsTextureCubeMap))) {
 		std::cerr << "Failed to create ds texture.\n";
