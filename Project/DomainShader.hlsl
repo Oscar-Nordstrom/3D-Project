@@ -1,4 +1,4 @@
-cbuffer cBuf : register(b0)
+cbuffer cBuf : register(b0)//Matrices
 {
 	float4x4 world;
 	float4x4 view;
@@ -27,7 +27,6 @@ cbuffer cBuf4 : register(b4)//Spot light 3
 
 struct DS_OUTPUT
 {
-	//float4 vPosition  : SV_POSITION;
 	float4 position : SV_POSITION;
 	float4 wPosition : W_POSITION;
 	float4 normal : NORMAL;
@@ -57,26 +56,27 @@ struct HS_CONSTANT_DATA_OUTPUT
 float3 ProjToPlane(float3 tripoint, float3 normal, float3 UVW)
 {
 	normal = normalize(normal);
-	float3 vec = UVW - tripoint;
-	float3 dist = dot(vec, normal);
-	return UVW - dist * normal;
+	float3 vec = UVW - tripoint;//Vector from corener to position in triangle
+	float3 dist = dot(vec, normal);//Lenght of vector in normals direction
+	return UVW - dist * normal;//Returns the new position of the position
 }
 
 [domain("tri")]
+/*											      Barycentric coordinates			        Control points from hull shader	*/
 DS_OUTPUT main(HS_CONSTANT_DATA_OUTPUT input, float3 UVW : SV_DomainLocation, const OutputPatch<HS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> tri)
 {
 	DS_OUTPUT Output = (DS_OUTPUT)0;
 
 
-	float3 pos = UVW.x * tri[0].position.xyz + UVW.y * tri[1].position.xyz + UVW.z * tri[2].position.xyz;
+	float3 pos = UVW.x * tri[0].position.xyz + UVW.y * tri[1].position.xyz + UVW.z * tri[2].position.xyz;//Gives us a position inide the triangle
+	/*Phong tesselation*/
 	float3 p0 = ProjToPlane(tri[0].position.xyz, tri[0].normal.xyz, pos);
 	float3 p1 = ProjToPlane(tri[1].position.xyz, tri[1].normal.xyz, pos);
 	float3 p2 = ProjToPlane(tri[2].position.xyz, tri[2].normal.xyz, pos);
 	float3x3 mat = float3x3(p0, p1, p2);
-	float alpha = 0.75f;
-	float3 finalPos = (1 - alpha) * pos + mul((alpha * UVW), mat);
-
-	//finalPos = pos;
+	float alpha = 0.5f;
+	float3 phongPoint = mul(UVW, mat);
+	float3 finalPos = ((1 - alpha) * pos) + (alpha * phongPoint);
 
 
 	//view and projection transformations
@@ -86,15 +86,16 @@ DS_OUTPUT main(HS_CONSTANT_DATA_OUTPUT input, float3 UVW : SV_DomainLocation, co
 
 
 
-	float3 finalNormal = UVW.x * tri[0].normal.xyz + UVW.y * tri[1].normal.xyz + UVW.z * tri[2].normal.xyz;
+	float3 finalNormal = UVW.x * tri[0].normal.xyz + UVW.y * tri[1].normal.xyz + UVW.z * tri[2].normal.xyz;//New normal
 	Output.normal = float4(finalNormal.xyz, 0.0f);
 
 
-	float2 finalTex = UVW.x * tri[0].uv + UVW.y * tri[1].uv + UVW.z * tri[2].uv;
+	float2 finalTex = UVW.x * tri[0].uv + UVW.y * tri[1].uv + UVW.z * tri[2].uv;//New UVW coordinates
 	Output.uv = finalTex;
 
-	float3 finalLightPos = UVW.x * tri[0].wPosition.xyz + UVW.y * tri[1].wPosition.xyz + UVW.z * tri[2].wPosition.xyz;
+	float3 finalLightPos = UVW.x * tri[0].wPosition.xyz + UVW.y * tri[1].wPosition.xyz + UVW.z * tri[2].wPosition.xyz;//New light position
 
+	/*Transforming the light to clip space*/
 	Output.lightPosition1 = mul(lightView1, float4(finalLightPos, 1.0f));
 	Output.lightPosition1 = mul(lightProjection1, Output.lightPosition1);
 
