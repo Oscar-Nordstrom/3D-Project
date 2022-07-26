@@ -865,7 +865,6 @@ void Scene::SetUpGameObjects()
 
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
-	//gameObjects.push_back(&cube);
 
 	particle.Init(texHandl, "No", dir + "/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, dir + "/PixelShaderParticle.cso", dir + "/ComputeShaderParticle.cso", dir + "/GeometryShaderParticle.cso", window.Gfx(), true);
 
