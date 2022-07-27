@@ -171,7 +171,7 @@ void Graphics::EndFrame(int width, int height, int flag)
 		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
 		deviceContext->CSSetShaderResources(0, 1, &shaderResources[2]);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
-		deviceContext->Dispatch(NUM_PARTICLES/2, 1, 1);
+		deviceContext->Dispatch(NUM_PARTICLES/10, 1, 1);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
 		deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUav, nullptr);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargets, dsView, 0, 1, &uav, nullptr);
