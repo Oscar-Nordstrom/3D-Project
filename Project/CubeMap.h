@@ -21,7 +21,6 @@ public:
 private:
 	bool setUpTextures(ID3D11Device*& device);
 	bool SetUpSrvs(ID3D11Device*& device);
-	bool SetUpRtvs(ID3D11Device*& device);
 	bool SetUpUavs(ID3D11Device*& device);
 	bool CreateDepthStencilView(ID3D11Device*& device);
 	bool LoadShader(Graphics*& gfx);
@@ -31,7 +30,6 @@ private:
 	ID3D11ShaderResourceView* srv;
 	ID3D11ShaderResourceView* nullSrv;
 	ID3D11UnorderedAccessView* nullUav;
-	ID3D11RenderTargetView* rtv[6];
 	ID3D11UnorderedAccessView* uav[6];
 	ID3D11Texture2D* dsTex;
 	ID3D11DepthStencilView* dsView;

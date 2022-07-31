@@ -42,8 +42,6 @@ public:
 
 private:
 
-	float timeI = 0;
-
 	int w, h;
 
 	void SetUpImGui(HWND& window);

@@ -77,17 +77,6 @@ Scene::~Scene()
 	texHandl->Delete();
 	delete texHandl;
 	delete qtree;
-
-	/*for (auto p : intersectingNodes) {
-		if (p != nullptr) {
-			delete p;
-		}
-	}
-	for (auto p : objectsToDraw) {
-		if (p != nullptr) {
-			//delete p;
-		}
-	}*/
 }
 
 int Scene::Start()
@@ -173,13 +162,14 @@ bool Scene::DoFrame()
 				UpdateCamera();
 				shadowBufferData[i].view = cam.GettViewMatrix();
 				shadowBufferData[i].proj = window.Gfx()->GetProjection();
-				//shadowBufferData[i].proj = cam.GettProjectionMatrix();
 				window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
 				if (shadowsOn) {
 					for (auto p : objectsToDraw) {
 						p->Draw(window.Gfx(), SHADOW);
 					}
-					//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
+					if (cam.GetFrustum()->intersect(cube.GetBoundingSphere())) {
+						cube.Draw(window.Gfx(), SHADOW);
+					}
 				}
 			}
 
@@ -189,7 +179,7 @@ bool Scene::DoFrame()
 			//Shadows End First Cube Map
 
 
-			//Render to current uavs
+			//Render to current UAV
 			window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
 			shadow.StartSeccond();
 			window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &shadowSettings);
@@ -200,8 +190,12 @@ bool Scene::DoFrame()
 			window.Gfx()->SetProjection(cMap.GetCam().GettProjectionMatrix());
 			window.Gfx()->SetCamera(cMap.GetCam().GettViewMatrix());
 
+			//Setting the new UAV
 			cMap.Set(window.Gfx()->GetContext(), i);
-
+			if (cam.GetFrustum()->intersect(cube.GetBoundingSphere())) {
+				cube.Draw(window.Gfx(), CUBE_MAP);
+			}
+			
 			for (auto p : objectsToDraw) {
 				p->Draw(window.Gfx(), CUBE_MAP);
 			}
@@ -216,8 +210,6 @@ bool Scene::DoFrame()
 				particle.Draw(window.Gfx(), PARTICLE);
 			}
 
-			
-			//shadow.StartSeccond(4);
 			window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 			window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 			window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
@@ -257,7 +249,9 @@ bool Scene::DoFrame()
 			for (auto p : objectsToDraw) {
 				p->Draw(window.Gfx(), SHADOW);
 			}
-			//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
+			if (cam.GetFrustum()->intersect(cube.GetBoundingSphere())) {
+				cube.Draw(window.Gfx(), SHADOW);
+			}
 		}
 	}
 

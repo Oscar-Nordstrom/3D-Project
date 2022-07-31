@@ -4,7 +4,6 @@ CubeMap::CubeMap(Graphics*& gfx)
 {
 	assert(setUpTextures(gfx->GetDevice())&& "Failed to set up textures.");
 	assert(SetUpSrvs(gfx->GetDevice()) && "Failed to set up shader resource view.");
-	//assert(SetUpRtvs(gfx->GetDevice()), "Failed to set up render target view.");
 	assert(SetUpUavs(gfx->GetDevice()) && "Failed to set up unorderd access view.");
 	assert(CreateDepthStencilView(gfx->GetDevice()) && "Failed to set up depth stencil view.");
 	assert(LoadShader(gfx) && "Failed to load pixel shader.");
@@ -24,7 +23,6 @@ CubeMap::~CubeMap()
 	if (tex)tex->Release();
 	if (srv)srv->Release();
 	for (int i = 0; i < NUM_TEX; i++) {
-		if (rtv[i])rtv[i]->Release();
 		if (uav[i])uav[i]->Release();
 	}
 	if (dsTex)dsTex->Release();
@@ -42,7 +40,6 @@ void CubeMap::Set(ID3D11DeviceContext* context, int num)
 
 void CubeMap::SetSeccond(Graphics*& gfx)
 {
-	//gfx->GetContext()->RSSetViewports(1, &viewPort);
 	gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 	gfx->GetContext()->CSSetUnorderedAccessViews(6, 1, &nullUav, nullptr);
 	gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
@@ -52,14 +49,12 @@ void CubeMap::SetSeccond(Graphics*& gfx)
 void CubeMap::SetEnd(Graphics*& gfx)
 {
 	gfx->GetContext()->PSSetShaderResources(3, 1, &nullSrv);
-	//gfx->SetNormalViewPort();
 }
 
 void CubeMap::Clear(ID3D11DeviceContext* context)
 {
 	FLOAT col[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	for (int i = 0; i < NUM_TEX; i++) {
-		//context->ClearRenderTargetView(rtv[i], col);
 		context->ClearUnorderedAccessViewFloat(uav[i], col);
 	}
 }
@@ -81,7 +76,7 @@ bool CubeMap::setUpTextures(ID3D11Device*& device)
 	texDesc.Height = W_H_CUBE;
 	texDesc.ArraySize = NUM_TEX;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc.BindFlags = /*D3D11_BIND_RENDER_TARGET |*/ D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	texDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.CPUAccessFlags = 0;
@@ -106,25 +101,6 @@ bool CubeMap::SetUpSrvs(ID3D11Device*& device)
 
 	HRESULT hr = device->CreateShaderResourceView(tex, &srvDesc, &srv);
 	return !FAILED(hr);
-}
-
-bool CubeMap::SetUpRtvs(ID3D11Device*& device)
-{
-	HRESULT hr;
-	for (int i = 0; i < NUM_TEX; i++) {
-		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-		rtvDesc.Texture2DArray.FirstArraySlice = (UINT)i;
-		rtvDesc.Texture2DArray.ArraySize = 1;
-
-		hr = device->CreateRenderTargetView(tex, &rtvDesc, &rtv[i]);
-		if (FAILED(hr)) {
-			return false;
-		}
-	}
-
-	return true;
 }
 
 bool CubeMap::SetUpUavs(ID3D11Device*& device)

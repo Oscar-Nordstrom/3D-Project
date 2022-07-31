@@ -83,10 +83,6 @@ ID3D11DeviceContext*& Graphics::GetContext()
 void Graphics::StartFrame(float r, float g, float b, int flag)
 {
 	if (flag == NORMAL) {
-		timeI += 0.005f;
-		if (timeI >= 1.0f) {
-			timeI = 0;
-		}
 		ImGuiStart();
 		deviceContext->RSSetViewports(1, &viewport);
 		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
@@ -101,7 +97,7 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 	}
 	else if (flag == CUBE_MAP) {
 		deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
-		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargetsCubeMap, dsViewCubeMap, numGbufs, 1, &uav, nullptr);
+		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargetsCubeMap, dsViewCubeMap, numGbufs, 1, &nullUav, nullptr);
 		const float color[] = { r, g, b, 1.0f };
 		deviceContext->ClearUnorderedAccessViewFloat(uav, color);
 		for (int i = 0; i < numGbufs; i++) {
@@ -110,14 +106,8 @@ void Graphics::StartFrame(float r, float g, float b, int flag)
 		deviceContext->ClearDepthStencilView(dsViewCubeMap, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
 	else if (flag == CUBE_MAP_TWO) {
-		//deviceContext->CSSetShaderResources(0, numGbufs, nullSrv);
-		//deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(numGbufs, renderTargets, dsView, numGbufs, 1, &uav, nullptr);
 		deviceContext->OMSetRenderTargets(1, &rtv, dsViewCubeMap);
 		const float color[] = { r, g, b, 1.0f };
-		/*deviceContext->ClearUnorderedAccessViewFloat(uav, color);
-		for (int i = 0; i < numGbufs; i++) {
-			deviceContext->ClearRenderTargetView(renderTargets[i], color);
-		}*/
 		deviceContext->ClearDepthStencilView(dsViewCubeMap, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 		deviceContext->CSSetUnorderedAccessViews(6, 1, &nullUav, 0);
 	}
@@ -156,16 +146,10 @@ void Graphics::EndFrame(int width, int height, int flag)
 		deviceContext->Dispatch(width / 20, height / 20, 1);
 		deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargetsCubeMap, dsView, 0, 1, &uav, nullptr);
-		//swapChain->Present(1, 0);
 	}
 	else if (flag == CUBE_MAP_TWO) {
 		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);
-		//deviceContext->CSSetShaderResources(0, numGbufs, shaderResources);
-		//deviceContext->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
-		//deviceContext->Dispatch(width / 20, height / 20, 1);
-		//deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUav, nullptr);
 		deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, renderTargetsCubeMap, dsView, 0, 1, &uav, nullptr);
-		//deviceContext->OMSetRenderTargets(1, &rtv, dsView);
 	}
 	else if (flag == PARTICLE) {
 		deviceContext->OMSetRenderTargets(numGbufs, nullRtv, dsView);

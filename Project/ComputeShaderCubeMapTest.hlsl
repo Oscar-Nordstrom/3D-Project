@@ -52,7 +52,6 @@ cbuffer lightCbSpot : register(b4)
 RWTexture2DArray<unorm float4> backbuffer : register(u6);
 
 
-
 [numthreads(20, 20, 1)]
 
 void main(uint3 DTid : SV_DispatchThreadID)

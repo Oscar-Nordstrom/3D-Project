@@ -226,13 +226,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="ComputeShaderCubeMap.hlsl">
-      <Filter>Resource Files\Shaders\CubeMapping</Filter>
-    </FxCompile>
     <FxCompile Include="ComputeShaderCubeMapTest.hlsl">
-      <Filter>Resource Files\Shaders\CubeMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShaderCubeMap.hlsl">
       <Filter>Resource Files\Shaders\CubeMapping</Filter>
     </FxCompile>
     <FxCompile Include="PixelShaderCubeMapTest.hlsl">
