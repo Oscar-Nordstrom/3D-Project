@@ -14,9 +14,7 @@ public:
 	~ShadowMap();
 	void Init(Graphics*& gfx, DirectionalLight* light);
 	void StartFirst();
-	void EndFirst();
 	void StartSeccond();
-	void EndSeccond();
 	void UpdateWhatShadow(int whatLight, int flag);
 	void SetDirLight(DirectionalLight* dLight);
 	void SetSampler(int slot = 1);

@@ -243,7 +243,6 @@ bool Scene::DoFrame()
 		UpdateCamera();
 		shadowBufferData[i].view = cam.GettViewMatrix();
 		shadowBufferData[i].proj = window.Gfx()->GetProjection();
-		//shadowBufferData[i].proj = cam.GettProjectionMatrix();
 		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
 		if (shadowsOn) {
 			for (auto p : objectsToDraw) {
@@ -283,7 +282,6 @@ bool Scene::DoFrame()
 	window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &lightBuf);
 	window.Gfx()->GetContext()->PSSetConstantBuffers(2, 1, &lightBufSpots);
 	shadow.StartSeccond();
-	shadow.EndSeccond();
 	//Shadows End Second
 
 	for (auto p : objectsToDraw) {

@@ -67,7 +67,6 @@ PixelShaderOutput main(PixelShaderInput input)
 {
 	const float bias = 0.0001f;
 	float4 zero = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	bool lit = false;
 	int numLights = 4;
 	float shadowCoeff = 1.0f;
 	for (int i = 0; i < numLights; i++) {
@@ -105,9 +104,9 @@ PixelShaderOutput main(PixelShaderInput input)
 		//Convert to NDC
 		lightPositionToUse.xy /= lightPositionToUse.w;
 		//Translate to UV (0-1)
-		float2 smTex = float2(lightPositionToUse.x * 0.5f + 0.5f, lightPositionToUse.y * (-0.5f) + 0.5f);//OK
+		float2 smTex = float2(lightPositionToUse.x * 0.5f + 0.5f, lightPositionToUse.y * (-0.5f) + 0.5f);
 		//Compute pixel depth for shadowing
-		float depth = lightPositionToUse.z / lightPositionToUse.w;//OK
+		float depth = lightPositionToUse.z / lightPositionToUse.w;
 		//Sample
 		float4 sampled = zero;
 		switch (i) {
@@ -131,9 +130,6 @@ PixelShaderOutput main(PixelShaderInput input)
 		{
 			//If the light sees is less than what we see, there is a shadow
 			shadowCoeff = 0.0f;
-		}
-		else {
-			lit = true;
 		}
 	}
 	if (!ShadowsOn) {

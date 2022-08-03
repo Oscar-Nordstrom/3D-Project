@@ -56,10 +56,6 @@ void ShadowMap::StartFirst()
 	gfx->GetContext()->PSSetShader(nullptr, nullptr, 0);
 }
 
-void ShadowMap::EndFirst()
-{
-}
-
 void ShadowMap::StartSeccond()
 {
 	DepthToSRV();
@@ -68,10 +64,6 @@ void ShadowMap::StartSeccond()
 	gfx->GetContext()->PSSetShaderResources(5, 1, &shadowSRV[2]);
 	gfx->GetContext()->PSSetShaderResources(6, 1, &shadowSRV[3]);
 	gfx->GetContext()->PSSetSamplers(1, 1, &samState);
-}
-
-void ShadowMap::EndSeccond()
-{
 }
 
 void ShadowMap::UpdateWhatShadow(int whatLight, int flag)
