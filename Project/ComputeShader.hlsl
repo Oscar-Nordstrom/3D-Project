@@ -30,7 +30,7 @@ cbuffer cb : register(b0)
 	float Ns;//Specular expontent
 	float3 kd;//Diffuse component
 	float3 ks;//Specular component  
-	float3 ka;//Amboient compinent
+	float3 ka;//Ambient compinent
 }
 cbuffer lightCbDirectional : register(b1)
 {

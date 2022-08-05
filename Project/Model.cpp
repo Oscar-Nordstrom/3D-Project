@@ -677,16 +677,3 @@ void Model::SetTexHandl(TextureHandler*& texHandl)
 	this->texHandl = texHandl;
 	fileLoader.SetTexHandl(texHandl);
 }
-
-/*int Model::FindVert()
-{
-	for (int i = 0; i < verts.size()-1; i++) {
-		for (int j = i+1; j < verts.size(); j++) {
-			if (verts[i] == verts[j]) {
-				return i;
-			}
-		}
-	}
-
-	return -1;
-}*/
