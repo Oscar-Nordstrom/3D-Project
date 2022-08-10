@@ -25,13 +25,6 @@ Texture2D<float4> ambients : register(t4);
 Texture2D<float4> speculars : register(t5);
 Texture2D<float4> diffuses : register(t6);
 
-cbuffer cb : register(b0)
-{
-	float Ns;//Specular expontent
-	float3 kd;//Diffuse component
-	float3 ks;//Specular component  
-	float3 ka;//Ambient compinent
-}
 cbuffer lightCbDirectional : register(b1)
 {
 	DirectionalLight dLight;
@@ -68,7 +61,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	float4 matColor = colors.Load(tPos);
 	float4 normal = normalize(normals.Load(tPos));
 	float4 ambient = ambients.Load(tPos);
-	float4 specular = speculars.Load(tPos);
+	float4 specular = speculars.Load(tPos);//Last component is Ns
 	float4 diffuse = diffuses.Load(tPos);
 
 	//Set all light to zero
@@ -104,7 +97,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = dot(ref, vec);
 			if (spec >= 0.0f) {
-				tempSpecular = specular * pow(abs(spec), Ns);
+				tempSpecular = specular * pow(abs(spec), specular.w);
 			}
 		}
 		//Spot Light
@@ -137,7 +130,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			float3 ref = normalize(reflect(-lightPixelVec, normal.xyz));
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = max(dot(ref, vec), 0.0f);
-			tempSpecular += specular * pow(spec, Ns);
+			tempSpecular += specular * pow(spec, specular.w);
 			tempSpecular *= lightFacotr;
 			
 		}

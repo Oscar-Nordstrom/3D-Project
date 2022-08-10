@@ -55,6 +55,14 @@ cbuffer camcb : register(b3)
 	float4 camPos;
 }
 
+cbuffer cb : register(b4)
+{
+	float Ns;//Specular expontent
+	float3 kd;//Diffuse component
+	float3 ks;//Specular component
+	float3 ka;//Ambient compinent
+}
+
 Texture2D<float4> map_Kd : register(t0); //Diffuse
 Texture2D<float4> map_Ks : register(t1); //Specular
 Texture2D<float4> map_Ka : register(t2); //Ambient
@@ -159,6 +167,7 @@ PixelShaderOutput main(PixelShaderInput input)
 	output.color = cMap.Sample(samp1, refelcVector);
 	output.diffuse = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
 	output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
+	output.specular.w = Ns;
 	output.ambient = map_Ka.Sample(samp1, input.uv);
 	output.position = input.position;
 	output.wPosition = input.wPosition;

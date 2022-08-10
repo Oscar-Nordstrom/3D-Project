@@ -28,7 +28,7 @@ void SubMesh::Bind(int flag)
 {
 	if (flag == NORMAL || flag == CUBE_MAP || flag == CUBE_MAP_TWO) {
 		gfx->GetContext()->PSSetShaderResources(0, 3, srv);
-		gfx->GetContext()->CSSetConstantBuffers(0, 1, &cbuf);
+		gfx->GetContext()->PSSetConstantBuffers(4, 1, &cbuf);
 	}
 	gfx->GetContext()->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
@@ -146,7 +146,7 @@ bool SubMesh::LoadMtl()
 	}
 
 	gfx->GetContext()->PSSetShaderResources(0, 3, srv);
-	gfx->GetContext()->CSSetConstantBuffers(0, 1, &cbuf);
+	gfx->GetContext()->PSSetConstantBuffers(4, 1, &cbuf);
 
 	return true;
 }
