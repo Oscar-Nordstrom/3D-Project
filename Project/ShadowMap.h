@@ -36,9 +36,11 @@ private:
 	SpotLight* sLight2;
 	SpotLight* sLight3;
 
-	ID3D11ShaderResourceView* shadowSRV[4];
+	ID3D11ShaderResourceView* shadowSRV;
+	//ID3D11ShaderResourceView* shadowSRV[4];
 	ID3D11DepthStencilView* dsViews[4];
-	ID3D11Texture2D* dsTexture[4];
+	//ID3D11Texture2D* dsTexture[4];
+	ID3D11Texture2D* dsTexture;
 	ID3D11VertexShader* vertexShadowShader;
 	ID3D11Resource* shadowRes;
 	ID3D11SamplerState* samState;
