@@ -136,6 +136,7 @@ void ShadowMap::DepthToSRV()
 	srvDesc.Texture2DArray.ArraySize = 4;
 	srvDesc.Texture2D.MipLevels = 1;
 
+	shadowSRV->Release();
 	HRESULT hr;
 	hr = gfx->GetDevice()->CreateShaderResourceView(dsTexture, &srvDesc, &shadowSRV);
 	assert(!FAILED(hr) && "Failed to create srv");

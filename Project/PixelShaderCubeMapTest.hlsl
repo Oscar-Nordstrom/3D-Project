@@ -71,11 +71,6 @@ Texture2D<float4> map_Ka : register(t2); //Ambient
 SamplerState samp1 : register(s0);
 SamplerState shadowSamp : register(s1);
 
-//Texture2D<float4> shadowMap1 : register(t3);//Directional Light
-//Texture2D<float4> shadowMap2 : register(t4);//SpotLight 1
-//Texture2D<float4> shadowMap3 : register(t5);//SpotLight 2
-//Texture2D<float4> shadowMap4 : register(t6);//SpotLight 3
-
 Texture2DArray<float4> shadowMaps : register(t3);
 
 TextureCube cMap : register(t7);//Cube map
@@ -134,20 +129,6 @@ PixelShaderOutput main(PixelShaderInput input)
 
 
 		sampled = shadowMaps.Sample(shadowSamp, float3(smTex,i));
-		/*switch (i) {
-		case 0:
-			sampled = shadowMap1.Sample(shadowSamp, smTex);
-			break;
-		case 1:
-			sampled = shadowMap2.Sample(shadowSamp, smTex);
-			break;
-		case 2:
-			sampled = shadowMap3.Sample(shadowSamp, smTex);
-			break;
-		case 3:
-			sampled = shadowMap4.Sample(shadowSamp, smTex);
-			break;
-		}*/
 
 
 		//Check if shadowd
