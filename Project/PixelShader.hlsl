@@ -28,7 +28,7 @@ struct PixelShaderInput
 
 struct PixelShaderOutput
 {
-	float4 position : SV_Target0;
+	float4 shadowC : SV_Target0;
 	float4 wPosition : SV_Target1;
 	float4 color : SV_Target2;
 	float4 normal : SV_Target3;
@@ -73,7 +73,7 @@ PixelShaderOutput main(PixelShaderInput input)
 	const float bias = 0.0001f;
 	float4 zero = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	int numLights = 4;
-	float shadowCoeff = 1.0f;
+	float shadowCoeff[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	for (int i = 0; i < numLights; i++) {
 		bool lightIsOn = true;
 		float4 lightPositionToUse = zero;
@@ -115,30 +115,33 @@ PixelShaderOutput main(PixelShaderInput input)
 		//Sample
 		float4 sampled = zero;
 
+		sampled = shadowMaps.Sample(shadowSamp, float3(smTex, i));
 
-
-		sampled = shadowMaps.Sample(shadowSamp, float3(smTex,i));
-		
 
 		//Check if shadowd
-		if (sampled.r+bias < depth)
+		if ((sampled.r + bias < depth))
 		{
-			//If the light sees is less than what we see, there is a shadow
-			shadowCoeff = 0.0f;
+			shadowCoeff[i] = 0.0f;
 		}
 	}
 	if (!ShadowsOn) {
-		shadowCoeff = 1.0f;
+		shadowCoeff[0] = 1.0f;
+		shadowCoeff[1] = 1.0f;
+		shadowCoeff[2] = 1.0f;
+		shadowCoeff[3] = 1.0f;
 	}
+
 
 	PixelShaderOutput output;
 
 	output.color = map_Kd.Sample(samp1, input.uv);
-	output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
+	output.specular = map_Ks.Sample(samp1, input.uv);
 	output.specular.w = Ns;
-	output.diffuse = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
+	output.diffuse = map_Kd.Sample(samp1, input.uv);
 	output.ambient = map_Ka.Sample(samp1, input.uv);
-	output.position = input.position;
+
+	output.shadowC = float4(shadowCoeff[0], shadowCoeff[1], shadowCoeff[2], shadowCoeff[3]);
+
 	output.wPosition = input.wPosition;
 	output.normal = input.normal;
 

@@ -723,8 +723,11 @@ void Scene::ImGuiWindows()
 	if (ImGui::Begin("Light Settings")) {
 		ImGui::Checkbox("Directional Light", &dLight.on);
 		ImGui::Checkbox("Spotlight 1 Light", &sLight1On);
+		ImGui::SliderFloat("Spotlight 1 pos", &sLights[0].position.z, -50.0f, 50.0f);
 		ImGui::Checkbox("Spotlight 2 Light", &sLight2On);
+		ImGui::SliderFloat("Spotlight 2 pos", &sLights[1].position.z, -50.0f, 50.0f);
 		ImGui::Checkbox("Spotlight 3 Light", &sLight3On);
+		ImGui::SliderFloat("Spotlight 3 pos", &sLights[2].position.z, -50.0f, 50.0f);
 	}
 	ImGui::End();
 	if (ImGui::Begin("Info")) {
