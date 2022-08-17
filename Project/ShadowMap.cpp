@@ -34,8 +34,6 @@ ShadowMap::~ShadowMap()
 	if (dsTexture)dsTexture->Release();
 	for (int i = 0; i < 4; i++) {
 		if (dsViews[i])dsViews[i]->Release();
-		//if (shadowSRV[i])shadowSRV[i]->Release();
-		//if (dsTexture[i])dsTexture[i]->Release();
 	}
 }
 
@@ -65,10 +63,6 @@ void ShadowMap::StartSeccond()
 {
 	DepthToSRV();
 	gfx->GetContext()->PSSetShaderResources(3, 1, &shadowSRV);
-	/*gfx->GetContext()->PSSetShaderResources(3, 1, &shadowSRV[0]);
-	gfx->GetContext()->PSSetShaderResources(4, 1, &shadowSRV[1]);
-	gfx->GetContext()->PSSetShaderResources(5, 1, &shadowSRV[2]);
-	gfx->GetContext()->PSSetShaderResources(6, 1, &shadowSRV[3]);*/
 	gfx->GetContext()->PSSetSamplers(1, 1, &samState);
 }
 
@@ -136,7 +130,7 @@ void ShadowMap::DepthToSRV()
 	srvDesc.Texture2DArray.ArraySize = 4;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	shadowSRV->Release();
+	if(shadowSRV)shadowSRV->Release();
 	HRESULT hr;
 	hr = gfx->GetDevice()->CreateShaderResourceView(dsTexture, &srvDesc, &shadowSRV);
 	assert(!FAILED(hr) && "Failed to create srv");
@@ -168,12 +162,10 @@ bool ShadowMap::CreateDepthStencil()
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 
-	//for (int i = 0; i < 4; i++) {
 	if (FAILED(gfx->GetDevice()->CreateTexture2D(&texDesc, nullptr, &dsTexture)))
 	{
 		return false;
 	}
-	//}
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsViewDesc = {};
 	dsViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
@@ -197,10 +189,8 @@ bool ShadowMap::CreateDepthStencil()
 	srvDesc.Texture2D.MipLevels = 1;
 
 	HRESULT hr;
-	//for (int i = 0; i < 4; i++) {
 	hr = gfx->GetDevice()->CreateShaderResourceView(dsTexture, &srvDesc, &shadowSRV);
 	assert(!FAILED(hr) && "Failed to create srv");
-	//}
 
 	return true;
 }

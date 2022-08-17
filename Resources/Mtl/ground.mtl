@@ -3,4 +3,4 @@ Ns 100
 Kd 0.5 0.5 0.5
 Ks 0.0 0.0 0.0
 Ka 0.2 0.2 0.2
-map_Kd Texturen\\ground.png
+map_Kd ground.png
