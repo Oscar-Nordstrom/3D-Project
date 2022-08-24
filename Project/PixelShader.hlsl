@@ -28,7 +28,7 @@ struct PixelShaderInput
 
 struct PixelShaderOutput
 {
-	float4 position : SV_Target0;
+	float4 shadowC : SV_Target0;
 	float4 wPosition : SV_Target1;
 	float4 color : SV_Target2;
 	float4 normal : SV_Target3;
@@ -50,6 +50,14 @@ cbuffer lightCbSpot : register(b2)
 	SpotLight sLights[3];
 }
 
+cbuffer cb : register(b4)
+{
+	float Ns;//Specular expontent
+	float3 kd;//Diffuse component
+	float3 ks;//Specular component
+	float3 ka;//Ambient compinent
+}
+
 
 Texture2D<float4> map_Kd : register(t0); //Diffuse
 Texture2D<float4> map_Ks : register(t1); //Specular
@@ -57,19 +65,15 @@ Texture2D<float4> map_Ka : register(t2); //Ambient
 SamplerState samp1 : register(s0);
 SamplerState shadowSamp : register(s1);
 
-Texture2D<float4> shadowMap1 : register(t3);//Directional Light
-Texture2D<float4> shadowMap2 : register(t4);//SpotLight 1
-Texture2D<float4> shadowMap3 : register(t5);//SpotLight 2
-Texture2D<float4> shadowMap4 : register(t6);//SpotLight 3
+Texture2DArray<float4> shadowMaps : register(t3);
 
 
 PixelShaderOutput main(PixelShaderInput input)
 {
 	const float bias = 0.0001f;
 	float4 zero = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	bool lit = false;
 	int numLights = 4;
-	float shadowCoeff = 1.0f;
+	float shadowCoeff[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	for (int i = 0; i < numLights; i++) {
 		bool lightIsOn = true;
 		float4 lightPositionToUse = zero;
@@ -105,51 +109,41 @@ PixelShaderOutput main(PixelShaderInput input)
 		//Convert to NDC
 		lightPositionToUse.xy /= lightPositionToUse.w;
 		//Translate to UV (0-1)
-		float2 smTex = float2(lightPositionToUse.x * 0.5f + 0.5f, lightPositionToUse.y * (-0.5f) + 0.5f);//OK
+		float2 smTex = float2(lightPositionToUse.x * 0.5f + 0.5f, lightPositionToUse.y * (-0.5f) + 0.5f);
 		//Compute pixel depth for shadowing
-		float depth = lightPositionToUse.z / lightPositionToUse.w;//OK
+		float depth = lightPositionToUse.z / lightPositionToUse.w;
 		//Sample
 		float4 sampled = zero;
-		switch (i) {
-		case 0:
-			sampled = shadowMap1.Sample(shadowSamp, smTex);
-			break;
-		case 1:
-			sampled = shadowMap2.Sample(shadowSamp, smTex);
-			break;
-		case 2:
-			sampled = shadowMap3.Sample(shadowSamp, smTex);
-			break;
-		case 3:
-			sampled = shadowMap4.Sample(shadowSamp, smTex);
-			break;
-		}
-		
+
+		sampled = shadowMaps.Sample(shadowSamp, float3(smTex, i));
+
 
 		//Check if shadowd
-		if (sampled.r+bias < depth)
+		if ((sampled.r + bias < depth))
 		{
-			//If the light sees is less than what we see, there is a shadow
-			shadowCoeff = 0.0f;
-		}
-		else {
-			lit = true;
+			shadowCoeff[i] = 0.0f;
 		}
 	}
 	if (!ShadowsOn) {
-		shadowCoeff = 1.0f;
+		shadowCoeff[0] = 1.0f;
+		shadowCoeff[1] = 1.0f;
+		shadowCoeff[2] = 1.0f;
+		shadowCoeff[3] = 1.0f;
 	}
+
 
 	PixelShaderOutput output;
 
 	output.color = map_Kd.Sample(samp1, input.uv);
-	output.specular = map_Ks.Sample(samp1, input.uv) * shadowCoeff;
-	output.diffuse = map_Kd.Sample(samp1, input.uv) * shadowCoeff;
+	output.specular = map_Ks.Sample(samp1, input.uv);
+	output.specular.w = Ns;
+	output.diffuse = map_Kd.Sample(samp1, input.uv);
 	output.ambient = map_Ka.Sample(samp1, input.uv);
-	output.position = input.position;
+
+	output.shadowC = float4(shadowCoeff[0], shadowCoeff[1], shadowCoeff[2], shadowCoeff[3]);
+
 	output.wPosition = input.wPosition;
 	output.normal = input.normal;
-
 
 
 	return output;

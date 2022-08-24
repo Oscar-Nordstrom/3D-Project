@@ -14,9 +14,7 @@ public:
 	~ShadowMap();
 	void Init(Graphics*& gfx, DirectionalLight* light);
 	void StartFirst();
-	void EndFirst();
 	void StartSeccond();
-	void EndSeccond();
 	void UpdateWhatShadow(int whatLight, int flag);
 	void SetDirLight(DirectionalLight* dLight);
 	void SetSampler(int slot = 1);
@@ -38,9 +36,11 @@ private:
 	SpotLight* sLight2;
 	SpotLight* sLight3;
 
-	ID3D11ShaderResourceView* shadowSRV[4];
+	ID3D11ShaderResourceView* shadowSRV;
+	//ID3D11ShaderResourceView* shadowSRV[4];
 	ID3D11DepthStencilView* dsViews[4];
-	ID3D11Texture2D* dsTexture[4];
+	//ID3D11Texture2D* dsTexture[4];
+	ID3D11Texture2D* dsTexture;
 	ID3D11VertexShader* vertexShadowShader;
 	ID3D11Resource* shadowRes;
 	ID3D11SamplerState* samState;

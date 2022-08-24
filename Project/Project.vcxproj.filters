@@ -129,6 +129,15 @@
     <ClCompile Include="HelpOp.cpp">
       <Filter>Source Files\Other</Filter>
     </ClCompile>
+    <ClCompile Include="FileLoader.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SubMesh.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -206,15 +215,18 @@
     <ClInclude Include="HelpOp.h">
       <Filter>Header Files\Other</Filter>
     </ClInclude>
+    <ClInclude Include="FileLoader.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SubMesh.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="ComputeShaderCubeMap.hlsl">
-      <Filter>Resource Files\Shaders\CubeMapping</Filter>
-    </FxCompile>
     <FxCompile Include="ComputeShaderCubeMapTest.hlsl">
-      <Filter>Resource Files\Shaders\CubeMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShaderCubeMap.hlsl">
       <Filter>Resource Files\Shaders\CubeMapping</Filter>
     </FxCompile>
     <FxCompile Include="PixelShaderCubeMapTest.hlsl">

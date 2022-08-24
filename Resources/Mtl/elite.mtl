@@ -10,7 +10,7 @@ newmtl skin
 	map_Kd skin.png
 
 newmtl steel
-	Ns 0
+	Ns 96
 	d 1
 	illum 2
 	Kd 0.5 0.5 0.5
@@ -19,7 +19,7 @@ newmtl steel
 	map_Kd steel.png
 
 newmtl rubber
-	Ns 0
+	Ns 96
 	d 1
 	illum 2
 	Kd 0.5 0.5 0.5
@@ -28,7 +28,7 @@ newmtl rubber
 	map_Kd carbon.png
 
 newmtl camo
-	Ns 0
+	Ns 96
 	d 1
 	illum 2
 	Kd 0.5 0.5 0.5
@@ -37,7 +37,7 @@ newmtl camo
 	map_Kd camo.png
 
 newmtl leather
-	Ns 0
+	Ns 96
 	d 1
 	illum 2
 	Kd 0.5 0.5 0.5
@@ -46,7 +46,7 @@ newmtl leather
 	map_Kd leather.png
 
 newmtl ribbon
-	Ns 0
+	Ns 96
 	d 1
 	illum 2
 	Kd 0.5 0.5 0.5
@@ -55,7 +55,7 @@ newmtl ribbon
 	map_Kd carbon.png
 
 newmtl eye
-	Ns 0
+	Ns 96
 	d 1
 	illum 2
 	Kd 0.8 0.8 0.8

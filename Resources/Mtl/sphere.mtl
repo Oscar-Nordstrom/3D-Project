@@ -1,5 +1,0 @@
-newmtl SphereMaterial
-Ns 3
-map_Kd Texturen\\ground.jpg
-map_Ks Texturen\\black.png
-map_Ka Texturen\\black.png

@@ -37,7 +37,7 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
 
 	//Billboarding start
 	float3 particleCamVec = input[0].position.xyz-camPos;
-	float3 up = cameraUpDirection;// float3(0.0f, 1.0f, 0.0f);
+	float3 up = cameraUpDirection;
 	float3 right = normalize(cross(up, particleCamVec));
 	//Billboarding end
 
@@ -46,18 +46,12 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
 	float3 bottomRight = input[0].position.xyz + (right * SIZE) - (up * SIZE);
 	float3 bottomLeft = input[0].position.xyz -(right * SIZE) - (up * SIZE);
 
-	/*float3 topLeft = float3(-SIZE, SIZE, 0);
-	float3 topRight = float3(SIZE, SIZE, 0);
-	float3 bottomRight = float3(SIZE, -SIZE, 0);
-	float3 bottomLeft = float3(-SIZE, -SIZE, 0);*/
-
 	float3 norm = normalize(cross(up, right));
 	GSOutput toOutput;
 	
-
+	/*Triangle one*/
 	toOutput.position = mul(view, float4(topLeft, 1.0f));
 	toOutput.position = mul(proj, toOutput.position);
-	//toOutput.position.w = 1.0f;
 	toOutput.uv = float2(0.0f, 0.0f);
 	toOutput.normal = norm;
 	output.Append(toOutput);
@@ -65,7 +59,6 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
 
 	toOutput.position = mul(view, float4(topRight, 1.0f));
 	toOutput.position = mul(proj, toOutput.position);
-	//toOutput.position.w = 1.0f;
 	toOutput.uv = float2(1.0f, 0.0f);
 	toOutput.normal = norm;
 	output.Append(toOutput);
@@ -73,18 +66,16 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
 
 	toOutput.position = mul(view, float4(bottomRight, 1.0f));
 	toOutput.position = mul(proj, toOutput.position);
-	//toOutput.position.w = 1.0f;
 	toOutput.uv = float2(1.0f, 1.0f);
 	toOutput.normal = norm;
 	output.Append(toOutput);
 
+	//Ending first triangle
 	output.RestartStrip();
-	toOutput.normal = normalize(cross(up, right));
 
-
+	/*Triangle two*/
 	toOutput.position = mul(view, float4(topLeft, 1.0f));
 	toOutput.position = mul(proj, toOutput.position);
-	//toOutput.position.w = 1.0f;
 	toOutput.uv = float2(0.0f, 0.0f);
 	toOutput.normal = norm;
 	output.Append(toOutput);
@@ -92,7 +83,6 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
 
 	toOutput.position = mul(view, float4(bottomRight, 1.0f));
 	toOutput.position = mul(proj, toOutput.position);
-	//toOutput.position.w = 1.0f;
 	toOutput.uv = float2(1.0f, 1.0f);
 	toOutput.normal = norm;
 	output.Append(toOutput);
@@ -100,7 +90,6 @@ void main(point GSInput input[1], inout TriangleStream<GSOutput> output)
 
 	toOutput.position = mul(view, float4(bottomLeft, 1.0f));
 	toOutput.position = mul(proj, toOutput.position);
-	//toOutput.position.w = 1.0f;
 	toOutput.uv = float2(0.0f, 1.0f);
 	toOutput.normal = norm;
 	output.Append(toOutput);

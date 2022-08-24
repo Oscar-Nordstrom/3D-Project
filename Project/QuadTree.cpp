@@ -82,7 +82,6 @@ void QuadTree::InsideNodes(Camera& cam, std::vector<QuadTree*>* list)
 		else {
 			list->push_back(this);
 		}
-		//list->push_back(this);
 	}
 }
 

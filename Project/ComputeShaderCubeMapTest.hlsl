@@ -17,7 +17,7 @@ struct DirectionalLight {
 	bool on;
 };
 
-Texture2D<float4> positions : register(t0);
+Texture2D<float4> shadowC : register(t0);
 Texture2D<float4> wPositions : register(t1);
 Texture2D<float4> colors : register(t2);
 Texture2D<float4> normals : register(t3);
@@ -25,13 +25,6 @@ Texture2D<float4> ambients : register(t4);
 Texture2D<float4> speculars : register(t5);
 Texture2D<float4> diffuses : register(t6);
 
-cbuffer cb : register(b0)
-{
-    float Ns;//Specular expontent
-    float3 kd;//Diffuse component
-    float3 ks;//Specular component  
-    float3 ka;//Amboient compinent
-}
 cbuffer lightCbDirectional : register(b1)
 {
     DirectionalLight dLight;
@@ -52,64 +45,10 @@ cbuffer lightCbSpot : register(b4)
 RWTexture2DArray<unorm float4> backbuffer : register(u6);
 
 
-
 [numthreads(20, 20, 1)]
 
 void main(uint3 DTid : SV_DispatchThreadID)
-{
-    
-    /*float4 final = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    int2 texPos = int2(0, 0);
-    texPos.x = DTid.x;
-    texPos.y = DTid.y;
-    int3 tPos = int3(texPos, 0);
-    float4 matColor = colors.Load(tPos);
-    final = matColor;
-   int2 texPos = int2(0, 0);
-    texPos.x = DTid.x;
-    texPos.y = DTid.y;
-    int3 tPos = int3(texPos, 0);
-    
-    float4 matColor = colors.Load(tPos);
-    float4 position = positions.Load(tPos);
-    float4 wPosition = wPositions.Load(tPos);
-    float4 normal = normalize(normals.Load(tPos));
-    float4 ambient = ambients.Load(tPos);
-    float4 specular = speculars.Load(tPos);
-    
-    float4 finalAmbient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    float4 finalDiffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    float4 finalSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    
-    //Do light calculations
-    
-    //Ambient calculations
-    finalAmbient = ambient * matColor;
-    
-    float3 d = normalize(dir);
-    normal = normalize(normal);
-    //Diffuse calculateions
-    float diff = dot(-d, normal.xyz);
-    if (diff >= 0.0f)
-    {
-        finalDiffuse = diff * (matColor + color);
-    }
-
-    //Specular calculations
-    if (diff >= 0.0f)
-    {
-        float3 r = -normalize(reflect(-d, normal.xyz));
-        float3 v = normalize(camPos.xyz - wPosition.xyz);
-        float spec = dot(r, v);
-        if (spec >= 0.0f)
-        {
-            finalSpecular = specular * pow(spec, s);
-        }
-
-    }
-    
-    final = finalAmbient + finalDiffuse + finalSpecular;*/
-    
+{ 
 
 	float3 neg = float3(-1.0f, -1.0f, -1.0f);
 	float4 zero = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -120,7 +59,9 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	int3 tPos = int3(texPos, 0);
 
 	//Load all values
-	float4 position = positions.Load(tPos);
+	float4 sc = shadowC.Load(tPos);
+	float shadowCoeff[4] = { sc.x, sc.y, sc.z, sc.w };
+
 	float4 wPosition = wPositions.Load(tPos);
 	float4 matColor = colors.Load(tPos);
 	float4 normal = normalize(normals.Load(tPos));
@@ -154,14 +95,14 @@ void main(uint3 DTid : SV_DispatchThreadID)
 			float3 d = -normalize(dLight.direction);
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			tempDiffuse = diff * normalize(matColor + dLight.color) * diffuse;
+			tempDiffuse = diff * normalize(matColor + dLight.color) * diffuse * shadowCoeff[i];
 
 			//Specular
 			float3 ref = -normalize(reflect(d, normal.xyz));
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = dot(ref, vec);
 			if (spec >= 0.0f) {
-				tempSpecular = specular * pow(abs(spec), Ns);
+				tempSpecular = specular * pow(abs(spec), specular.w) * shadowCoeff[i];
 			}
 		}
 		//Spot Light
@@ -187,13 +128,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
 			float diff = max(dot(d, normal.xyz), 0.0f);
 			if (diff == 0.0f) continue;
-			tempDiffuse = diff * (matColor + sLights[index].color) * diffuse * lightFacotr;
+			tempDiffuse = diff * (matColor + sLights[index].color) * diffuse * lightFacotr * shadowCoeff[i];
 
 			//Specular
 			float3 ref = normalize(reflect(-lightPixelVec, normal.xyz));
 			float3 vec = normalize(camPos.xyz - wPosition.xyz);
 			float spec = max(dot(ref, vec), 0.0f);
-			tempSpecular += specular * pow(spec, Ns);
+			tempSpecular += specular * pow(spec, specular.w) * shadowCoeff[i];
 			tempSpecular *= lightFacotr;
 
 		}

@@ -14,6 +14,8 @@
 
 #include "flags.h"
 
+#include "FileLoader.h"
+
 
 using namespace std;
 
@@ -25,7 +27,7 @@ public:
 	bool Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
 	bool LoadAsParticle(string vShaderPath, string gShaderPath, string pShaderPath, string cShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx);
 	void Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag = NORMAL);
-	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform);
+	bool UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform, float x = 0.0f, float y = 0.0f, float z = 0.0f);
 	void DisableTesselation();
 	void EnableTesselation();
 	void SetParticleUpdate(Graphics*& gfx);
@@ -42,15 +44,14 @@ private:
 	bool ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader*& v, ID3D11HullShader*& h, ID3D11DomainShader*& d, ID3D11PixelShader*& p, ID3D11ComputeShader*& c, ID3D11GeometryShader*& g);
 	
 private:
-	vector<DirectX::XMFLOAT3> v;
-	vector<DirectX::XMFLOAT3> vn;
-	vector<DirectX::XMFLOAT2> vt;
+	//vector<DirectX::XMFLOAT3> v;
+	//vector<DirectX::XMFLOAT3> vn;
+	//vector<DirectX::XMFLOAT2> vt;
 
 	vector<SimpleVertex> verts; 
 	vector<unsigned short> indices;
 	vector<SubMesh*> subs;
 
-	MtlImages* images;
 	TextureHandler* texHandl;
 
 	string vShaderByteCode;
@@ -68,10 +69,13 @@ private:
 	ID3D11UnorderedAccessView* uavBuffer;
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* constantBuffer;
+	ID3D11Buffer* posBuffer;
 	ID3D11Buffer* constantBufferTessBool;
 	D3D11_PRIMITIVE_TOPOLOGY topology;
 	D3D11_PRIMITIVE_TOPOLOGY topologyTriList;
-	D3D11_PRIMITIVE_TOPOLOGY topologyPoints;;
+	D3D11_PRIMITIVE_TOPOLOGY topologyPoints;
+
+	FileLoader fileLoader;
 
 	bool tesselation;
 

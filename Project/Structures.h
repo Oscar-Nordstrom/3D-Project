@@ -13,7 +13,13 @@
 
 #include "flags.h"
 
-#include "TextureHandler.h"
+
+struct ImageData {
+	std::string name;
+	int width, height, channels;
+	unsigned char* img;
+	ID3D11Texture2D* tex;
+};
 
 struct TimeData {
 	float dt;
@@ -51,6 +57,52 @@ struct MtlData {
 	DirectX::XMFLOAT3 kd, ks, ka;
 };
 
+struct Matrices
+{
+	DirectX::XMFLOAT4X4 mOne;
+	DirectX::XMFLOAT4X4 mTwo;
+	DirectX::XMFLOAT4X4 mThree;
+
+	Matrices(DirectX::XMFLOAT4X4& one, DirectX::XMFLOAT4X4& two, DirectX::XMFLOAT4X4& three)
+	{
+		mOne = one;
+		mTwo = two;
+		mThree = three;
+	}
+};
+
+struct SimpleVertex
+{
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 n;
+	DirectX::XMFLOAT2 uv;
+
+	SimpleVertex(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& normal, const DirectX::XMFLOAT2& UV)
+	{
+		pos = position;
+		n = normal;
+		uv = UV;
+	}
+	bool operator==(SimpleVertex& vertex)const {
+		if (pos.x == vertex.pos.x && pos.y == vertex.pos.y && pos.z == vertex.pos.z) {
+			if (n.x == vertex.n.x && n.y == vertex.n.y && n.z == vertex.n.z) {
+				if (uv.x == vertex.uv.x && uv.y == vertex.uv.y) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	std::string make_this_string() {
+		std::string ret;
+
+		ret = std::to_string(pos.x) + std::to_string(pos.y) + std::to_string(pos.z) + std::to_string(n.x) + std::to_string(n.y) + std::to_string(n.z) + std::to_string(uv.x) + std::to_string(uv.y);
+
+		return ret;
+	}
+};
+
+/*
 struct MtlImages {
 	std::vector<std::string> names;
 	std::vector<ID3D11Texture2D*>textures;
@@ -122,51 +174,6 @@ struct MtlImages {
 
 };
 
-struct SimpleVertex
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 n;
-	DirectX::XMFLOAT2 uv;
-
-	SimpleVertex(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& normal, const DirectX::XMFLOAT2& UV)
-	{
-		pos = position;
-		n = normal;
-		uv = UV;
-	}
-	bool operator==(SimpleVertex& vertex)const {
-		if (pos.x == vertex.pos.x && pos.y == vertex.pos.y && pos.z == vertex.pos.z) {
-			if (n.x == vertex.n.x && n.y == vertex.n.y && n.z == vertex.n.z) {
-				if (uv.x == vertex.uv.x && uv.y == vertex.uv.y) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	std::string make_this_string() {
-		std::string ret;
-
-		ret = std::to_string(pos.x)+ std::to_string(pos.y) + std::to_string(pos.z) + std::to_string(n.x) + std::to_string(n.y) + std::to_string(n.z) + std::to_string(uv.x) + std::to_string(uv.y);
-
-		return ret;
-	}
-};
-
-struct Matrices
-{
-	DirectX::XMFLOAT4X4 mOne;
-	DirectX::XMFLOAT4X4 mTwo;
-	DirectX::XMFLOAT4X4 mThree;
-
-	Matrices(DirectX::XMFLOAT4X4& one, DirectX::XMFLOAT4X4& two, DirectX::XMFLOAT4X4& three)
-	{
-		mOne = one;
-		mTwo = two;
-		mThree = three;
-	}
-};
-
 struct Material {
 	MtlData theMtlData;
 	std::string map_Kd, map_Ks, map_Ka;
@@ -174,9 +181,6 @@ struct Material {
 	Material(float Ns, DirectX::XMFLOAT3 kd, DirectX::XMFLOAT3 ks, DirectX::XMFLOAT3 ka, std::string map_Kd, std::string map_Ks, std::string map_Ka)
 		:map_Kd(map_Kd), map_Ks(map_Ks), map_Ka(map_Ka)
 	{
-		if (map_Kd == "Texturen\\ground.png") {
-			int dkjsd = 0;
-		}
 		theMtlData.Ns = Ns;
 		theMtlData.kd = kd;
 		theMtlData.ks = ks;
@@ -335,9 +339,6 @@ struct SubMesh {
 		bool foundMapKd = false;
 		bool foundMapKa = false;
 		bool foundMapKs = false;
-		if (fileName == "ground.mtl") {
-			int kldsd = 0;
-		}
 		file.open("../Resources/Mtl/" + fileName);
 		if (!file.is_open()) {
 			std::cerr << "Failed to open mesh file.\n";
@@ -425,4 +426,4 @@ struct SubMesh {
 		}
 	}
 };
-
+*/

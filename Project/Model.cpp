@@ -2,7 +2,7 @@
 
 Model::Model()
 {
-	images = nullptr;
+	//images = nullptr;
 	pShader = nullptr;
 	hShader = nullptr;
 	dShader = nullptr;
@@ -41,16 +41,17 @@ Model::~Model()
 	if (uavBuffer)uavBuffer->Release();
 	if (indexBuffer)indexBuffer->Release();
 	if (constantBuffer)constantBuffer->Release();
+	if (posBuffer)posBuffer->Release();
 	if (constantBufferTessBool)constantBufferTessBool->Release();
 	if (paprticleTexSrv)paprticleTexSrv->Release();
 
 
 	for (auto o : subs) {
-		o->Terminate();
+		//o->Terminate();
 		delete o;
 	}
 
-	delete images;
+	//delete images;
 }
 
 bool Model::Load(string obj, string vShaderPath, string hShaderPath, string dShaderPath, string pShaderPath, string cShaderPath, string gShaderPath, DirectX::XMMATRIX transform, Graphics*& gfx)
@@ -96,10 +97,10 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		UpdateCbuf(*gfx, transform);
 
 		gfx->GetContext()->PSSetSamplers(0, 1, &samState);
-		//gfx->GetContext()->PSSetSamplers(1, 1, &shadowSamp);
-		gfx->GetContext()->IASetPrimitiveTopology(topology);
+		gfx->GetContext()->IASetPrimitiveTopology(topology);//(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST)
 		gfx->GetContext()->DSSetConstantBuffers(0, 1, &constantBuffer);
 		gfx->GetContext()->HSSetConstantBuffers(1, 1, &constantBufferTessBool);
+		gfx->GetContext()->HSSetConstantBuffers(2, 1, &posBuffer);
 
 		gfx->GetContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		gfx->GetContext()->IASetInputLayout(inputLayout);
@@ -157,7 +158,6 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->VSSetShader(vShader, nullptr, 0);
 		gfx->GetContext()->GSSetShader(gShader, nullptr, 0);
 		gfx->GetContext()->PSSetShader(pShader, nullptr, 0);
-		//gfx->GetContext()->CSSetShader(cShader, nullptr, 0);
 		gfx->GetContext()->HSSetShader(nullptr, nullptr, 0);
 		gfx->GetContext()->DSSetShader(nullptr, nullptr, 0);
 
@@ -188,10 +188,6 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 		gfx->GetContext()->IASetInputLayout(inputLayout);
 		gfx->GetContext()->VSSetConstantBuffers(0, 1, &constantBuffer);
 		gfx->GetContext()->PSSetShaderResources(0, 1, &paprticleTexSrv);
-
-
-
-		//gfx->GetContext()->PSSetSamplers(0, 1, &samState);
 		
 	}
 
@@ -199,7 +195,7 @@ void Model::Draw(Graphics*& gfx, DirectX::XMMATRIX transform, int flag)
 	if (flag != PARTICLE) {
 		if (subs.size() > 0) {
 			for (auto& o : subs) {
-				o->Bind(gfx->GetContext(), flag);
+				o->Bind(flag);
 			}
 		}
 		else {
@@ -242,7 +238,7 @@ bool Model::LoadShaders(string vShaderPath, string hShaderPath, string dShaderPa
 
 bool Model::LoadObj(string obj, Graphics*& gfx)
 {
-	bool foundMtllib = false;
+	/*bool foundMtllib = false;
 
 	bool submesh = false;
 	bool useSubs = false;
@@ -367,12 +363,19 @@ bool Model::LoadObj(string obj, Graphics*& gfx)
 		submeshEnd = (int)indices.size() - 1;
 		SubMesh* subM = new SubMesh(gfx->GetDevice(), gfx->GetContext(), indices, images, subName, mtlFile, mtl, submeshStart, submeshEnd);
 		subs.push_back(subM);
-	}
+	}*/
+
+	fileLoader.LoadObj(obj, gfx);
+	verts = fileLoader.GetVerts();
+	indices = fileLoader.GetIndices();
+	subs = fileLoader.GetSubs();
 
 	/*For debugging
 	if (FindVert() != -1) {
 		assert(false && "THIS WAS SAD");
 	}*/
+
+	
 	return true;
 }
 
@@ -440,13 +443,10 @@ bool Model::CreateVertexBuffer(ID3D11Device*& device, bool particle)
 	else {
 		float randX, randY, randZ;
 		std::vector<DirectX::XMFLOAT3> points;
-		//DirectX::XMFLOAT3 points[NUM_PARTICLES];
 		for (int i = 0; i < NUM_PARTICLES; i++) {
-			//srand(time(0));
 			randX = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
 			randY = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
 			randZ = (float)(rand() % PARTICLE_RANGE) - (PARTICLE_RANGE / 2);
-			//points[i] = DirectX::XMFLOAT3(randX, randY, randZ);
 			points.push_back(DirectX::XMFLOAT3(randX, randY, randZ));
 		}
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_UNORDERED_ACCESS;
@@ -523,6 +523,14 @@ bool Model::CreateConstantBuffer(Graphics& gfx, DirectX::XMMATRIX transform)
 	data.SysMemSlicePitch = 0;
 
 	HRESULT hr = gfx.GetDevice()->CreateBuffer(&cbDesc, &data, &constantBuffer);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	DirectX::XMFLOAT3 posData = {0.0f, 0.0f, 0.0f};
+	data.pSysMem = &posData;
+	cbDesc.ByteWidth = 16;
+	hr = gfx.GetDevice()->CreateBuffer(&cbDesc, &data, &posBuffer);
 	if (FAILED(hr)) {
 		return false;
 	}
@@ -608,7 +616,7 @@ bool Model::ReadShader(Graphics*& gfx, string path, int flag, ID3D11VertexShader
 	return true;
 }
 
-bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
+bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform, float x, float y, float z)
 {
 	DirectX::XMFLOAT4X4 world;
 	DirectX::XMFLOAT4X4 view;
@@ -625,6 +633,15 @@ bool Model::UpdateCbuf(Graphics& gfx, DirectX::XMMATRIX transform)
 	gfx.GetContext()->Unmap(constantBuffer, 0);
 	if (FAILED(hr)) {
 		assert(false&& "Failed to update constant buffer.");
+	}
+
+	DirectX::XMFLOAT3 newPosData = { x,y,z };
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));//Clear the mappedResource
+	hr = gfx.GetContext()->Map(posBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	CopyMemory(mappedResource.pData, &newPosData, sizeof(DirectX::XMFLOAT3));//Write the new memory
+	gfx.GetContext()->Unmap(posBuffer, 0);
+	if (FAILED(hr)) {
+		assert(false && "Failed to update constant buffer.");
 	}
 
 	const bool data = tesselation;
@@ -658,17 +675,5 @@ void Model::SetParticleUpdate(Graphics*& gfx)
 void Model::SetTexHandl(TextureHandler*& texHandl)
 {
 	this->texHandl = texHandl;
+	fileLoader.SetTexHandl(texHandl);
 }
-
-/*int Model::FindVert()
-{
-	for (int i = 0; i < verts.size()-1; i++) {
-		for (int j = i+1; j < verts.size(); j++) {
-			if (verts[i] == verts[j]) {
-				return i;
-			}
-		}
-	}
-
-	return -1;
-}*/

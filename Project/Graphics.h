@@ -9,7 +9,6 @@
 #include"imgui_impl_win32.h"
 #include"imgui_impl_dx11.h"
 
-
 class Graphics {
 public:
 	Graphics(int width, int height, HWND& window);
@@ -42,8 +41,6 @@ public:
 
 
 private:
-
-	float timeI = 0;
 
 	int w, h;
 

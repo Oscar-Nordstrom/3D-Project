@@ -19,8 +19,8 @@ Scene::Scene()
 
 	tesselation = true;
 	tesselationTemp = tesselation;
-	quadTreeOn = true;
-	frustumCheckOn = true;
+	quadTreeOn = false;
+	frustumCheckOn = false;
 	shadowsOn = true;
 	particlesOn = true;
 	cubeMappingOn = true;
@@ -77,17 +77,6 @@ Scene::~Scene()
 	texHandl->Delete();
 	delete texHandl;
 	delete qtree;
-
-	/*for (auto p : intersectingNodes) {
-		if (p != nullptr) {
-			delete p;
-		}
-	}
-	for (auto p : objectsToDraw) {
-		if (p != nullptr) {
-			//delete p;
-		}
-	}*/
 }
 
 int Scene::Start()
@@ -173,13 +162,14 @@ bool Scene::DoFrame()
 				UpdateCamera();
 				shadowBufferData[i].view = cam.GettViewMatrix();
 				shadowBufferData[i].proj = window.Gfx()->GetProjection();
-				//shadowBufferData[i].proj = cam.GettProjectionMatrix();
 				window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
 				if (shadowsOn) {
 					for (auto p : objectsToDraw) {
 						p->Draw(window.Gfx(), SHADOW);
 					}
-					//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
+					if (cam.GetFrustum()->intersect(cube.GetBoundingSphere())) {
+						cube.Draw(window.Gfx(), SHADOW);
+					}
 				}
 			}
 
@@ -189,7 +179,7 @@ bool Scene::DoFrame()
 			//Shadows End First Cube Map
 
 
-			//Render to current uavs
+			//Render to current UAV
 			window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, CUBE_MAP);
 			shadow.StartSeccond();
 			window.Gfx()->GetContext()->PSSetConstantBuffers(0, 1, &shadowSettings);
@@ -200,8 +190,12 @@ bool Scene::DoFrame()
 			window.Gfx()->SetProjection(cMap.GetCam().GettProjectionMatrix());
 			window.Gfx()->SetCamera(cMap.GetCam().GettViewMatrix());
 
+			//Setting the new UAV
 			cMap.Set(window.Gfx()->GetContext(), i);
-
+			if (cam.GetFrustum()->intersect(cube.GetBoundingSphere())) {
+				cube.Draw(window.Gfx(), CUBE_MAP);
+			}
+			
 			for (auto p : objectsToDraw) {
 				p->Draw(window.Gfx(), CUBE_MAP);
 			}
@@ -216,8 +210,6 @@ bool Scene::DoFrame()
 				particle.Draw(window.Gfx(), PARTICLE);
 			}
 
-			
-			//shadow.StartSeccond(4);
 			window.Gfx()->GetContext()->HSSetConstantBuffers(0, 1, &camBuf);
 			window.Gfx()->GetContext()->CSSetConstantBuffers(1, 1, &lightBuf);
 			window.Gfx()->GetContext()->CSSetConstantBuffers(2, 1, &camBuf);
@@ -251,13 +243,14 @@ bool Scene::DoFrame()
 		UpdateCamera();
 		shadowBufferData[i].view = cam.GettViewMatrix();
 		shadowBufferData[i].proj = window.Gfx()->GetProjection();
-		//shadowBufferData[i].proj = cam.GettProjectionMatrix();
 		window.Gfx()->StartFrame(0.0f, 0.0f, 0.0f, SHADOW);
 		if (shadowsOn) {
 			for (auto p : objectsToDraw) {
 				p->Draw(window.Gfx(), SHADOW);
 			}
-			//particle.Draw(window.Gfx(), PARTICLE_SHADOW);
+			if (cam.GetFrustum()->intersect(cube.GetBoundingSphere())) {
+				cube.Draw(window.Gfx(), SHADOW);
+			}
 		}
 	}
 
@@ -289,7 +282,6 @@ bool Scene::DoFrame()
 	window.Gfx()->GetContext()->PSSetConstantBuffers(1, 1, &lightBuf);
 	window.Gfx()->GetContext()->PSSetConstantBuffers(2, 1, &lightBufSpots);
 	shadow.StartSeccond();
-	shadow.EndSeccond();
 	//Shadows End Second
 
 	for (auto p : objectsToDraw) {
@@ -731,8 +723,11 @@ void Scene::ImGuiWindows()
 	if (ImGui::Begin("Light Settings")) {
 		ImGui::Checkbox("Directional Light", &dLight.on);
 		ImGui::Checkbox("Spotlight 1 Light", &sLight1On);
+		ImGui::SliderFloat("Spotlight 1 pos", &sLights[0].position.z, -50.0f, 50.0f);
 		ImGui::Checkbox("Spotlight 2 Light", &sLight2On);
+		ImGui::SliderFloat("Spotlight 2 pos", &sLights[1].position.z, -50.0f, 50.0f);
 		ImGui::Checkbox("Spotlight 3 Light", &sLight3On);
+		ImGui::SliderFloat("Spotlight 3 pos", &sLights[2].position.z, -50.0f, 50.0f);
 	}
 	ImGui::End();
 	if (ImGui::Begin("Info")) {
@@ -742,7 +737,7 @@ void Scene::ImGuiWindows()
 	}
 	ImGui::End();
 	if (ImGui::Begin("Player")) {
-		ImGui::SliderFloat("Player Speed", &cam.GetSpeed(), 0.0f, 1.0f);
+		ImGui::SliderFloat("Player Speed", &cam.GetSpeed(), 0.0f, 10.0f);
 		ImGui::SliderFloat("Rotation Speed", &cam.GetRotSpeed(), 0.0f, 5.0f);
 		ImGui::SliderFloat("Frustum buffer zone", cam.GetFrustumBuffer(), 0.0, 20.0f);
 	}
@@ -772,7 +767,6 @@ void Scene::HandleCulling(Camera& cam)
 		}
 		objectsToDraw.clear();
 		qtree->InsideNodes(cam, &intersectingNodes);
-		std::vector<SceneObjectTest*> objectsTemp;
 		for (auto p : intersectingNodes) {
 			std::vector<SceneObjectTest*> vec = p->GetObjects();
 			for (auto q : vec) {
@@ -864,14 +858,11 @@ void Scene::SetUpGameObjects()
 	ground3.Move(-150.0f, -20.0f, 50.0f);
 	grounds.push_back(&ground3);
 
-
-
-
 	cube.Init(texHandl, "../Resources/Obj/cubeTex.obj", dir + "/VertexShader.cso", dir + "/HullShader.cso", dir + "/DomainShader.cso", dir + "/PixelShader.cso", dir + "/ComputeShader.cso", NO_SHADER, window.Gfx());
 	cube.Scale(2.0f, 2.0f, 2.0f);
-	gameObjects.push_back(&cube);
 
 	particle.Init(texHandl, "No", dir + "/VertexShaderParticle.cso", NO_SHADER, NO_SHADER, dir + "/PixelShaderParticle.cso", dir + "/ComputeShaderParticle.cso", dir + "/GeometryShaderParticle.cso", window.Gfx(), true);
+
 }
 
 void Scene::UpdateCamera()
